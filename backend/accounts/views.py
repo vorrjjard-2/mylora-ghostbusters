@@ -4,6 +4,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+
+
 @api_view(['POST'])
 def login_view(request):
     username = request.data.get('username')
@@ -19,7 +22,7 @@ def login_view(request):
     login(request, user)
     return Response({'message': 'Logged in'})
 
-
+@ensure_csrf_cookie
 @api_view(['GET'])
 def me_view(request):
     if not request.user.is_authenticated:

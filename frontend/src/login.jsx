@@ -28,16 +28,7 @@ export default function Login() {
         throw new Error(data.error || "Login failed");
       }
 
-      // optional: fetch user info after login
-      const me = await fetch("http://localhost:8000/api/me/", {
-        credentials: "include",
-      }).then(r => r.json());
-
-      console.log("Logged in as:", me.username);
-
-      // redirect or update global auth state here
-      alert("Login successful");
-
+      alert("Logged in successfully!");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -54,7 +45,7 @@ export default function Login() {
           <label>Username</label>
           <input
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
@@ -64,7 +55,7 @@ export default function Login() {
           <input
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
