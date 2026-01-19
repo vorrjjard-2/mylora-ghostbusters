@@ -6,6 +6,8 @@ from rest_framework import status
 
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+from django.contrib.auth import logout
+from rest_framework.response import Response
 
 @api_view(['POST'])
 def login_view(request):
@@ -23,12 +25,23 @@ def login_view(request):
     return Response({'message': 'Logged in'})
 
 @ensure_csrf_cookie
-@api_view(['GET'])
+@api_view(["GET"])
 def me_view(request):
     if not request.user.is_authenticated:
-        return Response({'authenticated': False})
+        return Response({"authenticated": False})
+
+    roles = list(
+        request.user.groups.values_list("name", flat=True)
+    )
 
     return Response({
-        'authenticated': True,
-        'username': request.user.username,
+        "authenticated": True,
+        "username": request.user.username,
+        "roles": roles,
     })
+
+
+@api_view(["POST"])
+def logout_view(request):
+    logout(request)
+    return Response({"success": True})

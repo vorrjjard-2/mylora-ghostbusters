@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getCookie } from "./utils/csrf";
+import { getCookie } from "../utils/csrf";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -28,7 +28,13 @@ export default function Login() {
         throw new Error(data.error || "Login failed");
       }
 
-      alert("Logged in successfully!");
+      const me = await fetch("http://localhost:8000/api/me/", {
+        credentials: "include",
+      }).then((r) => r.json());
+
+      if (me.authenticated) {
+        window.location.href = "/home";
+      }
     } catch (err) {
       setError(err.message);
     } finally {
