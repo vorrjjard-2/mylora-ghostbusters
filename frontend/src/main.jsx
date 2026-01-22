@@ -12,7 +12,7 @@ import Navbar from "./components/CustomerNavbar";
 import CustomerLanding from "./pages/CustomerLanding";
 import CustomerOrders from "./pages/CustomerOrders";
 import CustomerAccount from "./pages/CustomerAccount";
-import Login from "./pages/Login";
+import Login from "./pages/Login/Login";
 import ApplyStep1 from "./pages/apply/ApplyStep1";
 import ApplyStep2 from "./pages/apply/ApplyStep2";
 
