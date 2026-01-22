@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { getCookie } from "../utils/csrf";
+import { Link } from "react-router-dom";
+
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -71,6 +73,10 @@ export default function Login() {
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
+                <p style={{ marginTop: "1rem" }}>
+          No Account Yet?{" "}
+          <Link to="/apply/step-1">Sign up</Link>
+        </p>
       </form>
     </div>
   );

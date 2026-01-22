@@ -13,11 +13,16 @@ import CustomerLanding from "./pages/CustomerLanding";
 import CustomerOrders from "./pages/CustomerOrders";
 import CustomerAccount from "./pages/CustomerAccount";
 import Login from "./pages/Login";
+import ApplyStep1 from "./pages/apply/ApplyStep1";
+import ApplyStep2 from "./pages/apply/ApplyStep2";
+
+
+
 
 function Layout() {
   const location = useLocation();
 
-  const hideNavbar = location.pathname === "/login";
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup";
 
   return (
     <>
@@ -29,6 +34,9 @@ function Layout() {
           <Route path="/" element={<Navigate to="/login" replace />} />
 
           <Route path="/login" element={<Login />} />
+          <Route path="/apply/step-1" element={<ApplyStep1 />} />
+          <Route path="/apply/step-2" element={<ApplyStep2 />} />
+          
           <Route path="/home" element={<CustomerLanding />} />
           <Route path="/orders" element={<CustomerOrders />} />
           <Route path="/account" element={<CustomerAccount />} />
