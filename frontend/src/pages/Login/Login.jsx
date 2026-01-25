@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { getCookie } from "../../utils/csrf"; // Path is fixed!
-import { Link } from "react-router-dom";
-import "./Login.css"; 
-import logo from "../../assets/mylora-logo.png"; // Path is fixed!
+import { useNavigate, Link } from "react-router-dom";
+import { getCookie } from "../../utils/csrf";
+import "./Login.css";
+import logo from "../../assets/mylora-logo.png";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -10,11 +10,60 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    // ... your existing fetch logic stays the same ...
+
+    try {
+      // 1️⃣ Login
+      const res = await fetch("http://localhost:8000/api/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Login failed");
+      }
+
+      // 2️⃣ Get logged-in user + roles
+      const meRes = await fetch("http://localhost:8000/api/me/", {
+        credentials: "include",
+      });
+
+      if (!meRes.ok) {
+        throw new Error("Failed to fetch user info");
+      }
+
+      const me = await meRes.json();
+
+      // 3️⃣ Redirect by role
+      if (me.roles.includes("admin")) {
+        navigate("/internal/dashboard");
+      } else if (me.roles.includes("credit")) {
+        navigate("/credit/dashboard");
+      } else if (me.roles.includes("order")) {
+        navigate("/order/dashboard");
+      } else {
+        navigate("/customer/dashboard");
+      }
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -23,7 +72,7 @@ export default function Login() {
         <div className="logo-section">
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
         </div>
-        
+
         <h1 className="system-title">Web Credit System</h1>
 
         <form onSubmit={handleSubmit} className="mylora-form">
@@ -52,7 +101,7 @@ export default function Login() {
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
-          
+
           <Link to="/apply/step-1" className="enrol-link-btn">
             Enrol for a credit account
           </Link>

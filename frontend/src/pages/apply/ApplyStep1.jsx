@@ -15,7 +15,6 @@ export default function ApplyStep1() {
       return;
     }
 
-    // ✅ Store ONLY email
     localStorage.setItem(
       "application_step_1",
       JSON.stringify({ email })

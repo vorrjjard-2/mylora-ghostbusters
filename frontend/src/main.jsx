@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+
 import {
   BrowserRouter,
   Routes,
@@ -15,6 +16,9 @@ import CustomerAccount from "./pages/CustomerAccount";
 import Login from "./pages/Login/Login";
 import ApplyStep1 from "./pages/apply/ApplyStep1";
 import ApplyStep2 from "./pages/apply/ApplyStep2";
+
+import UpperDashboard from "./pages/upper_m/Dashboard";
+import EnrollmentReview from "./pages/upper_m/EnrollmentReview";
 
 
 
@@ -36,7 +40,11 @@ function Layout() {
           <Route path="/login" element={<Login />} />
           <Route path="/apply/step-1" element={<ApplyStep1 />} />
           <Route path="/apply/step-2" element={<ApplyStep2 />} />
-          
+          <Route path="/internal/dashboard" element={<UpperDashboard />} />
+          <Route
+            path="/upper_m/enrollments/:applicationId"
+            element={<EnrollmentReview />}
+            />
           <Route path="/home" element={<CustomerLanding />} />
           <Route path="/orders" element={<CustomerOrders />} />
           <Route path="/account" element={<CustomerAccount />} />
