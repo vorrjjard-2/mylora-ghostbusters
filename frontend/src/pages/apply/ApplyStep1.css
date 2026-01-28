@@ -1,4 +1,4 @@
-.apply-page-wrapper {
+/*.apply-page-wrapper {
   padding: 20px 5%;
   background-color: #fff;
   font-family: 'Arimo', sans-serif;
@@ -108,4 +108,109 @@
 .error-text {
   color: #911818;
   font-weight: bold;
+}*/
+
+/* Layout Wrapper */
+.apply-page-wrapper {
+  padding: 20px 4%; /* Moves branding away from the very edge */
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: 'Arimo', sans-serif;
+}
+
+/* Header Branding (Top Left) */
+.apply-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mylora-logo {
+  height: 40px; /* Adjust based on your actual image aspect ratio */
+  width: auto;
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #385930; /* Your brand green */
+}
+
+/* Main Content Area */
+.apply-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-title {
+  font-size: 64px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #262626;
+}
+
+.sub-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 50px;
+  color: #262626;
+}
+
+/* Form Styling */
+.apply-form {
+  max-width: 550px; /* Prevents the email bar from stretching across the screen */
+  margin: 0 auto;   /* Centers the form itself */
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.input-group label {
+  font-weight: 700;
+  font-size: 18px;
+  color: #183112;
+}
+
+.input-group input {
+  background-color: #F8F8F8;
+  border: 1px solid #183112;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Button Styling (The Dark Green) */
+.btn-continue {
+  background-color: #1b2614; /* Match the dark green in your screenshot */
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-continue:hover {
+  background-color: #2a3b1f;
+}
+
+.error-text {
+  color: #911818;
+  font-weight: bold;
+  margin-bottom: 10px;
 }

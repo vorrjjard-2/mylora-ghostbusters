@@ -43,11 +43,10 @@
 
 .system-title {
   color: #385930;
-  font-size: 80px;     
+  font-size: 64px;     
   font-weight: 700;
   margin: 0;          
   white-space: nowrap; 
-  margin-bottom: -70px;
 }
 
 .mylora-form {
@@ -57,10 +56,6 @@
   width: 100%;
   max-width: 550px;
 }
-
-.mylora-form .input-group:first-of-type {
-  margin-bottom: -90px;
-} 
 
 .input-group {
   display: flex;
