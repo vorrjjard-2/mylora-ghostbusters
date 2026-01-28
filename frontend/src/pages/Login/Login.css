@@ -1,5 +1,3 @@
-/* Login.css */
-
 .login-page-container {
   display: flex;
   flex-direction: column;
@@ -19,58 +17,85 @@
 
 .login-card {
   text-align: center;
-  width: 100%;
-  max-width: 450px;
+  width: 90%;
+  max-width: 800px;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
 }
 
 .mylora-logo {
-  width: 220px; 
-  margin-bottom: -50px;
+  height: 80px; 
+  width: auto;
+  margin-bottom: 0 !important;
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 40px;
+  width: 100%;        
 }
 
 .system-title {
-  color: #3e5631;
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 40px;
+  color: #385930;
+  font-size: 80px;     
+  font-weight: 700;
+  margin: 0;          
+  white-space: nowrap; 
+  margin-bottom: -70px;
 }
 
 .mylora-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 550px;
 }
+
+.mylora-form .input-group:first-of-type {
+  margin-bottom: -90px;
+} 
 
 .input-group {
   display: flex;
   flex-direction: column;
   text-align: left;
-  gap: 8px;
+  gap: 4px;
 }
 
 .input-group label {
-  font-weight: 400;
-  font-size: 1.1rem;
+  font-weight: 700;
+  font-size: 20px;
 }
 
 .input-group input {
-  padding: 12px;
-  border: 1px solid #666;
-  border-radius: 12px; 
-  font-size: 1rem;
+  background-color: #F8F8F8;
+  border: 1px solid #183112; 
+  border-radius: 10px; 
+  padding: 14px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .login-btn {
-  background-color: #1b2614;
+  background-color: #183112;
   color: white;
-  padding: 15px;
-  border: none;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  height: 50px;
   cursor: pointer;
   margin-top: 10px;
+  border: 1px solid #183112;
+
 }
 
 .enrol-link-btn {

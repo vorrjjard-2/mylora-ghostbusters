@@ -20,11 +20,10 @@ export default function Login() {
   return (
     <div className="login-page-container">
       <div className="login-card">
-        <div className="logo-section">
+        <div className="header-brand">
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <h1 className="system-title">Web Credit System</h1>
         </div>
-        
-        <h1 className="system-title">Web Credit System</h1>
 
         <form onSubmit={handleSubmit} className="mylora-form">
           <div className="input-group">

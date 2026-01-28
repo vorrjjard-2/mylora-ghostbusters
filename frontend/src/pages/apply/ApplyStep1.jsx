@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import "./ApplyStep1.css"
 
 export default function ApplyStep1() {
   const [email, setEmail] = useState("");
@@ -24,29 +26,39 @@ export default function ApplyStep1() {
     navigate("/apply/step-2");
   }
 
-  return (
-    <div style={{ maxWidth: 720, margin: "4rem auto" }}>
-      <h1>New user? Apply for a credit account.</h1>
-      <p>Enter your email to start the application.</p>
-
-      <form onSubmit={handleNext}>
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label>Email Address</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            style={{ width: "100%", padding: "0.75rem" }}
-          />
+return (
+    <div className="apply-page-wrapper">
+      <header className="apply-header">
+        <div className="header-brand">
+          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <span className="header-title">Web Credit System</span>
         </div>
+      </header>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+      <div className="apply-container">
+        <h1 className="main-title">Apply for Credit Account.</h1>
+        <p className="sub-title">Enter email to begin application.</p>
 
-        <button type="submit">
-          Continue Application
-        </button>
-      </form>
+        <form onSubmit={handleNext} className="enroll-form">
+          <div className="input-group">
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && <p className="error-text">{error}</p>}
+
+          <div className="form-footer-step1">
+            <button type="submit" className="btn-continue">
+              Continue
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
