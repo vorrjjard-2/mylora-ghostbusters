@@ -1,6 +1,7 @@
 import json
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CreditEnrollment
@@ -44,6 +45,7 @@ def create_application(request):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def pending_enrollments(request):
     qs = CreditEnrollment.objects.filter(enrollment_status="PENDING").order_by("-submission_date")
     data = []
@@ -59,6 +61,7 @@ def pending_enrollments(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def enrollment_detail(request, application_id):
     app = CreditEnrollment.objects.get(application_id=application_id)
 
@@ -81,7 +84,29 @@ def enrollment_detail(request, application_id):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def approve_enrollment(request, application_id):
+    from django.contrib.auth import authenticate
+    
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    user = authenticate(
+        username=request.user.username,
+        password=password
+    )
+    if user is None:
+        return Response(
+            {"error": "Invalid password"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Proceed with approval
     app = CreditEnrollment.objects.get(application_id=application_id)
     app.enrollment_status = "APPROVED"
     app.approved_by = request.user
@@ -90,7 +115,29 @@ def approve_enrollment(request, application_id):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def reject_enrollment(request, application_id):
+    from django.contrib.auth import authenticate
+    
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    user = authenticate(
+        username=request.user.username,
+        password=password
+    )
+    if user is None:
+        return Response(
+            {"error": "Invalid password"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Proceed with rejection
     app = CreditEnrollment.objects.get(application_id=application_id)
     app.enrollment_status = "REJECTED"
     app.approved_by = request.user

@@ -8,10 +8,20 @@ export default function Dashboard() {
   const [enrollments, setEnrollments] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/enrollments/pending/")
-      .then(res => res.json())
+    fetch("http://localhost:8000/api/enrollments/pending/", {
+      credentials: "include"
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to load enrollments: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => setEnrollments(data))
-      .catch(err => console.error("Failed to load enrollments", err));
+      .catch(err => {
+        console.error("Failed to load enrollments", err);
+        alert(err.message);
+      });
   }, []);
 
   return (

@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 
 import Navbar from "./components/CustomerNavbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 import CustomerLanding from "./pages/CustomerLanding";
 import CustomerOrders from "./pages/CustomerOrders";
 import CustomerAccount from "./pages/CustomerAccount";
@@ -40,11 +41,26 @@ function Layout() {
           <Route path="/login" element={<Login />} />
           <Route path="/apply/step-1" element={<ApplyStep1 />} />
           <Route path="/apply/step-2" element={<ApplyStep2 />} />
-          <Route path="/internal/dashboard" element={<UpperDashboard />} />
+          
+          {/* Protected internal routes */}
+          <Route
+            path="/internal/dashboard"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <UpperDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/upper_m/enrollments/:applicationId"
-            element={<EnrollmentReview />}
-            />
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <EnrollmentReview />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Customer routes - can also be protected if needed */}
           <Route path="/home" element={<CustomerLanding />} />
           <Route path="/orders" element={<CustomerOrders />} />
           <Route path="/account" element={<CustomerAccount />} />

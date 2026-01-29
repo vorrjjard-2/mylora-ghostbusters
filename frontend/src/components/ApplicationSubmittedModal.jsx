@@ -43,7 +43,7 @@ export default function ApplicationSubmittedModal({
             wordBreak: "break-all",
           }}
         >
-          {applicationId}
+          {applicationId.slice(0, 8).toUpperCase()}
         </code>
 
         <p style={{ fontSize: "0.9rem", color: "#555" }}>

@@ -5,7 +5,6 @@ export default function ApplyStep2() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
 
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
@@ -30,7 +29,7 @@ export default function ApplyStep2() {
     setError(null);
 
     if (
-      !firstName || !lastName || !phone || !email ||
+      !firstName || !lastName || !phone ||
       !address1 || !barangay || !city || !zipCode ||
       !branch || !creditAmount || !creditTerm
     ) {
@@ -56,7 +55,6 @@ export default function ApplyStep2() {
           firstName,
           lastName,
           phone,
-          email,
           address1,
           address2,
           barangay,
@@ -102,7 +100,6 @@ export default function ApplyStep2() {
             <input placeholder="First Name*" onChange={e => setFirstName(e.target.value)} />
             <input placeholder="Last Name*" onChange={e => setLastName(e.target.value)} />
             <input placeholder="Phone Number*" onChange={e => setPhone(e.target.value)} />
-            <input placeholder="Email Address*" onChange={e => setEmail(e.target.value)} />
           </div>
 
           <h3>02 Delivery Address</h3>
@@ -136,11 +133,24 @@ export default function ApplyStep2() {
           </select>
 
           <h3>04 Upload Supporting Documents</h3>
-          <input
-            type="file"
-            multiple
-            onChange={e => setSupportingDocs([...e.target.files])}
-          />
+          <div style={{ marginBottom: "1rem" }}>
+                <label>Supporting Document 1 *</label>
+                <input
+                type="file"
+                required
+                onChange={e => setSupportingDocs(prev => [e.target.files[0], prev[1]])}
+                />
+                </div>
+
+
+<div>
+<label>Supporting Document 2 *</label>
+<input
+type="file"
+required
+onChange={e => setSupportingDocs(prev => [prev[0], e.target.files[0]])}
+/>
+</div>
 
           <h3>05 Upload a Government-Issued ID</h3>
           <input
