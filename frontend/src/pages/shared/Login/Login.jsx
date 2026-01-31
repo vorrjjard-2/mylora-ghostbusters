@@ -65,47 +65,41 @@ export default function Login() {
     }
   }
 
-  return (
-    <div className="login-page-container">
-      <div className="login-card">
-        <div className="logo-section">
-          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
-        </div>
-
-        <h1 className="system-title">Web Credit System</h1>
-
-        <form onSubmit={handleSubmit} className="mylora-form">
-          <div className="input-group">
-            <label>Email</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          {error && <p className="error-message">{error}</p>}
-
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
-
-          <Link to="/apply/step-1" className="enrol-link-btn">
-            Enrol for a credit account
-          </Link>
-        </form>
-      </div>
-    </div>
-  );
+ return (
+   <div className="login-page-container">
+     <div className="login-card">
+       <div className="header-brand">
+         <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+         <h1 className="system-title">Web Credit System</h1>
+       </div>
+       <form onSubmit={handleSubmit} className="mylora-form">
+         <div className="input-group">
+           <label>Email</label>
+           <input
+             type="text"
+             value={username}
+             onChange={(e) => setUsername(e.target.value)}
+             required
+           />
+         </div>
+         <div className="input-group">
+           <label>Password</label>
+           <input
+             type="password"
+             value={password}
+             onChange={(e) => setPassword(e.target.value)}
+             required
+           />
+         </div>
+         {error && <p className="error-message">{error}</p>}
+         <button type="submit" className="login-btn" disabled={loading}>
+           {loading ? "Logging in..." : "Login"}
+         </button>
+         <Link to="/apply/step-1" className="enrol-link-btn">
+           Enrol for a credit account
+         </Link>
+       </form>
+     </div>
+   </div>
+ );
 }

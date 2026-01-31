@@ -156,6 +156,7 @@ input, select {
     border-radius: 10px;
     font-size: 20px;
     font-weight: 700;
+    cursor: pointer;
     height: 41px;
     width: auto; 
     min-width: 350px;

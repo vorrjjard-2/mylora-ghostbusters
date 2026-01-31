@@ -26,43 +26,35 @@ export default function ApplyStep1() {
   }
 
 return (
- <div className="apply-page-wrapper">
-   {/* Top Header Branding */}
-   <header className="apply-header">
-     <div className="header-brand">
-         <img src={logo} alt="Mylora Logo" className="mylora-logo" />
-       <span className="header-title">Web Credit System</span>
-     </div>
-   </header>
-
-
-   <div className="apply-container">
-     <h1 className="main-title">Apply for Credit Account.</h1>
-     <p className="sub-title">Enter email to begin application.</p>
-
-
-     <form onSubmit={handleNext} className="apply-form">
-       <div className="input-group">
-         <label>Email</label>
-         <input
-           type="email"
-           value={email}
-           onChange={e => setEmail(e.target.value)}
-           required
-           placeholder="Enter your email"
-         />
-       </div>
-
-
-       {error && <p className="error-text">{error}</p>}
-
-
-       <button type="submit" className="btn-continue">
-         Continue
-       </button>
-     </form>
-   </div>
- </div>
+<div className="apply-page-wrapper">
+  {/* Top Header Branding */}
+  <header className="apply-header">
+    <div className="header-brand">
+        <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+      <span className="header-title">Web Credit System</span>
+    </div>
+  </header>
+  <div className="apply-container">
+    <h1 className="main-title">Apply for Credit Account.</h1>
+    <p className="sub-title">Enter email to begin application.</p>
+    <form onSubmit={handleNext} className="apply-form">
+      <div className="input-group">
+        <label>Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          placeholder="Enter your email"
+        />
+      </div>
+      {error && <p className="error-text">{error}</p>}
+      <button type="submit" className="btn-continue">
+        Continue
+      </button>
+    </form>
+  </div>
+</div>
 );
 }
 
