@@ -1,128 +1,137 @@
-.login-page-container {
- display: flex;
- flex-direction: column;
- justify-content: center;
- align-items: center;    
- width: 100%;
- height: 100vh;          
- margin: 0;
- padding: 0;
- background-color: #ffffff;
- overflow: hidden;
- position: fixed;
- top: 0;
- left: 0;
- font-family: 'Arimo', sans-serif;
+/* Main Wrapper */
+.login-page-wrapper {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    font-family: 'Arimo', sans-serif;
+    padding: 1rem;
+}
+
+/* Logo & Title */
+.login-page-wrapper .brand-section {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.login-page-wrapper .logo-img {
+    height: 190px; 
+    display: block;
+    margin: 0 auto 1rem auto;
+    margin-top: -200px;
+    margin-bottom: -40px;
+}
+
+.login-page-wrapper .system-title {
+    color: #395A31;
+    font-weight: 600;
+    font-size: 64px; 
+    font-family: 'Arimo', sans-serif;
+    margin-bottom: 40px;
+    letter-spacing: -2px;
+}
+
+/* Login Card */
+.login-page-wrapper .login-card-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 431px;
+}
+
+.login-page-wrapper .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+/* Inputs */
+.login-page-wrapper .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.login-page-wrapper .form-label {
+    font-weight: 600;
+    color: #222;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+
+.login-page-wrapper .form-input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #333;
+    background-color: #ffffff;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    margin-left: 0px;
+}
+
+.login-page-wrapper .form-input:focus {
+    outline: none;
+    border-color: #1f3d1a;
+}
+
+/* Buttons */
+.login-page-wrapper .form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: -30px;
+}
+
+.login-page-wrapper .btn-submit {
+    width: 100%;
+    height: 41px;
+    padding: 8px 59px;
+    background-color: #183112;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    border: 1px solid;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    margin-left: 0px;
+}
+
+.login-page-wrapper .enroll-link {
+    width: 100%; 
+    height: 41px;
+    display: block;
+    box-sizing: border-box;
+    padding: 8px 59px;
+    text-align: center;
+    color: #333;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid #333;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+    gap: 10px;
+    font-size: 20px;
+    transition: background-color 0.2s;
+}
+
+.login-page-wrapper .error-message {
+    color: #d93025;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
 }
 
 
-.login-card {
- text-align: center;
- width: 90%;
- max-width: 800px;
- padding: 20px;
- display: flex;
- flex-direction: column;
- align-items: center;
-}
 
-
-.mylora-logo {
- height: 80px;
- width: auto;
- margin-bottom: 0 !important;
-}
-
-
-.header-brand {
- display: flex;
- flex-direction: column;
- align-items: center;
- justify-content: center;
- gap: 10px;
- margin-bottom: 40px;
- width: 100%;       
-}
-
-
-.system-title {
- color: #385930;
- font-size: 64px;    
- font-weight: 700;
- margin: 0;         
- white-space: nowrap;
-}
-
-
-.mylora-form {
- display: flex;
- flex-direction: column;
- gap: 20px;
- width: 100%;
- max-width: 550px;
-}
-
-
-.input-group {
- display: flex;
- flex-direction: column;
- text-align: left;
- gap: 4px;
-}
-
-
-.input-group label {
- font-weight: 700;
- font-size: 20px;
-}
-
-
-.input-group input {
- background-color: #F8F8F8;
- border: 1px solid #183112;
- border-radius: 10px;
- padding: 14px;
- font-size: 16px;
- width: 100%;
- box-sizing: border-box;
-}
-
-
-.login-btn {
- background-color: #183112;
- color: white;
- padding: 12px;
- border-radius: 10px;
- font-size: 20px;
- font-weight: 700;
- height: 50px;
- cursor: pointer;
- margin-top: 10px;
- border: 1px solid #183112;
-
-
-}
-
-
-.enrol-link-btn {
- background-color: white;
- color: #1b2614;
- padding: 12px;
- border: 1px solid #1b2614;
- border-radius: 12px;
- text-decoration: none;
- font-weight: 600;
- font-size: 1.1rem;
- transition: background-color 0.2s;
-}
-
-
-.enrol-link-btn:hover {
- background-color: #f0f0f0;
-}
-
-
-.error-message {
- color: red;
- font-weight: bold;
-}

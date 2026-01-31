@@ -65,7 +65,7 @@ export default function Login() {
     }
   }
 
- return (
+ /*return (
    <div className="login-page-container">
      <div className="login-card">
        <div className="header-brand">
@@ -100,6 +100,61 @@ export default function Login() {
          </Link>
        </form>
      </div>
+   </div>
+ ); */
+
+ return (
+   <div className="login-page-wrapper"> {/* Changed to wrapper for consistency */}
+     
+     {/* SECTION 1: Branding (Logo + Title) */}
+     <header className="brand-section">
+       <img src={logo} alt="Mylora Logo" className="logo-img" />
+       <h1 className="system-title">Web Credit System</h1>
+     </header>
+
+     {/* SECTION 2: The Card Container */}
+     <main className="login-card-section">
+       <div className="login-card">         
+         <form onSubmit={handleSubmit} className="login-form">
+           {/* Email Group */}
+           <div className="form-group">
+             <label className="form-label">Email</label>
+             <input
+               type="text"
+               className="form-input"
+               value={username}
+               onChange={(e) => setUsername(e.target.value)}
+               required
+             />
+           </div>
+
+           {/* Password Group */}
+           <div className="form-group">
+             <label className="form-label">Password</label>
+             <input
+               type="password"
+               className="form-input"
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+               required
+             />
+           </div>
+
+           {error && <p className="error-message">{error}</p>}
+
+           {/* Actions Group */}
+           <div className="form-actions">
+             <button type="submit" className="btn-submit" disabled={loading}>
+               {loading ? "Logging in..." : "Login"}
+             </button>
+             
+             <Link to="/apply/step-1" className="enroll-link">
+               Enrol for a credit account
+             </Link>
+           </div>
+         </form>
+       </div>
+     </main>
    </div>
  );
 }

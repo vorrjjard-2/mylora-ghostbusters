@@ -16,13 +16,8 @@ export default function ActivateAccount() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // --- BYPASS START ---
-    setValidToken(true); // Pretend the token is valid
-    setUserData({ name: "Bianca", email: "bianca@example.com" }); // Fake user data
-    setLoading(false); // Stop the loading spinner/text
-    // --- BYPASS END ---
     // Verify token on page load
-    /*fetch(`http://localhost:8000/api/activate/verify/${token}/`)
+    fetch(`http://localhost:8000/api/activate/verify/${token}/`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Invalid or expired activation link");
@@ -38,7 +33,7 @@ export default function ActivateAccount() {
       })
       .finally(() => {
         setLoading(false);
-      });*/
+      });
   }, [token]);
 
   async function handleSubmit(e) {
@@ -179,66 +174,54 @@ export default function ActivateAccount() {
 }*/
 
 return (
-  <div className="page-wrapper">
+  <div className="activate-page-wrapper">
     <header className="logo-container">
       <img src={logo} alt="Mylora Logo" className="logo-img" />
       <span className="system-title">Web Credit System</span>
     </header>
 
-    <main className="activate-container">
+    <div className="header-section">
       <h1 className="main-header">Secure your account.</h1>
-      
       <p className="welcome-text">
         Welcome, <strong>{userData?.name}</strong>! <br />
-        Your credit account has been approved. Please set up your password below.
+          Your credit account has been approved. Please set up your password below
       </p>
+    </div>
+<div className="form-section">
+    <form onSubmit={handleSubmit} className="activate-form">
+      <div className="form-group">
+        <label className="form-label">Email Address</label>
+        <input type="email" className="form-input" value={userData?.email || ""} disabled />
+      </div>
 
-      <form onSubmit={handleSubmit} className="activate-form">
-        {/* Email Field */}
-        <div className="form-group">
-          <label className="form-label">Email Address</label>
-          <input
-            type="email"
-            className="form-input"
-            value={userData?.email || ""}
-            disabled
-          />
-        </div>
+      <div className="form-group">
+        <label className="form-label">Password</label>
+        <p className="input-hint">Minimum of 8 characters</p>
+        <input
+          type="password"
+          className="form-input"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
 
-        {/* Password Field */}
-        <div className="form-group">
-          <label className="form-label">Password</label>
-          <p className="input-hint">Minimum of 8 characters</p>
-          <input
-            type="password"
-            className="form-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="Enter new password"
-          />
-        </div>
+      <div className="form-group">
+        <label className="form-label">Confirm Password</label>
+        <input
+          type="password"
+          className="form-input"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+      </div>
 
-        {/* Confirm Password Field */}
-        <div className="form-group">
-          <label className="form-label">Confirm Password</label>
-          <input
-            type="password"
-            className="form-input"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            placeholder="Re-type password"
-          />
-        </div>
-
-        {error && <p className="error-message">{error}</p>}
-
-        <button type="submit" className="btn-submit" disabled={submitting}>
-          {submitting ? "Processing..." : "Set Password"}
-        </button>
-      </form>
-    </main>
+      <button type="submit" className="btn-submit" disabled={submitting}>
+        {submitting ? "Processing..." : "Set Password"}
+      </button>
+    </form>
   </div>
+</div>
 );
 }
