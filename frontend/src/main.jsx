@@ -11,15 +11,28 @@ import {
 
 import Navbar from "./components/CustomerNavbar";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CustomerLanding from "./pages/CustomerLanding";
-import CustomerOrders from "./pages/CustomerOrders";
-import CustomerAccount from "./pages/CustomerAccount";
-import Login from "./pages/Login/Login";
-import ApplyStep1 from "./pages/apply/ApplyStep1";
-import ApplyStep2 from "./pages/apply/ApplyStep2";
 
-import UpperDashboard from "./pages/upper_m/Dashboard";
-import EnrollmentReview from "./pages/upper_m/EnrollmentReview";
+// Shared pages (public or multi-role)
+import Login from "./pages/shared/Login/Login";
+import ApplyStep1 from "./pages/shared/apply/ApplyStep1";
+import ApplyStep2 from "./pages/shared/apply/ApplyStep2";
+import ActivateAccount from "./pages/shared/ActivateAccount";
+
+// Customer pages
+import CustomerLanding from "./pages/customer/CustomerLanding";
+import CustomerOrders from "./pages/customer/CustomerOrders";
+import CustomerAccount from "./pages/customer/CustomerAccount";
+import CustomerDashboard from "./pages/customer/Dashboard.jsx";
+
+// Upper Management pages
+import UpperDashboard from "./pages/upper_management/Dashboard";
+import EnrollmentReview from "./pages/upper_management/EnrollmentReview";
+
+// Credit Manager pages
+import CreditDashboard from "./pages/credit_manager/Dashboard";
+
+// Order Processor pages
+import OrderDashboard from "./pages/order_processor/Dashboard";
 
 
 
@@ -38,32 +51,66 @@ function Layout() {
           {/* 👇 default redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />
 
+          {/* Shared/Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/apply/step-1" element={<ApplyStep1 />} />
           <Route path="/apply/step-2" element={<ApplyStep2 />} />
+          <Route path="/activate/:token" element={<ActivateAccount />} />
           
-          {/* Protected internal routes */}
+          {/* Upper Management routes */}
           <Route
-            path="/internal/dashboard"
+            path="/upper-management/dashboard"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="upper_management">
                 <UpperDashboard />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/upper_m/enrollments/:applicationId"
+            path="/upper-management/enrollments/:applicationId"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="upper_management">
                 <EnrollmentReview />
               </ProtectedRoute>
             }
           />
           
-          {/* Customer routes - can also be protected if needed */}
+          {/* Credit Manager routes */}
+          <Route
+            path="/credit-manager/dashboard"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <CreditDashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Order Processor routes */}
+          <Route
+            path="/order-processor/dashboard"
+            element={
+              <ProtectedRoute requiredRole="order_processor">
+                <OrderDashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Customer routes */}
+          <Route
+            path="/customer/dashboard"
+            element={
+              <ProtectedRoute>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/home" element={<CustomerLanding />} />
           <Route path="/orders" element={<CustomerOrders />} />
           <Route path="/account" element={<CustomerAccount />} />
+          
+          {/* Legacy routes - redirect to new structure */}
+          <Route path="/internal/dashboard" element={<Navigate to="/upper-management/dashboard" replace />} />
+          <Route path="/upper_m/enrollments/:applicationId" element={<Navigate to="/upper-management/enrollments/:applicationId" replace />} />
         </Routes>
       </div>
     </>

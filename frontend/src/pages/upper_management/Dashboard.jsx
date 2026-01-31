@@ -53,7 +53,7 @@ export default function Dashboard() {
             >
               <div>
                 <Link
-                    to={`/upper_m/enrollments/${e.application_id}`}
+                    to={`/upper-management/enrollments/${e.application_id}`}
                     style={{ fontWeight: "bold", textDecoration: "none", color: "#1f3d1a" }}
                     >
                     {e.application_id.slice(0, 8).toUpperCase()}

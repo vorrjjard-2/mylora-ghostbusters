@@ -24,8 +24,17 @@ export default function EnrollmentReview() {
     fetch(`http://localhost:8000/api/enrollments/${applicationId}/`, {
       credentials: "include"
     })
-      .then(res => res.json())
-      .then(setData);
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to load enrollment: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(setData)
+      .catch(err => {
+        console.error("Error loading enrollment:", err);
+        alert(err.message);
+      });
   }, [applicationId]);
 
   function handleActionClick(action) {
@@ -57,7 +66,7 @@ export default function EnrollmentReview() {
       })
       .then(() => {
         setShowModal(false);
-        navigate("/internal/dashboard");
+        navigate("/upper-management/dashboard");
       })
       .catch(err => {
         setError(err.message);

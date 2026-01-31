@@ -87,6 +87,9 @@ def enrollment_detail(request, application_id):
 @permission_classes([IsAuthenticated])
 def approve_enrollment(request, application_id):
     from django.contrib.auth import authenticate
+    from django.core.mail import send_mail
+    from django.utils import timezone
+    import secrets
     
     # Verify password
     password = request.data.get("password")
@@ -110,8 +113,43 @@ def approve_enrollment(request, application_id):
     app = CreditEnrollment.objects.get(application_id=application_id)
     app.enrollment_status = "APPROVED"
     app.approved_by = request.user
+    
+    # Generate secure activation token
+    app.activation_token = secrets.token_urlsafe(32)
+    app.activation_token_created = timezone.now()
     app.save()
-    return Response({"status": "approved"})
+    
+    # Send activation email
+    activation_link = f"http://localhost:5173/activate/{app.activation_token}"
+    
+    try:
+        send_mail(
+            subject="Your Mylora Credit Account Has Been Approved!",
+            message=f"""
+Hello {app.first_name},
+
+Congratulations! Your credit account application has been approved.
+
+To complete your account setup, please click the link below to create your password:
+
+{activation_link}
+
+This link will expire in 24 hours.
+
+If you did not apply for a credit account, please ignore this email.
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[app.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        # Log the error but don't fail the approval
+        print(f"Email sending failed: {e}")
+    
+    return Response({"status": "approved", "email_sent": True})
 
 
 @api_view(["POST"])
@@ -143,3 +181,99 @@ def reject_enrollment(request, application_id):
     app.approved_by = request.user
     app.save()
     return Response({"status": "rejected"})
+
+
+@api_view(["GET"])
+def verify_activation_token(request, token):
+    """Verify if activation token is valid"""
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    try:
+        app = CreditEnrollment.objects.get(
+            activation_token=token,
+            enrollment_status="APPROVED",
+            account_activated=False
+        )
+        
+        # Check if token is expired (24 hours)
+        if app.activation_token_created:
+            expiry = app.activation_token_created + timedelta(hours=24)
+            if timezone.now() > expiry:
+                return Response(
+                    {"error": "Activation link has expired"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        return Response({
+            "valid": True,
+            "email": app.email,
+            "name": f"{app.first_name} {app.last_name}"
+        })
+        
+    except CreditEnrollment.DoesNotExist:
+        return Response(
+            {"error": "Invalid or expired activation link"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+@api_view(["POST"])
+def activate_account(request, token):
+    """Create user account with password"""
+    from django.contrib.auth.models import User
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        app = CreditEnrollment.objects.get(
+            activation_token=token,
+            enrollment_status="APPROVED",
+            account_activated=False
+        )
+        
+        # Check if token is expired (24 hours)
+        if app.activation_token_created:
+            expiry = app.activation_token_created + timedelta(hours=24)
+            if timezone.now() > expiry:
+                return Response(
+                    {"error": "Activation link has expired"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # Create user account
+        user = User.objects.create_user(
+            username=app.email,
+            email=app.email,
+            password=password,
+            first_name=app.first_name,
+            last_name=app.last_name
+        )
+        
+        # Mark account as activated
+        app.account_activated = True
+        app.activation_token = None  # Invalidate token
+        app.save()
+        
+        return Response({
+            "success": True,
+            "message": "Account created successfully"
+        })
+        
+    except CreditEnrollment.DoesNotExist:
+        return Response(
+            {"error": "Invalid or expired activation link"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )

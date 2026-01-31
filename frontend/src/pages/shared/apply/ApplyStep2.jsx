@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ApplicationSubmittedModal from "../../components/ApplicationSubmittedModal";
+import ApplicationSubmittedModal from "../../../components/ApplicationSubmittedModal";
 
 export default function ApplyStep2() {
   const [firstName, setFirstName] = useState("");

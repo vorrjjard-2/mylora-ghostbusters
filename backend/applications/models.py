@@ -60,7 +60,11 @@ class CreditEnrollment(models.Model):
         on_delete=models.SET_NULL,
         related_name="approved_enrollments",
     )
+    
+    # Activation token for password setup
+    activation_token = models.CharField(max_length=64, blank=True, null=True)
+    activation_token_created = models.DateTimeField(blank=True, null=True)
+    account_activated = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.application_id)
-

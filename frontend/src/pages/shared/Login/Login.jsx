@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
+import { getCookie } from "../../../utils/csrf";
 import "./Login.css";
-import logo from "../../assets/mylora-logo.png";
+import logo from "../../../assets/mylora-logo.png";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -48,13 +48,12 @@ export default function Login() {
 
       const me = await meRes.json();
 
-      // 3️⃣ Redirect by role
-      if (me.roles.includes("admin")) {
+      if (me.roles.includes("upper_management")) {
         navigate("/internal/dashboard");
       } else if (me.roles.includes("credit")) {
-        navigate("/credit/dashboard");
+        navigate("/credit_manager/dashboard");
       } else if (me.roles.includes("order")) {
-        navigate("/order/dashboard");
+        navigate("/order_processor/dashboard");
       } else {
         navigate("/customer/dashboard");
       }
