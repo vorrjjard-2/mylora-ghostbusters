@@ -1,0 +1,115 @@
+.apply-page-wrapper {
+ padding: 20px 4%; 
+ background-color: #ffffff;
+ min-height: 100vh;
+ font-family: 'Arimo', sans-serif;
+}
+
+
+.apply-header {
+ display: flex;
+ align-items: center;
+ margin-bottom: 60px;
+}
+
+
+.header-brand {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+}
+
+
+.mylora-logo {
+ height: 55px; 
+ width: auto;
+ margin-bottom: 0px;
+}
+
+
+.header-title {
+ font-size: 32px;
+ font-weight: 700;
+ color: #385930; 
+}
+
+
+.apply-container {
+ max-width: 1200px;
+ margin: 0 auto;
+}
+
+
+.main-title {
+ font-size: 64px;
+ font-weight: 800;
+ margin-bottom: 10px;
+ color: #262626;
+}
+
+
+.sub-title {
+ font-size: 24px;
+ font-weight: 550;
+ margin-top: 40px;
+ margin-bottom: 90px;
+ color: #262626;
+}
+
+
+.apply-form {
+ max-width: 550px; 
+ margin: 0 auto;   
+}
+
+
+.input-group {
+ display: flex;
+ flex-direction: column;
+ gap: 8px;
+ margin-bottom: 24px;
+}
+
+
+.input-group label {
+ font-weight: 700;
+ font-size: 18px;
+ color: #183112;
+}
+
+
+.input-group input {
+ background-color: #F8F8F8;
+ border: 1px solid #183112;
+ border-radius: 8px;
+ padding: 14px;
+ font-size: 16px;
+ width: 100%;
+ box-sizing: border-box;
+}
+
+
+.btn-continue {
+ background-color: #183112; 
+ color: white;
+ border: none;
+ padding: 14px;
+ border-radius: 8px;
+ font-size: 20px;
+ font-weight: 500;
+ width: 100%;
+ cursor: pointer;
+ transition: background-color 0.2s;
+}
+
+
+.btn-continue:hover {
+ background-color: #2a3b1f;
+}
+
+
+.error-text {
+ color: #911818;
+ font-weight: bold;
+ margin-bottom: 10px;
+}
