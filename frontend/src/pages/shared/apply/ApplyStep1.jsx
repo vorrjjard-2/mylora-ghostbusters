@@ -26,7 +26,7 @@ export default function ApplyStep1() {
   }
 
 return (
-<div className="apply-page-wrapper">
+<div className="apply1-page-wrapper">
   {/* Top Header Branding */}
   <header className="apply-header">
     <div className="header-brand">
@@ -45,7 +45,6 @@ return (
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          placeholder="Enter your email"
         />
       </div>
       {error && <p className="error-text">{error}</p>}

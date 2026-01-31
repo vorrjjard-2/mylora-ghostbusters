@@ -104,7 +104,7 @@ export default function Login() {
  ); */
 
  return (
-   <div className="login-page-wrapper"> {/* Changed to wrapper for consistency */}
+   <div className="login-page-wrapper"> 
      
      {/* SECTION 1: Branding (Logo + Title) */}
      <header className="brand-section">
