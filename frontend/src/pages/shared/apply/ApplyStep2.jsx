@@ -93,7 +93,7 @@ export default function ApplyStep2() {
 
  return (
    <>
-     <div className="apply-page-wrapper">
+     <div className="apply2-page-wrapper">
      <header className="apply-header">
        <div className="header-brand">
          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
