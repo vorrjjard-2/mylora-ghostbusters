@@ -1,4 +1,7 @@
+import "./Sidebar.css";
+
 export default function Sidebar() {
+  /*
   return (
     <aside
       style={{
@@ -31,6 +34,28 @@ function MenuItem({ children, active }) {
         cursor: "pointer",
       }}
     >
+      {children}
+    </div>
+  );
+  */
+
+  return (
+    <aside className="um-sidebar">
+      <nav className="um-sidebar-nav">
+        <MenuItem active>Dashboard</MenuItem>
+        <MenuItem>New Account Requests</MenuItem>
+        <MenuItem>All Orders</MenuItem>
+        <MenuItem>Customer Database</MenuItem>
+        <MenuItem>Employee Database</MenuItem>
+        <MenuItem>Audit Log</MenuItem>
+      </nav>
+    </aside>
+  );
+}
+
+function MenuItem({ children, active }) {
+  return (
+    <div className={`um-sidebar-item ${active ? "active" : ""}`}>
       {children}
     </div>
   );
