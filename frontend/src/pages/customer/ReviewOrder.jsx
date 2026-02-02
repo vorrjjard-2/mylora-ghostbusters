@@ -5,8 +5,7 @@ export default function ReviewOrder() {
   const navigate = useNavigate();
   const [orderItems, setOrderItems] = useState([]);
   const [customerInfo, setCustomerInfo] = useState(null);
-  const [deliveryMode, setDeliveryMode] = useState("DELIVERY");
-  const [shippingAddress, setShippingAddress] = useState("");
+  const [deliveryDetails, setDeliveryDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -18,7 +17,15 @@ export default function ReviewOrder() {
     }
     setOrderItems(JSON.parse(items));
 
-    // Fetch customer info for default address
+    // Load delivery details from localStorage
+    const delivery = localStorage.getItem("delivery_details");
+    if (!delivery) {
+      navigate("/orders/delivery");
+      return;
+    }
+    setDeliveryDetails(JSON.parse(delivery));
+
+    // Fetch customer info
     fetch("http://localhost:8000/api/customer/dashboard/", {
       credentials: "include",
     })
@@ -34,23 +41,39 @@ export default function ReviewOrder() {
   };
 
   const handleSubmit = async () => {
-    if (!shippingAddress && deliveryMode === "DELIVERY") {
-      alert("Please enter delivery address");
-      return;
-    }
-
     setSubmitting(true);
+
+    // Get CSRF token from cookie
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+
+    // Build shipping address from delivery details
+    let shippingAddress = "For Pickup";
+    if (deliveryDetails.deliveryMode === "DELIVERY") {
+      const parts = [
+        deliveryDetails.address1,
+        deliveryDetails.address2,
+        deliveryDetails.barangay,
+        deliveryDetails.city,
+        deliveryDetails.zipCode
+      ].filter(Boolean);
+      shippingAddress = parts.join(", ");
+    }
 
     try {
       const res = await fetch("http://localhost:8000/api/orders/create/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
         },
         credentials: "include",
         body: JSON.stringify({
-          delivery_mode: deliveryMode,
-          shipping_address: deliveryMode === "DELIVERY" ? shippingAddress : "For Pickup",
+          delivery_mode: deliveryDetails.deliveryMode,
+          shipping_address: shippingAddress,
           items: orderItems,
         }),
       });
@@ -64,6 +87,7 @@ export default function ReviewOrder() {
       
       // Clear localStorage
       localStorage.removeItem("order_items");
+      localStorage.removeItem("delivery_details");
       
       // Navigate to success page
       navigate("/orders/success", { state: { orderId: data.order_id } });
@@ -74,7 +98,7 @@ export default function ReviewOrder() {
     }
   };
 
-  if (orderItems.length === 0) {
+  if (orderItems.length === 0 || !deliveryDetails) {
     return <div style={styles.container}>Loading...</div>;
   }
 
@@ -97,6 +121,25 @@ export default function ReviewOrder() {
               <p>Available Credit: ₱{parseFloat(customerInfo.credit.available_credit).toLocaleString()}</p>
             </div>
           )}
+        </div>
+
+        {/* Delivery Details */}
+        <div style={styles.section}>
+          <h3 style={styles.sectionTitle}>Delivery Details</h3>
+          <p><strong>Mode:</strong> {deliveryDetails.deliveryMode === "DELIVERY" ? "Delivery" : "Pick up in-store"}</p>
+          {deliveryDetails.deliveryMode === "DELIVERY" && (
+            <div style={{ marginTop: "0.5rem" }}>
+              <p>{deliveryDetails.address1}</p>
+              {deliveryDetails.address2 && <p>{deliveryDetails.address2}</p>}
+              <p>{deliveryDetails.barangay}, {deliveryDetails.city} {deliveryDetails.zipCode}</p>
+            </div>
+          )}
+          <button
+            onClick={() => navigate("/orders/delivery")}
+            style={styles.editBtn}
+          >
+            Edit Delivery Details
+          </button>
         </div>
 
         {/* Order Items */}
@@ -136,51 +179,6 @@ export default function ReviewOrder() {
               </span>
             </div>
           </div>
-        </div>
-
-        {/* Delivery Details */}
-        <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>Delivery Details</h3>
-          
-          <div style={styles.radioGroup}>
-            <label style={styles.radioLabel}>
-              <input
-                type="radio"
-                value="DELIVERY"
-                checked={deliveryMode === "DELIVERY"}
-                onChange={(e) => setDeliveryMode(e.target.value)}
-              />
-              Delivery
-            </label>
-            <label style={styles.radioLabel}>
-              <input
-                type="radio"
-                value="PICKUP"
-                checked={deliveryMode === "PICKUP"}
-                onChange={(e) => setDeliveryMode(e.target.value)}
-              />
-              Pick-up
-            </label>
-          </div>
-
-          {deliveryMode === "DELIVERY" && (
-            <div style={{ marginTop: "1rem" }}>
-              <label style={styles.label}>Delivery Address *</label>
-              <textarea
-                value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
-                placeholder="Enter delivery address..."
-                rows="3"
-                style={styles.textarea}
-              />
-            </div>
-          )}
-
-          {deliveryMode === "PICKUP" && (
-            <p style={{ marginTop: "1rem", color: "#666" }}>
-              Your order will be ready for pick-up at your designated branch.
-            </p>
-          )}
         </div>
 
         {/* Action Buttons */}
@@ -317,6 +315,16 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
     fontSize: "1rem",
+  },
+  editBtn: {
+    marginTop: "1rem",
+    padding: "0.5rem 1rem",
+    background: "#fff",
+    border: "1px solid #1f3d1a",
+    color: "#1f3d1a",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
   },
   submitBtn: {
     padding: "0.75rem 2rem",

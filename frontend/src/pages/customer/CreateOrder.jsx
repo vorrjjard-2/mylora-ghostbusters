@@ -80,9 +80,9 @@ export default function CreateOrder() {
       alert("Please add at least one product to your order");
       return;
     }
-    // Save to localStorage and navigate to review
+    // Save to localStorage and navigate to delivery details
     localStorage.setItem("order_items", JSON.stringify(selectedItems));
-    navigate("/orders/review");
+    navigate("/orders/delivery");
   };
 
   if (loading) {

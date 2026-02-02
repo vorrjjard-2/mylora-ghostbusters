@@ -24,6 +24,7 @@ import CustomerOrders from "./pages/customer/CustomerOrders";
 import CustomerAccount from "./pages/customer/CustomerAccount";
 import CustomerDashboard from "./pages/customer/Dashboard";
 import CreateOrder from "./pages/customer/CreateOrder";
+import DeliveryDetails from "./pages/customer/DeliveryDetails";
 import ReviewOrder from "./pages/customer/ReviewOrder";
 import OrderSuccess from "./pages/customer/OrderSuccess";
 
@@ -112,6 +113,14 @@ function Layout() {
             element={
               <ProtectedRoute>
                 <CreateOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/delivery"
+            element={
+              <ProtectedRoute>
+                <DeliveryDetails />
               </ProtectedRoute>
             }
           />
