@@ -15,13 +15,66 @@ def create_application(request):
         step2 = json.loads(request.data.get("step2"))
     except Exception:
         return Response({"error": "Invalid payload"}, status=400)
+    
+    email = step1["email"]
+    phone_number = step2["phone"]
+    
+    # Check if email already has an enrollment
+    existing_enrollment = CreditEnrollment.objects.filter(email=email).first()
+    if existing_enrollment:
+        if existing_enrollment.enrollment_status == "PENDING":
+            return Response(
+                {
+                    "error": "Application already exists",
+                    "message": "An application with this email is pending review.",
+                    "application_id": str(existing_enrollment.application_id)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        elif existing_enrollment.enrollment_status == "APPROVED":
+            if existing_enrollment.account_activated:
+                return Response(
+                    {
+                        "error": "Account already exists",
+                        "message": "An active account with this email already exists. Please log in."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return Response(
+                    {
+                        "error": "Application approved",
+                        "message": "Your application has been approved. Please check your email for the activation link."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        elif existing_enrollment.enrollment_status == "REJECTED":
+            return Response(
+                {
+                    "error": "Previous application rejected",
+                    "message": "A previous application with this email was rejected. Please contact support."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    # Check if phone number already exists in enrollments
+    existing_phone = CreditEnrollment.objects.filter(phone_number=phone_number).first()
+    if existing_phone:
+        return Response(
+            {
+                "error": "Phone number already registered",
+                "message": "This phone number is already associated with another application."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
+    # Create application
     application = CreditEnrollment.objects.create(
-        email=step1["email"],
+        email=email,
 
         first_name=step2["firstName"],
         last_name=step2["lastName"],
-        phone_number=step2["phone"],
+        phone_number=phone_number,
 
         address1=step2["address1"],
         address2=step2.get("address2", ""),
@@ -42,6 +95,40 @@ def create_application(request):
         {"application_id": str(application.application_id)},
         status=status.HTTP_201_CREATED,
     )
+
+
+@api_view(["POST"])
+def check_duplicate(request):
+    """Check if email or phone number already exists"""
+    email = request.data.get("email")
+    phone = request.data.get("phone")
+    
+    response_data = {
+        "email_exists": False,
+        "phone_exists": False,
+        "message": None
+    }
+    
+    if email:
+        enrollment = CreditEnrollment.objects.filter(email=email).first()
+        if enrollment:
+            response_data["email_exists"] = True
+            if enrollment.enrollment_status == "PENDING":
+                response_data["message"] = "This email has a pending application."
+            elif enrollment.enrollment_status == "APPROVED" and enrollment.account_activated:
+                response_data["message"] = "An account with this email already exists."
+            elif enrollment.enrollment_status == "APPROVED" and not enrollment.account_activated:
+                response_data["message"] = "This email has an approved application. Check your email for activation link."
+            elif enrollment.enrollment_status == "REJECTED":
+                response_data["message"] = "A previous application with this email was rejected."
+    
+    if phone:
+        if CreditEnrollment.objects.filter(phone_number=phone).exists():
+            response_data["phone_exists"] = True
+            if not response_data["message"]:
+                response_data["message"] = "This phone number is already registered."
+    
+    return Response(response_data)
 
 
 @api_view(["GET"])
