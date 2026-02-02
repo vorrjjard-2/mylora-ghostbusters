@@ -44,13 +44,20 @@ import OrderDashboard from "./pages/order_processor/Dashboard";
 function Layout() {
   const location = useLocation();
 
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup";
-
+  const hideNavbar = 
+    location.pathname === "/login" || 
+    location.pathname === "/signup" || 
+    location.pathname.startsWith("/activate/") || 
+    location.pathname.startsWith("/apply/") || 
+    location.pathname.startsWith("/upper-management/") ||
+    location.pathname.startsWith("/credit-manager/") ||
+    location.pathname.startsWith("/order-processor/");
+    
   return (
     <>
       {!hideNavbar && <Navbar />}
 
-      <div style={{ padding: "2rem" }}>
+      <div className="app-container">
         <Routes>
           {/* 👇 default redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -65,7 +72,7 @@ function Layout() {
           <Route
             path="/upper-management/dashboard"
             element={
-              <ProtectedRoute requiredRole="upper_management">
+              <ProtectedRoute requiredRole="upper_management"> 
                 <UpperDashboard />
               </ProtectedRoute>
             }

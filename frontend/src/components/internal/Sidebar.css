@@ -1,0 +1,38 @@
+.um-sidebar {
+  width: 240px;
+  padding: 2rem 1rem;
+  background-color: #FCFCFC; 
+  min-height: calc(100vh - 70px); 
+  display: flex;
+  flex-direction: column;
+}
+
+.um-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; 
+  margin-top: 140px;
+}
+
+.um-sidebar-item {
+    padding: 10px 16px;
+    font-family: 'Arimo', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px; 
+}
+
+/* Active state */
+.um-sidebar-item.active {
+  background-color: #CFD4C4; 
+  color: #000;
+  font-weight: 700;
+  border-radius: 8px; 
+}
+
+.um-sidebar-item:hover:not(.active) {
+  background-color: #E8E8E8;
+}
