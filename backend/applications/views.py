@@ -308,7 +308,7 @@ def verify_activation_token(request, token):
 @api_view(["POST"])
 def activate_account(request, token):
     """Create user account with password and set up customer profile"""
-    from django.contrib.auth.models import User
+    from django.contrib.auth.models import User, Group
     from django.utils import timezone
     from datetime import timedelta
     from accounts.models import Customer, Branch, CreditAccount
@@ -348,19 +348,23 @@ def activate_account(request, token):
                 last_name=app.last_name
             )
             
-            # 2. Create Customer profile
+            # 2. Assign customer role/group
+            customer_group, created = Group.objects.get_or_create(name='customer')
+            user.groups.add(customer_group)
+            
+            # 3. Create Customer profile
             customer = Customer.objects.create(
                 user=user,
                 application=app
             )
             
-            # 3. Get or create Branch
+            # 4. Get or create Branch
             branch, created = Branch.objects.get_or_create(
                 name=app.default_branch,
                 defaults={'address': 'To be updated'}
             )
             
-            # 4. Create CreditAccount with approved credit info
+            # 5. Create CreditAccount with approved credit info
             credit_account = CreditAccount.objects.create(
                 customer=customer,
                 branch=branch,
@@ -371,7 +375,7 @@ def activate_account(request, token):
                 status='ACTIVE'
             )
             
-            # 5. Mark enrollment as activated
+            # 6. Mark enrollment as activated
             app.account_activated = True
             app.activation_token = None  # Invalidate token
             app.save()

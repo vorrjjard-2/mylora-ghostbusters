@@ -22,7 +22,10 @@ import ActivateAccount from "./pages/shared/ActivateAccount";
 import CustomerLanding from "./pages/customer/CustomerLanding";
 import CustomerOrders from "./pages/customer/CustomerOrders";
 import CustomerAccount from "./pages/customer/CustomerAccount";
-import CustomerDashboard from "./pages/customer/Dashboard.jsx";
+import CustomerDashboard from "./pages/customer/Dashboard";
+import CreateOrder from "./pages/customer/CreateOrder";
+import ReviewOrder from "./pages/customer/ReviewOrder";
+import OrderSuccess from "./pages/customer/OrderSuccess";
 
 // Upper Management pages
 import UpperDashboard from "./pages/upper_management/Dashboard";
@@ -40,12 +43,8 @@ import OrderDashboard from "./pages/order_processor/Dashboard";
 function Layout() {
   const location = useLocation();
 
-  const hideNavbar = 
-    location.pathname === "/login" || 
-    location.pathname === "/signup" || 
-    location.pathname.startsWith("/activate/") || 
-    location.pathname.startsWith("/apply/");
-    
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup";
+
   return (
     <>
       {!hideNavbar && <Navbar />}
@@ -105,6 +104,30 @@ function Layout() {
             element={
               <ProtectedRoute>
                 <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/create"
+            element={
+              <ProtectedRoute>
+                <CreateOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/review"
+            element={
+              <ProtectedRoute>
+                <ReviewOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/success"
+            element={
+              <ProtectedRoute>
+                <OrderSuccess />
               </ProtectedRoute>
             }
           />
