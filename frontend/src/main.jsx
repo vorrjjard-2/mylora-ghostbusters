@@ -22,7 +22,11 @@ import ActivateAccount from "./pages/shared/ActivateAccount";
 import CustomerLanding from "./pages/customer/CustomerLanding";
 import CustomerOrders from "./pages/customer/CustomerOrders";
 import CustomerAccount from "./pages/customer/CustomerAccount";
-import CustomerDashboard from "./pages/customer/Dashboard.jsx";
+import CustomerDashboard from "./pages/customer/Dashboard";
+import CreateOrder from "./pages/customer/CreateOrder";
+import DeliveryDetails from "./pages/customer/DeliveryDetails";
+import ReviewOrder from "./pages/customer/ReviewOrder";
+import OrderSuccess from "./pages/customer/OrderSuccess";
 
 // Upper Management pages
 import UpperDashboard from "./pages/upper_management/Dashboard";
@@ -108,6 +112,38 @@ function Layout() {
             element={
               <ProtectedRoute>
                 <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/create"
+            element={
+              <ProtectedRoute>
+                <CreateOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/delivery"
+            element={
+              <ProtectedRoute>
+                <DeliveryDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/review"
+            element={
+              <ProtectedRoute>
+                <ReviewOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/success"
+            element={
+              <ProtectedRoute>
+                <OrderSuccess />
               </ProtectedRoute>
             }
           />

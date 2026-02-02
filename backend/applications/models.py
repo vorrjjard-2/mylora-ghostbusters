@@ -20,8 +20,8 @@ class CreditEnrollment(models.Model):
     # Personal info
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=50)
-    email = models.EmailField()
+    phone_number = models.CharField(max_length=50, db_index=True)
+    email = models.EmailField(db_index=True)
 
     # Address
     address1 = models.CharField(max_length=255)
