@@ -220,10 +220,12 @@ def verify_activation_token(request, token):
 
 @api_view(["POST"])
 def activate_account(request, token):
-    """Create user account with password"""
+    """Create user account with password and set up customer profile"""
     from django.contrib.auth.models import User
     from django.utils import timezone
     from datetime import timedelta
+    from accounts.models import Customer, Branch, CreditAccount
+    from django.db import transaction
     
     password = request.data.get("password")
     if not password:
@@ -248,23 +250,49 @@ def activate_account(request, token):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
-        # Create user account
-        user = User.objects.create_user(
-            username=app.email,
-            email=app.email,
-            password=password,
-            first_name=app.first_name,
-            last_name=app.last_name
-        )
-        
-        # Mark account as activated
-        app.account_activated = True
-        app.activation_token = None  # Invalidate token
-        app.save()
+        # Use transaction to ensure all-or-nothing creation
+        with transaction.atomic():
+            # 1. Create user account
+            user = User.objects.create_user(
+                username=app.email,
+                email=app.email,
+                password=password,
+                first_name=app.first_name,
+                last_name=app.last_name
+            )
+            
+            # 2. Create Customer profile
+            customer = Customer.objects.create(
+                user=user,
+                application=app
+            )
+            
+            # 3. Get or create Branch
+            branch, created = Branch.objects.get_or_create(
+                name=app.default_branch,
+                defaults={'address': 'To be updated'}
+            )
+            
+            # 4. Create CreditAccount with approved credit info
+            credit_account = CreditAccount.objects.create(
+                customer=customer,
+                branch=branch,
+                credit_limit=app.credit_amt_request,
+                available_credit=app.credit_amt_request,  # Start with full credit available
+                outstanding_bal=0.00,  # No balance initially
+                credit_term=int(app.credit_term_request),  # Convert to int days
+                status='ACTIVE'
+            )
+            
+            # 5. Mark enrollment as activated
+            app.account_activated = True
+            app.activation_token = None  # Invalidate token
+            app.save()
         
         return Response({
             "success": True,
-            "message": "Account created successfully"
+            "message": "Account created successfully",
+            "credit_limit": str(app.credit_amt_request)
         })
         
     except CreditEnrollment.DoesNotExist:
