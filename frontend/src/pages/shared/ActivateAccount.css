@@ -1,0 +1,164 @@
+.activate-page-wrapper {
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.activate-page-wrapper .logo-container {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+    margin-top: -50px;
+    margin-left: -70px;
+}
+
+.activate-page-wrapper .logo-img {
+    height: 50px;
+}
+
+.activate-page-wrapper .system-title {
+    color: #395A31;
+    font-weight: 700;
+    font-size: 32px;
+    font-family: 'Arimo', sans-serif;
+    letter-spacing: -0.64px;
+    line-height: 38.4px;
+}
+
+.activate-page-wrapper .header-section {
+    text-align: left;
+}
+
+.activate-page-wrapper .main-header {
+    font-size: 64px;
+    font-weight: 800;
+    font-family: 'Arimo', sans-serif;
+    letter-spacing: -1.28px;
+    color: #222;
+    margin-bottom: 1rem;
+    margin-top: 50px;
+    margin-left: -40px;
+    align-self: stretch;
+}
+
+.activate-page-wrapper .welcome-text {
+    font-size: 25px;
+    font-family: 'Arimo', sans-serif;
+    color: #444;
+    line-height: 1.6;
+    margin-top: 40px;
+    margin-left: -40px;
+}
+
+.activate-page-wrapper .form-section {
+    display: flex;
+    justify-content: center; 
+    width: 100%;
+}
+
+.activate-page-wrapper .activate-form {
+    width: 100%;
+    max-width: 500px; 
+    margin-top: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.activate-page-wrapper .activate-container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+    font-family: 'Arimo', sans-serif;
+}
+
+.activate-page-wrapper .form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 20px;
+    font-family: 'Arimo', sans-serif;
+    margin-bottom: 0.5rem;
+    color: #1f3d1a;
+    margin-left: -100px;
+    margin-top: 15px;
+}
+
+.activate-page-wrapper .form-input {
+    width: 715px;
+    height: 44px;
+    padding: 10px 15px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    font-size: 1rem;
+    gap: 10px;
+    margin-left: -100px;
+}
+
+.activate-page-wrapper .input-hint {
+    font-size: 20px;
+    font-weight: 350;
+    font-family: 'Arimo', sans-serif;
+    color: #183112;
+    margin-bottom: 1rem;
+    line-height: 24px;
+    margin-left: -100px;
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+
+.activate-page-wrapper .btn-submit {
+    width: 100%;
+    align-items: center;
+    border: 1px solid;
+    border-radius: 10px;
+    gap: 10px;
+    height: 41px;
+    padding: 8px 59px;
+    width: 715px;
+    height: 41px;
+    background-color: #183112;
+    color: white;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 24px;
+    letter-spacing: 0.5px;
+    margin-top: -0.50px;
+    cursor: pointer;
+    margin-top: 35px;
+    margin-left: -100px
+}
+
+.activate-page-wrapper .btn-submit:disabled {
+    background-color: #ccc;
+}
+
+.activate-page-wrapper .error-message {
+ color: red;
+ font-weight: bold;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

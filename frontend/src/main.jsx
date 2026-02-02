@@ -40,8 +40,12 @@ import OrderDashboard from "./pages/order_processor/Dashboard";
 function Layout() {
   const location = useLocation();
 
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/signup";
-
+  const hideNavbar = 
+    location.pathname === "/login" || 
+    location.pathname === "/signup" || 
+    location.pathname.startsWith("/activate/") || 
+    location.pathname.startsWith("/apply/");
+    
   return (
     <>
       {!hideNavbar && <Navbar />}

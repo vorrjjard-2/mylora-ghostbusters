@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import "./ActivateAccount.css";
 
 export default function ActivateAccount() {
   const { token } = useParams();
@@ -93,7 +95,7 @@ export default function ActivateAccount() {
     );
   }
 
-  return (
+  /*return (
     <div style={{ maxWidth: 500, margin: "4rem auto" }}>
       <h1>Set Up Your Password</h1>
       <p>
@@ -169,4 +171,57 @@ export default function ActivateAccount() {
       </form>
     </div>
   );
+}*/
+
+return (
+  <div className="activate-page-wrapper">
+    <header className="logo-container">
+      <img src={logo} alt="Mylora Logo" className="logo-img" />
+      <span className="system-title">Web Credit System</span>
+    </header>
+
+    <div className="header-section">
+      <h1 className="main-header">Secure your account.</h1>
+      <p className="welcome-text">
+        Welcome, <strong>{userData?.name}</strong>! <br />
+          Your credit account has been approved. Please set up your password below
+      </p>
+    </div>
+<div className="form-section">
+    <form onSubmit={handleSubmit} className="activate-form">
+      <div className="form-group">
+        <label className="form-label">Email Address</label>
+        <input type="email" className="form-input" value={userData?.email || ""} disabled />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Password</label>
+        <p className="input-hint">Minimum of 8 characters</p>
+        <input
+          type="password"
+          className="form-input"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Confirm Password</label>
+        <input
+          type="password"
+          className="form-input"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+      </div>
+
+      <button type="submit" className="btn-submit" disabled={submitting}>
+        {submitting ? "Processing..." : "Set Password"}
+      </button>
+    </form>
+  </div>
+</div>
+);
 }

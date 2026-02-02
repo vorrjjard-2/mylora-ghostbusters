@@ -1,5 +1,7 @@
 import { useState } from "react";
 import ApplicationSubmittedModal from "../../../components/ApplicationSubmittedModal";
+import logo from "../../../assets/mylora-logo.png";
+import "./ApplyStep2.css";
 
 export default function ApplyStep2() {
   const [firstName, setFirstName] = useState("");
@@ -89,92 +91,151 @@ export default function ApplyStep2() {
     }
   }
 
-  return (
-    <>
-      <div style={{ maxWidth: 1000, margin: "3rem auto" }}>
-        <h1>Enrol for a credit line.</h1>
+ return (
+   <>
+     <div className="apply2-page-wrapper">
+     <header className="apply-header">
+       <div className="header-brand">
+         <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+         <span className="header-title">Web Credit System</span>
+       </div>
+     </header>
+     <div className="apply-container">
+       <h1 className="main-title">Enrol for a credit line.</h1>
+       <form onSubmit={handleSubmit} className="enroll-form">
 
-        <form onSubmit={handleSubmit}>
-          <h3>01 Personal Information</h3>
-          <div className="grid-2">
-            <input placeholder="First Name*" onChange={e => setFirstName(e.target.value)} />
-            <input placeholder="Last Name*" onChange={e => setLastName(e.target.value)} />
-            <input placeholder="Phone Number*" onChange={e => setPhone(e.target.value)} />
-          </div>
+         {/* Section 01 */}
+         <section className="form-section">
+           <h2 className="section-title">01 Personal Information</h2>
+           <div className="input-grid">
+             <div className="input-group">
+               <label>First Name<span className="required">*</span></label>
+               <input type="text" onChange={e => setFirstName(e.target.value)} required />
+           </div>
+           <div className="input-group">
+               <label>Last Name<span className="required">*</span></label>
+               <input type="text" onChange={e => setLastName(e.target.value)} required />
+           </div>
+           <div className="input-group">
+               <label>Phone Number<span className="required">*</span></label>
+               <input type="text" placeholder="XXXX XXX XXXX" onChange={e => setPhone(e.target.value)} required />
+           </div>
+           <div className="input-group">
+               <label>Email Address<span className="required">*</span></label>
+               <input type="email" onChange={e => setEmail(e.target.value)} required />
+             </div>
+           </div>
+         </section>
+    
+         {/* Section 2 */}
+         <section className="form-section">
+           <h2 className="section-title">02 Delivery Address</h2>
+           <div className="input-group full-width">
+             <label>Address 1<span className="required">*</span></label>
+             <input type="text" placeholder="UNIT NO., BLDG NAME, STREET" onChange={e => setAddress1(e.target.value)} required />
+           </div>
+           <div className="input-group full-width">
+             <label>Address 2</label>
+             <input type="text" placeholder="LANDMARK STATUE" onChange={e => setAddress2(e.target.value)} />
+           </div>
+           <div className="input-grid three-col">
+             <div className="input-group">
+               <label>Barangay<span className="required">*</span></label>
+               <input type="text" onChange={e => setBarangay(e.target.value)} required />
+             </div>
+             <div className="input-group">
+               <label>City<span className="required">*</span></label>
+               <input type="text" onChange={e => setCity(e.target.value)} required />
+             </div>
+             <div className="input-group">
+               <label>Zip Code<span className="required">*</span></label>
+               <input type="text" onChange={e => setZipCode(e.target.value)} required />
+             </div>
+           </div>
+           <div className="input-group">
+             <label>Default Store Branch<span className="required">*</span></label>
+             <select onChange={e => setBranch(e.target.value)} required>
+               <option value="">Select your preferred branch</option>
+               <option value="branch-a">Branch A</option>
+             </select>
+           </div>
+         </section>
 
-          <h3>02 Delivery Address</h3>
-          <input placeholder="Address 1*" onChange={e => setAddress1(e.target.value)} />
-          <input placeholder="Address 2" onChange={e => setAddress2(e.target.value)} />
+         {/* Section 3 */}
+         <section className="form-section">
+           <h2 className="section-title">03 Credit Line Application</h2>
+           <div className="input-group full-width">
+             <label>How much credit are you applying for?</label>
+             <input type="number" placeholder="Enter your amount here" onChange={e => setCreditAmount(e.target.value)} />
+           </div>
+           <div className="input-group">
+             <label>What is your preferred credit term?</label>
+             <select onChange={e => setCreditTerm(e.target.value)}>
+               <option value="">Select your preferred terms</option>
+               <option value="30">30 Days</option>
+               <option value="60">60 Days</option>
+               <option value="90">90 Days</option>
+             </select>
+           </div>
+         </section>
 
-          <div className="grid-3">
-            <input placeholder="Barangay*" onChange={e => setBarangay(e.target.value)} />
-            <input placeholder="City*" onChange={e => setCity(e.target.value)} />
-            <input placeholder="Zip Code*" onChange={e => setZipCode(e.target.value)} />
-          </div>
+         {/* Section 04 */}
+         <section className="form-section">
+           <h2 className="section-title">04 Upload Supporting Documents</h2>
+           <label className="upload-zone">
+             <div className="upload-content">
+               <p className="upload-icon">↑ Upload files here.</p>
+               <small className="upload-hint">
+                 Supported formats are .jpg, .jpeg, and .png, .pdf. Max file size is 10mb
+               </small>
+             </div>
+             <input
+               type="file"
+               multiple
+               onChange={e => setSupportingDocs([...e.target.files])}
+               className="hidden-file-input"
+             />
+           </label>
+         </section>
 
-          <select onChange={e => setBranch(e.target.value)}>
-            <option value="">Select your preferred branch*</option>
-            <option value="branch-a">Branch A</option>
-            <option value="branch-b">Branch B</option>
-          </select>
+         {/* Section 05 */}
+         <section className="form-section">
+           <h2 className="section-title">05 Upload a Government-Issued ID</h2>
+           <label className="upload-zone">
+             <div className="upload-content">
+               <p className="upload-icon">↑ Upload file here.</p>
+               <small className="upload-hint">
+                 Supported formats are .jpg, .jpeg, and .png. Max file size is 10mb
+               </small>
+             </div>
+             <input
+               type="file"
+               onChange={e => setGovId(e.target.files[0])}
+               className="hidden-file-input"
+             />
+           </label>
+         </section>
 
-          <h3>03 Credit Line Application</h3>
-          <input
-            type="number"
-            placeholder="Enter your amount here"
-            onChange={e => setCreditAmount(e.target.value)}
-          />
+         {error && <p className="error-text">{error}</p>}
 
-          <select onChange={e => setCreditTerm(e.target.value)}>
-            <option value="">Select your preferred terms</option>
-            <option value="30">30 Days</option>
-            <option value="60">60 Days</option>
-            <option value="90">90 Days</option>
-          </select>
+         <div className="form-footer">
+           <button type="button" className="btn-back">Back</button>
+           <button type="submit" className="btn-next" disabled={submitting}>
+             {submitting ? "Submitting..." : "Next"}
+             </button>
+           </div>
+         </form>
+       </div>
+     </div>
 
-          <h3>04 Upload Supporting Documents</h3>
-          <div style={{ marginBottom: "1rem" }}>
-                <label>Supporting Document 1 *</label>
-                <input
-                type="file"
-                required
-                onChange={e => setSupportingDocs(prev => [e.target.files[0], prev[1]])}
-                />
-                </div>
-
-
-<div>
-<label>Supporting Document 2 *</label>
-<input
-type="file"
-required
-onChange={e => setSupportingDocs(prev => [prev[0], e.target.files[0]])}
-/>
-</div>
-
-          <h3>05 Upload a Government-Issued ID</h3>
-          <input
-            type="file"
-            onChange={e => setGovId(e.target.files[0])}
-          />
-
-          {error && <p style={{ color: "red" }}>{error}</p>}
-
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "2rem" }}>
-            <button type="button">Back</button>
-            <button type="submit" disabled={submitting}>
-              {submitting ? "Submitting..." : "Next"}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {showModal && (
-        <ApplicationSubmittedModal
-          applicationId={applicationId}
-          onClose={() => setShowModal(false)}
-        />
-      )}
-    </>
-  );
+     {showModal && (
+       <ApplicationSubmittedModal
+         applicationId={applicationId}
+         onClose={() => setShowModal(false)}
+       />
+     )}
+   </>
+ );
 }
+
+
