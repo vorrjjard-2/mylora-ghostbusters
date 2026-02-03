@@ -5,9 +5,10 @@ from rest_framework import status
 from django.db import transaction
 from decimal import Decimal
 
-from .models import Order, OrderItem
+from .models import Order, OrderItem, OrderApproval
 from accounts.models import Customer, CreditAccount
 from products.models import Product
+from payments.models import PaymentRequest
 
 
 @api_view(["POST"])
@@ -191,3 +192,174 @@ def customer_orders(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+# ─── Credit Manager endpoints ────────────────────────────────────────────────
+
+def _require_role(request, role_name):
+    """Return True if the user has the given group."""
+    return request.user.groups.filter(name=role_name).exists()
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cm_pending_orders(request):
+    """Dashboard summary + list of PENDING orders for credit approval."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    pending = Order.objects.filter(order_status="PENDING").select_related(
+        "account__customer__user",
+        "account__customer__application",
+    ).order_by("-date_ordered")
+
+    orders_data = []
+    for order in pending:
+        customer = order.account.customer
+        orders_data.append({
+            "order_id": order.order_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "total_amount": str(order.total_amount),
+            "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
+        })
+
+    # Pending payment count
+    pending_payment_count = PaymentRequest.objects.filter(payment_status="PENDING").count()
+
+    return Response({
+        "pending_credit_count": pending.count(),
+        "pending_payment_count": pending_payment_count,
+        "pending_orders": orders_data,
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cm_order_detail(request, order_id):
+    """Full order detail for the credit-approval review screen."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        order = Order.objects.select_related(
+            "account__customer__user",
+            "account__customer__application",
+        ).get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    customer = order.account.customer
+    app = customer.application          # CreditEnrollment – may be None
+    credit = order.account
+
+    items_data = [
+        {
+            "name": item.product.name,
+            "quantity": str(item.quantity.normalize()),
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("product").all()
+    ]
+
+    return Response({
+        "order_id": order.order_id,
+        "order_status": order.order_status,
+        "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+        "customer_name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "email": app.email if app else customer.user.email,
+        "items": items_data,
+        "total_amount": str(order.total_amount),
+        "available_credit": str(credit.available_credit),
+        "credit_limit": str(credit.credit_limit),
+        "outstanding_balance": str(credit.outstanding_bal),
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cm_approve_order(request, order_id):
+    """Approve a pending order – flip status, move amount to outstanding, record approval."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        order = Order.objects.select_related("account").get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if order.order_status != "PENDING":
+        return Response(
+            {"error": "Only pending orders can be approved"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    from django.utils import timezone
+
+    with transaction.atomic():
+        order.order_status = "APPROVED"
+        order.save()
+
+        credit = order.account
+        credit.outstanding_bal += order.total_amount
+        credit.save()
+
+        OrderApproval.objects.create(
+            user=request.user,
+            order=order,
+            approval_status="APPROVED",
+            approval_date=timezone.now(),
+        )
+
+    credit.refresh_from_db()
+    return Response({
+        "success": True,
+        "order_id": order.order_id,
+        "order_status": order.order_status,
+        "available_credit": str(credit.available_credit),
+        "credit_limit": str(credit.credit_limit),
+        "outstanding_balance": str(credit.outstanding_bal),
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cm_reject_order(request, order_id):
+    """Reject a pending order – flip status, return reserved credit, record rejection."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        order = Order.objects.select_related("account").get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if order.order_status != "PENDING":
+        return Response(
+            {"error": "Only pending orders can be rejected"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    from django.utils import timezone
+
+    with transaction.atomic():
+        order.order_status = "REJECTED"
+        order.save()
+
+        # Return the reserved credit to the customer
+        credit = order.account
+        credit.available_credit += order.total_amount
+        credit.save()
+
+        OrderApproval.objects.create(
+            user=request.user,
+            order=order,
+            approval_status="REJECTED",
+            approval_date=timezone.now(),
+        )
+
+    return Response({
+        "success": True,
+        "order_id": order.order_id,
+        "order_status": order.order_status,
+    })
