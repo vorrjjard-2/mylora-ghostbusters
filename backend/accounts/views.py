@@ -88,13 +88,14 @@ def customer_dashboard(request):
         # Get credit account
         credit_account = customer.credit_account
         
-        # Get recent orders
-        recent_orders = Order.objects.filter(account=credit_account)[:5]
+        # Get 3 most recent orders
+        recent_orders = Order.objects.filter(account=credit_account).order_by('-date_ordered')[:3]
         
         orders_data = []
         for order in recent_orders:
             orders_data.append({
                 'order_id': f"XX{order.order_id}",
+                'raw_id': order.order_id,
                 'amount': str(order.total_amount),
                 'date_ordered': order.date_ordered.strftime('%B %d, %Y'),
                 'status': order.order_status

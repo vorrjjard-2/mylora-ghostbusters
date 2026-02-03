@@ -113,7 +113,12 @@ export default function CustomerDashboard() {
 
       {/* Recent Orders */}
       <div style={styles.section}>
-        <h2 style={styles.sectionTitle}>Your On-going Orders</h2>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle}>Recent Orders</h2>
+          <button style={styles.viewAllBtn} onClick={() => navigate("/orders")}>
+            View All Orders →
+          </button>
+        </div>
         {data.recent_orders.length === 0 ? (
           <p style={styles.noOrders}>No orders yet</p>
         ) : (
@@ -128,14 +133,18 @@ export default function CustomerDashboard() {
             </thead>
             <tbody>
               {data.recent_orders.map((order) => (
-                <tr key={order.order_id}>
+                <tr
+                  key={order.order_id}
+                  style={styles.tableRow}
+                  onClick={() => navigate(`/orders/${order.raw_id}`, { state: { from: "/customer/dashboard" } })}
+                >
                   <td style={styles.td}>{order.order_id}</td>
                   <td style={styles.td}>
                     ₱ {parseFloat(order.amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td style={styles.td}>{order.date_ordered}</td>
                   <td style={styles.td}>
-                    <span style={styles.statusBadge}>{order.status}</span>
+                    <span style={getStatusBadgeStyle(order.status)}>{formatStatus(order.status)}</span>
                   </td>
                 </tr>
               ))}
@@ -145,6 +154,43 @@ export default function CustomerDashboard() {
       </div>
     </div>
   );
+}
+
+function formatStatus(status) {
+  const map = {
+    PENDING: "Pending Approval",
+    APPROVED: "Approved",
+    PROCESSING: "Processing",
+    COMPLETED: "Completed",
+    CANCELLED: "Cancelled",
+    REJECTED: "Rejected",
+  };
+  return map[status] || status;
+}
+
+function getStatusBadgeStyle(status) {
+  const base = {
+    padding: "0.25rem 0.75rem",
+    borderRadius: "12px",
+    fontSize: "0.875rem",
+    fontWeight: "500",
+  };
+  switch (status) {
+    case "APPROVED":
+      return { ...base, background: "#d4edda", color: "#155724" };
+    case "REJECTED":
+      return { ...base, background: "#f8d7da", color: "#721c24" };
+    case "PENDING":
+      return { ...base, background: "#fff3cd", color: "#856404" };
+    case "PROCESSING":
+      return { ...base, background: "#cce5ff", color: "#004085" };
+    case "COMPLETED":
+      return { ...base, background: "#d1ecf1", color: "#0c5460" };
+    case "CANCELLED":
+      return { ...base, background: "#e2e3e5", color: "#383d41" };
+    default:
+      return { ...base, background: "#f5f5f5", color: "#333" };
+  }
 }
 
 const styles = {
@@ -270,5 +316,23 @@ const styles = {
     textAlign: "center",
     color: "#666",
     padding: "2rem",
+  },
+  sectionHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "1rem",
+  },
+  viewAllBtn: {
+    background: "none",
+    border: "none",
+    color: "#1f3d1a",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    padding: 0,
+  },
+  tableRow: {
+    cursor: "pointer",
   },
 };

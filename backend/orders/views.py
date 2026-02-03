@@ -106,6 +106,60 @@ def create_order(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def order_detail(request, order_id):
+    """Get a single order with its line items and customer info"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+        credit_account = customer.credit_account
+
+        order = Order.objects.get(order_id=order_id, account=credit_account)
+        items = order.items.select_related('product').all()
+
+        # Pull phone from the enrollment linked to the customer
+        phone = ""
+        if customer.application and customer.application.phone_number:
+            phone = customer.application.phone_number
+
+        items_data = []
+        for item in items:
+            items_data.append({
+                'name': item.product.name,
+                'quantity': str(item.quantity.normalize()),
+                'unit_price': str(item.unit_price),
+                'subtotal': str(item.subtotal),
+            })
+
+        return Response({
+            'order_id': order.order_id,
+            'date_submitted': order.date_ordered.strftime('%B %d, %Y'),
+            'customer_name': request.user.get_full_name() or request.user.username,
+            'phone': phone,
+            'delivery_mode': order.delivery_mode,
+            'shipping_address': order.shipping_address,
+            'order_status': order.order_status,
+            'total_amount': str(order.total_amount),
+            'items': items_data,
+        })
+
+    except Order.DoesNotExist:
+        return Response(
+            {"error": "Order not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Customer.DoesNotExist:
+        return Response(
+            {"error": "Customer profile not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def customer_orders(request):
     """Get all orders for the logged-in customer"""
     try:

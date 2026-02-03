@@ -9,7 +9,6 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import Navbar from "./components/CustomerNavbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Shared pages (public or multi-role)
@@ -27,6 +26,8 @@ import CreateOrder from "./pages/customer/CreateOrder";
 import DeliveryDetails from "./pages/customer/DeliveryDetails";
 import ReviewOrder from "./pages/customer/ReviewOrder";
 import OrderSuccess from "./pages/customer/OrderSuccess";
+import OrderHistory from "./pages/customer/OrderHistory";
+import OrderDetail from "./pages/customer/OrderDetail";
 
 // Upper Management pages
 import UpperDashboard from "./pages/upper_management/Dashboard";
@@ -44,20 +45,9 @@ import OrderDashboard from "./pages/order_processor/Dashboard";
 function Layout() {
   const location = useLocation();
 
-  const hideNavbar = 
-    location.pathname === "/login" || 
-    location.pathname === "/signup" || 
-    location.pathname.startsWith("/activate/") || 
-    location.pathname.startsWith("/apply/") || 
-    location.pathname.startsWith("/upper-management/") ||
-    location.pathname.startsWith("/credit-manager/") ||
-    location.pathname.startsWith("/order-processor/");
-    
   return (
     <>
-      {!hideNavbar && <Navbar />}
-
-      <div className="app-container">
+      <div style={{ padding: "2rem" }}>
         <Routes>
           {/* 👇 default redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -72,7 +62,7 @@ function Layout() {
           <Route
             path="/upper-management/dashboard"
             element={
-              <ProtectedRoute requiredRole="upper_management"> 
+              <ProtectedRoute requiredRole="upper_management">
                 <UpperDashboard />
               </ProtectedRoute>
             }
@@ -148,7 +138,22 @@ function Layout() {
             }
           />
           <Route path="/home" element={<CustomerLanding />} />
-          <Route path="/orders" element={<CustomerOrders />} />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <OrderHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/:orderId"
+            element={
+              <ProtectedRoute>
+                <OrderDetail />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/account" element={<CustomerAccount />} />
           
           {/* Legacy routes - redirect to new structure */}
