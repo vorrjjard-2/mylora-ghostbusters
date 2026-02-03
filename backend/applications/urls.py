@@ -7,12 +7,14 @@ from .views import (
     approve_enrollment, 
     reject_enrollment,
     verify_activation_token,
-    activate_account
+    activate_account,
+    check_duplicate
 )
 
 
 urlpatterns = [
     path("api/applications/", create_application),
+    path("api/applications/check-duplicate/", check_duplicate),
     path("api/enrollments/pending/", pending_enrollments),
     path("api/enrollments/<uuid:application_id>/", enrollment_detail),
     path("api/enrollments/<uuid:application_id>/approve/", approve_enrollment),
