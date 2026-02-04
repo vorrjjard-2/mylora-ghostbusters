@@ -10,7 +10,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: -50px;
+    margin-top: -18px;
     margin-left: -70px;
 }
 
@@ -72,7 +72,12 @@
 }
 
 .apply2-page-wrapper .input-group.full-width {
-  grid-column: span 2;
+    grid-column: span 2;
+}
+
+.apply2-page-wrapper .full-width input{
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .apply2-page-wrapper .input-group label {
@@ -179,5 +184,105 @@ input, select {
     cursor: pointer;
     height: 41px;
     width: auto;
+}
+
+/* Container for uploaded file pills */
+.file-list-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows files to wrap to the next line if there are many */
+    gap: 12px;
+    margin-left: -40px;
+    margin-top: 10px;
+}
+
+/* Individual File Pill/Badge */
+.file-display-badge {
+    display: flex;
+    align-items: center;
+    background-color: #F8F8F8;
+    border: 1px solid #183112;
+    border-radius: 10px;
+    padding: 10px 15px;
+    min-width: 200px;
+    max-width: 100%;
+    justify-content: space-between;
+}
+
+.custom-file-icon {
+    width: 23px;  
+    height: auto;
+    object-fit: contain;
+    margin-right: 12px;
+}
+
+.file-name {
+    flex-grow: 1;
+    font-size: 16px;
+    color: #183112;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    margin-right: 10px;
+}
+
+.remove-file {
+    background: none;
+    border: none;
+    color: #183112;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 5px;
+    line-height: 1;
+}
+
+.add-more-files {
+    background: transparent;
+    border: 1px dashed #183112;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: #183112;
+    cursor: pointer;
+    font-family: 'Arimo', sans-serif;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.add-more-files:hover {
+    background-color: #f0f4f0;
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+.section-header-text, .id-hint-text {
+    margin-left: -40px;
+    margin-bottom: 15px;
+    color: #183112; 
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.required-docs-list {
+    list-style-type: disc;
+    margin-left: 30px;
+    padding-left: 0;
+    margin-top: -10px;
+    font-size: 20px;
+}
+
+.required-docs-list li {
+    margin-bottom: 4px;
+}
+
+.required-docs-list span {
+    font-style: italic;
+    font-weight: 400;
+}
+
+.id-hint-text {
+    margin-top: -10px;
+    font-size: 20px;
 }
 

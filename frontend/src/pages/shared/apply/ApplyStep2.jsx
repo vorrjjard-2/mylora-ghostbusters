@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ApplicationSubmittedModal from "../../../components/ApplicationSubmittedModal";
 import logo from "../../../assets/mylora-logo.png";
+import fileIcon from "../../../assets/file.png";
 import "./ApplyStep2.css";
 
 export default function ApplyStep2() {
@@ -110,20 +111,64 @@ export default function ApplyStep2() {
            <div className="input-grid">
              <div className="input-group">
                <label>First Name<span className="required">*</span></label>
-               <input type="text" onChange={e => setFirstName(e.target.value)} required />
+                <input 
+                      type="text" 
+                      value={firstName} 
+                      onChange={e => {
+                        const value = e.target.value;
+                        // allows letters (a-z) and spaces, but blocks numbers/symbols
+                        if (value === '' || /^[a-zA-Z\s]+$/.test(value)) {
+                          setFirstName(value);
+                        }
+                      }} 
+                      required 
+                    />
            </div>
            <div className="input-group">
                <label>Last Name<span className="required">*</span></label>
-               <input type="text" onChange={e => setLastName(e.target.value)} required />
+                <input 
+                      type="text" 
+                      value={lastName}
+                      onChange={e => {
+                        const value = e.target.value;
+                        // allows letters (a-z) and spaces, but blocks numbers/symbols
+                        if (value === '' || /^[a-zA-Z\s]+$/.test(value)) {
+                          setLastName(value);
+                        }
+                      }} 
+                      required 
+                    />
            </div>
-           <div className="input-group">
+           <div className="input-group full-width">
                <label>Phone Number<span className="required">*</span></label>
-               <input type="text" placeholder="XXXX XXX XXXX" onChange={e => setPhone(e.target.value)} required />
-           </div>
-           <div className="input-group">
-               <label>Email Address<span className="required">*</span></label>
-               <input type="email" onChange={e => setEmail(e.target.value)} required />
-             </div>
+                <input 
+                      type="text" 
+                      placeholder="09XX XXX XXXX" 
+                      value={phone} 
+                      onChange={e => {
+                        // 1. Remove all non-numeric characters
+                        let rawValue = e.target.value.replace(/\D/g, "");
+                        
+                        // 2. Limit to 11 digits
+                        if (rawValue.length > 11) rawValue = rawValue.substring(0, 11);
+                        
+                        // 3. Apply the mask (09XX XXX XXXX)
+                        let formattedValue = "";
+                        if (rawValue.length > 0) {
+                          formattedValue += rawValue.substring(0, 4);
+                          if (rawValue.length > 4) {
+                            formattedValue += " " + rawValue.substring(4, 7);
+                          }
+                          if (rawValue.length > 7) {
+                            formattedValue += " " + rawValue.substring(7, 11);
+                          }
+                        }
+                        
+                        setPhone(formattedValue);
+                      }} 
+                      required 
+                    />           
+                </div>
            </div>
          </section>
     
@@ -149,8 +194,22 @@ export default function ApplyStep2() {
              </div>
              <div className="input-group">
                <label>Zip Code<span className="required">*</span></label>
-               <input type="text" onChange={e => setZipCode(e.target.value)} required />
-             </div>
+                <input 
+                      type="text" 
+                      placeholder="XXXX"
+                      value={zipCode} 
+                      onChange={e => {
+                        // Remove anything that isn't a number
+                        const value = e.target.value.replace(/\D/g, "");
+                        
+                        // Only update state if it's 4 digits or less
+                        if (value.length <= 4) {
+                          setZipCode(value);
+                        }
+                      }} 
+                      required 
+                    />             
+                </div>
            </div>
            <div className="input-group">
              <label>Default Store Branch<span className="required">*</span></label>
@@ -179,63 +238,99 @@ export default function ApplyStep2() {
            </div>
          </section>
 
-         {/* Section 04 */}
-         <section className="form-section">
-           <h2 className="section-title">04 Upload Supporting Documents</h2>
-           <label className="upload-zone">
-             <div className="upload-content">
-               <p className="upload-icon">↑ Upload files here.</p>
-               <small className="upload-hint">
-                 Supported formats are .jpg, .jpeg, and .png, .pdf. Max file size is 10mb
-               </small>
-             </div>
-             <input
-               type="file"
-               multiple
-               onChange={e => setSupportingDocs([...e.target.files])}
-               className="hidden-file-input"
-             />
-           </label>
-         </section>
+        {/* Section 04 */}
+        <section className="form-section">
+          <h2 className="section-title">04 Upload Supporting Documents</h2>
+          <div className="section-header-text">
+            <p>The following supporting documents are required:</p>
+            <ul className="required-docs-list">
+              <li>Document 1<span className="required">*</span></li>
+              <li>Document 2<span className="required">*</span></li>
+              <li>Document 3 <span>(optional)</span></li>
+            </ul>
+          </div>
+          {supportingDocs.length > 0 ? (
+            <div className="file-list-container">
+              {supportingDocs.map((file, index) => (
+                <div key={index} className="file-display-badge">
+                <img src={fileIcon} alt="File Icon" className="custom-file-icon" />                  
+                <span className="file-name">{file.name}</span>
+                  <button type="button" className="remove-file" onClick={() => setSupportingDocs(supportingDocs.filter((_, i) => i !== index))}>×</button>
+                </div>
+              ))}
+              <button type="button" className="add-more-files" onClick={() => document.getElementById('docs-input').click()}>+ Add more</button>
+              <input
+                id="docs-input"
+                type="file"
+                multiple
+                accept=".jpg, .jpeg, .png, .pdf"
+                onChange={e => setSupportingDocs([...supportingDocs, ...e.target.files])}
+                className="hidden-file-input"
+              />
+            </div>
+          ) : (
+            <label className="upload-zone">
+              <div className="upload-content">
+                <p className="upload-icon">↑ Upload files here.</p>
+                <small className="upload-hint">Supported formats are .jpg, .jpeg, and .png, .pdf. Max file size is 10mb</small>
+              </div>
+              <input
+                type="file"
+                multiple
+                onChange={e => setSupportingDocs([...e.target.files])}
+                className="hidden-file-input"
+              />
+            </label>
+          )}
+        </section>
 
-         {/* Section 05 */}
-         <section className="form-section">
-           <h2 className="section-title">05 Upload a Government-Issued ID</h2>
-           <label className="upload-zone">
-             <div className="upload-content">
-               <p className="upload-icon">↑ Upload file here.</p>
-               <small className="upload-hint">
-                 Supported formats are .jpg, .jpeg, and .png. Max file size is 10mb
-               </small>
-             </div>
-             <input
-               type="file"
-               onChange={e => setGovId(e.target.files[0])}
-               className="hidden-file-input"
-             />
-           </label>
-         </section>
+        {/* Section 05 */}
+        <section className="form-section">
+          <h2 className="section-title">05 Upload a Government-Issued ID</h2>
+          <p className="id-hint-text">Please make sure that uploaded image is clear.<span className="required">*</span></p>
+          {govId ? (
+            <div className="file-list-container">
+              <div className="file-display-badge">
+                <img src={fileIcon} alt="File Icon" className="custom-file-icon" />                  
+                <span className="file-name">{govId.name}</span>
+                <button type="button" className="remove-file" onClick={() => setGovId(null)}>×</button>
+              </div>
+            </div>
+          ) : (
+            <label className="upload-zone">
+              <div className="upload-content">
+                <p className="upload-icon">↑ Upload file here.</p>
+                <small className="upload-hint">Supported formats are .jpg, .jpeg, and .png. Max file size is 10mb</small>
+              </div>
+              <input
+                type="file"
+                accept=".jpg, .jpeg, .png"
+                onChange={e => setGovId(e.target.files[0])}
+                className="hidden-file-input"
+              />
+            </label>
+          )}
+        </section>
 
-         {error && <p className="error-text">{error}</p>}
+        {error && <p className="error-text" style={{color: '#911818', marginLeft: '-40px', marginTop: '20px'}}>{error}</p>}
 
-         <div className="form-footer">
-           <button type="button" className="btn-back">Back</button>
-           <button type="submit" className="btn-next" disabled={submitting}>
-             {submitting ? "Submitting..." : "Next"}
-             </button>
-           </div>
-         </form>
-       </div>
-     </div>
+        <div className="form-footer">
+          <button type="button" className="btn-back">Back</button>
+          <button type="submit" className="btn-next" disabled={submitting}>
+            {submitting ? "Submitting..." : "Next"}
+          </button>
+        </div>
+      </form> {/* Closing the enroll-form */}
+    </div> {/* Closing the apply-container */}
+  </div> {/* Closing the apply2-page-wrapper */}
 
-     {showModal && (
-       <ApplicationSubmittedModal
-         applicationId={applicationId}
-         onClose={() => setShowModal(false)}
-       />
-     )}
-   </>
+  {showModal && (
+    <ApplicationSubmittedModal
+      applicationId={applicationId}
+      onClose={() => setShowModal(false)}
+    />
+  )}
+</>
  );
 }
-
 
