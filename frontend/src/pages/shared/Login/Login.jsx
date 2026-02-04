@@ -50,9 +50,9 @@ export default function Login() {
 
       if (me.roles.includes("upper_management")) {
         navigate("/internal/dashboard");
-      } else if (me.roles.includes("credit")) {
-        navigate("/credit_manager/dashboard");
-      } else if (me.roles.includes("order")) {
+      } else if (me.roles.includes("credit_manager")) {
+        navigate("/credit-manager/dashboard");
+      } else if (me.roles.includes("order_processor")) {
         navigate("/order_processor/dashboard");
       } else {
         navigate("/customer/dashboard");

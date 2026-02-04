@@ -28,6 +28,8 @@ import ReviewOrder from "./pages/customer/ReviewOrder";
 import OrderSuccess from "./pages/customer/OrderSuccess";
 import OrderHistory from "./pages/customer/OrderHistory";
 import OrderDetail from "./pages/customer/OrderDetail";
+import PaymentRequest from "./pages/customer/PaymentRequest";
+import PaymentSuccess from "./pages/customer/PaymentSuccess";
 
 // Upper Management pages
 import UpperDashboard from "./pages/upper_management/Dashboard";
@@ -35,6 +37,9 @@ import EnrollmentReview from "./pages/upper_management/EnrollmentReview";
 
 // Credit Manager pages
 import CreditDashboard from "./pages/credit_manager/Dashboard";
+import PaymentReview from "./pages/credit_manager/PaymentReview";
+import CreditApproval from "./pages/credit_manager/CreditApproval";
+import CreditApprovalSuccess from "./pages/credit_manager/CreditApprovalSuccess";
 
 // Order Processor pages
 import OrderDashboard from "./pages/order_processor/Dashboard";
@@ -82,6 +87,30 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="credit_manager">
                 <CreditDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-manager/approve/:orderId"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <CreditApproval />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-manager/approve/:orderId/success"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <CreditApprovalSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-manager/payment/:paymentId"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <PaymentReview />
               </ProtectedRoute>
             }
           />
@@ -134,6 +163,22 @@ function Layout() {
             element={
               <ProtectedRoute>
                 <OrderSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit/update"
+            element={
+              <ProtectedRoute>
+                <PaymentRequest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment/success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
               </ProtectedRoute>
             }
           />

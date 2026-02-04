@@ -2,12 +2,95 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from decimal import Decimal
+from datetime import datetime
+from django.db import transaction
 
 from .models import PaymentRequest
+from accounts.models import Customer
 
 
 def _require_role(request, role_name):
     return request.user.groups.filter(name=role_name).exists()
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def submit_payment(request):
+    """Customer submits a payment request"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+        credit_account = customer.credit_account
+        
+        # Extract payment data
+        inv_number = request.data.get("inv_number", "")
+        amount_paid = request.data.get("amount_paid")
+        date_paid = request.data.get("date_paid")
+        proof_payment = request.FILES.get("proof_payment")
+        
+        # Validate required fields
+        if not amount_paid:
+            return Response(
+                {"error": "Amount paid is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not date_paid:
+            return Response(
+                {"error": "Payment date is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not proof_payment:
+            return Response(
+                {"error": "Proof of payment is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Convert amount to Decimal
+        try:
+            amount_decimal = Decimal(str(amount_paid))
+        except:
+            return Response(
+                {"error": "Invalid amount format"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Parse date
+        try:
+            date_obj = datetime.strptime(date_paid, "%Y-%m-%d").date()
+        except:
+            return Response(
+                {"error": "Invalid date format. Use YYYY-MM-DD"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Create payment request
+        payment = PaymentRequest.objects.create(
+            account=credit_account,
+            inv_number=inv_number,
+            amount_paid=amount_decimal,
+            date_paid=date_obj,
+            proof_payment=proof_payment,
+            payment_status="PENDING"
+        )
+        
+        return Response({
+            "success": True,
+            "payment_id": payment.payment_id,
+            "message": "Payment request submitted successfully"
+        }, status=status.HTTP_201_CREATED)
+        
+    except Customer.DoesNotExist:
+        return Response(
+            {"error": "Customer profile not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(["GET"])
@@ -34,3 +117,118 @@ def cm_pending_payments(request):
         })
 
     return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cm_payment_detail(request, payment_id):
+    """Get detailed payment information for review"""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        payment = PaymentRequest.objects.select_related(
+            "account__customer__user",
+            "account__customer__application"
+        ).get(payment_id=payment_id)
+    except PaymentRequest.DoesNotExist:
+        return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    customer = payment.account.customer
+    app = customer.application
+    credit = payment.account
+
+    return Response({
+        "payment_id": payment.payment_id,
+        "customer_name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "email": app.email if app else customer.user.email,
+        "inv_number": payment.inv_number,
+        "amount_paid": str(payment.amount_paid),
+        "date_paid": payment.date_paid.strftime("%B %d, %Y"),
+        "date_submitted": payment.timestamp.strftime("%B %d, %Y"),
+        "proof_payment_url": request.build_absolute_uri(payment.proof_payment.url) if payment.proof_payment else None,
+        "outstanding_balance": str(credit.outstanding_bal),
+        "available_credit": str(credit.available_credit),
+        "credit_limit": str(credit.credit_limit),
+        "payment_status": payment.payment_status,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cm_approve_payment(request, payment_id):
+    """Approve/verify a payment - reduce outstanding balance and increase available credit"""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not request.user.check_password(password):
+        return Response(
+            {"error": "Invalid password"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    try:
+        payment = PaymentRequest.objects.select_related("account").get(payment_id=payment_id)
+    except PaymentRequest.DoesNotExist:
+        return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if payment.payment_status != "PENDING":
+        return Response(
+            {"error": "Only pending payments can be verified"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    with transaction.atomic():
+        payment.payment_status = "VERIFIED"
+        payment.approved_by = request.user
+        payment.save()
+
+        # Update credit account
+        credit = payment.account
+        credit.outstanding_bal -= payment.amount_paid
+        credit.available_credit += payment.amount_paid
+        credit.save()
+
+    return Response({
+        "success": True,
+        "payment_id": payment.payment_id,
+        "message": "Payment verified successfully",
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cm_reject_payment(request, payment_id):
+    """Reject a payment request"""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        payment = PaymentRequest.objects.get(payment_id=payment_id)
+    except PaymentRequest.DoesNotExist:
+        return Response({"error": "Payment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if payment.payment_status != "PENDING":
+        return Response(
+            {"error": "Only pending payments can be rejected"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    payment.payment_status = "REJECTED"
+    payment.approved_by = request.user
+    payment.save()
+
+    return Response({
+        "success": True,
+        "payment_id": payment.payment_id,
+        "message": "Payment rejected",
+    })

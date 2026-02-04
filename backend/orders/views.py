@@ -324,6 +324,49 @@ def cm_approve_order(request, order_id):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+def cm_request_override(request, order_id):
+    """Request an override for an order that exceeds available credit"""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        order = Order.objects.select_related("account").get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if order.order_status != "PENDING":
+        return Response(
+            {"error": "Only pending orders can have override requests"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    reason = request.data.get("reason", "").strip()
+    if not reason:
+        return Response(
+            {"error": "Reason for override is required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    from .models import OverrideRequest
+    from django.utils import timezone
+
+    # Create override request
+    OverrideRequest.objects.create(
+        requesting_user=request.user,
+        order=order,
+        reason=reason,
+        override_status="PENDING",
+    )
+
+    return Response({
+        "success": True,
+        "order_id": order.order_id,
+        "message": "Override request submitted successfully",
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def cm_reject_order(request, order_id):
     """Reject a pending order – flip status, return reserved credit, record rejection."""
     if not _require_role(request, "credit_manager"):

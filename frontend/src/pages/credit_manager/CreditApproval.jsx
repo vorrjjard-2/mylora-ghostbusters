@@ -12,10 +12,15 @@ export default function CreditApproval() {
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [acting, setActing] = useState(false); // true while approve/reject POST is in-flight
+  const [acting, setActing] = useState(false);
+  
+  // Override modal state
+  const [showOverrideModal, setShowOverrideModal] = useState(false);
+  const [overrideReason, setOverrideReason] = useState("");
+  const [showOverrideSuccess, setShowOverrideSuccess] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/cm/orders/${orderId}/`, { credentials: "include" })
+    fetch(`http://localhost:8000/api/cm/order/${orderId}/`, { credentials: "include" })
       .then((r) => {
         if (!r.ok) throw new Error("Not found");
         return r.json();
@@ -25,12 +30,19 @@ export default function CreditApproval() {
       .finally(() => setLoading(false));
   }, [orderId, navigate]);
 
+  const needsOverride = () => {
+    if (!order) return false;
+    const totalAmount = parseFloat(order.total_amount);
+    const availableCredit = parseFloat(order.available_credit);
+    return totalAmount > availableCredit;
+  };
+
   const postAction = async (action) => {
     // action = "approve" | "reject"
     setActing(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/api/cm/orders/${orderId}/${action}/`,
+        `http://localhost:8000/api/cm/order/${orderId}/${action}/`,
         {
           method: "POST",
           credentials: "include",
@@ -45,15 +57,53 @@ export default function CreditApproval() {
       const data = await res.json();
 
       if (action === "approve") {
-        // navigate to success page; carry both the original order (for items)
-        // and the fresh approve response (for updated credit figures)
         navigate(`/credit-manager/approve/${orderId}/success`, {
           state: { order, ...data },
         });
       } else {
-        // rejection — just go back to dashboard
         navigate("/credit-manager/dashboard");
       }
+    } catch (e) {
+      alert("Request failed. Please try again.");
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handleRequestOverride = () => {
+    setShowOverrideModal(true);
+    setOverrideReason("");
+  };
+
+  const submitOverrideRequest = async () => {
+    if (!overrideReason.trim()) {
+      alert("Please enter a reason for the override request");
+      return;
+    }
+
+    setActing(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/cm/order/${orderId}/request-override/`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify({ reason: overrideReason }),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to submit override request");
+        return;
+      }
+
+      setShowOverrideModal(false);
+      setShowOverrideSuccess(true);
     } catch (e) {
       alert("Request failed. Please try again.");
     } finally {
@@ -66,6 +116,11 @@ export default function CreditApproval() {
 
   const fmt = (n) =>
     parseFloat(n).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const requiresOverride = needsOverride();
+  const exceedsBy = requiresOverride 
+    ? parseFloat(order.total_amount) - parseFloat(order.available_credit)
+    : 0;
 
   return (
     <div style={styles.container}>
@@ -100,6 +155,16 @@ export default function CreditApproval() {
           </div>
         </div>
       </div>
+
+      {/* Warning if override needed */}
+      {requiresOverride && (
+        <div style={styles.warningBox}>
+          <strong>WARNING!</strong>
+          <br />
+          ORDER XX{order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
+          credit limit. {order.customer_name} has insufficient credit balance.
+        </div>
+      )}
 
       {/* ── Order Form ── */}
       <h2 style={styles.subTitle}>Order Form</h2>
@@ -164,14 +229,83 @@ export default function CreditApproval() {
         >
           Reject Order
         </button>
-        <button
-          style={styles.approveBtn}
-          disabled={acting}
-          onClick={() => postAction("approve")}
-        >
-          Approve Order
-        </button>
+        {requiresOverride ? (
+          <button
+            style={styles.overrideBtn}
+            disabled={acting}
+            onClick={handleRequestOverride}
+          >
+            Request Override
+          </button>
+        ) : (
+          <button
+            style={styles.approveBtn}
+            disabled={acting}
+            onClick={() => postAction("approve")}
+          >
+            Approve Order
+          </button>
+        )}
       </div>
+
+      {/* Override Request Modal */}
+      {showOverrideModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h3 style={styles.modalTitle}>WARNING!</h3>
+            <p style={styles.modalWarning}>
+              ORDER XX{order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
+              credit limit. {order.customer_name} has insufficient credit balance.
+            </p>
+            <div style={styles.modalFormGroup}>
+              <label style={styles.modalLabel}>Please enter reason for override:</label>
+              <textarea
+                style={styles.modalTextarea}
+                placeholder="Enter reason here..."
+                value={overrideReason}
+                onChange={(e) => setOverrideReason(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div style={styles.modalActions}>
+              <button
+                style={styles.modalCancelBtn}
+                onClick={() => setShowOverrideModal(false)}
+                disabled={acting}
+              >
+                Cancel
+              </button>
+              <button
+                style={styles.modalSubmitBtn}
+                onClick={submitOverrideRequest}
+                disabled={acting}
+              >
+                {acting ? "Submitting..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Override Success Modal */}
+      {showOverrideSuccess && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h3 style={styles.successTitle}>Override request submitted for review.</h3>
+            <p style={styles.successMessage}>
+              Reason for override:
+              <br />
+              {overrideReason}
+            </p>
+            <button
+              style={styles.returnBtn}
+              onClick={() => navigate("/credit-manager/dashboard")}
+            >
+              Return to Dashboard
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -190,6 +324,18 @@ const styles = {
 
   title: { fontSize: "2rem", fontWeight: 700, marginBottom: "1.25rem" },
   subTitle: { fontSize: "1.1rem", fontWeight: 600, marginBottom: "0.6rem", marginTop: "1.5rem" },
+
+  warningBox: {
+    background: "#fff3cd",
+    border: "2px solid #ffc107",
+    borderRadius: "6px",
+    padding: "1rem",
+    marginTop: "1rem",
+    marginBottom: "1rem",
+    color: "#856404",
+    fontSize: "0.95rem",
+    lineHeight: "1.5",
+  },
 
   /* customer info */
   infoGrid: { display: "flex", flexDirection: "column", gap: "0.75rem" },
@@ -228,5 +374,108 @@ const styles = {
     padding: "0.75rem 1.75rem", background: "#1f3d1a", color: "#fff",
     border: "none", borderRadius: "6px", cursor: "pointer",
     fontSize: "0.95rem", fontWeight: 600,
+  },
+  overrideBtn: {
+    padding: "0.75rem 1.75rem", background: "#1f3d1a", color: "#fff",
+    border: "none", borderRadius: "6px", cursor: "pointer",
+    fontSize: "0.95rem", fontWeight: 600,
+  },
+
+  /* Modal styles */
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    background: "#fff",
+    borderRadius: "8px",
+    maxWidth: "600px",
+    width: "90%",
+    padding: "2rem",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  },
+  modalTitle: {
+    fontSize: "1.5rem",
+    fontWeight: 700,
+    marginBottom: "1rem",
+    color: "#d32f2f",
+  },
+  modalWarning: {
+    fontSize: "1rem",
+    lineHeight: "1.6",
+    marginBottom: "1.5rem",
+    color: "#555",
+  },
+  modalFormGroup: {
+    marginBottom: "1.5rem",
+  },
+  modalLabel: {
+    display: "block",
+    fontWeight: 600,
+    marginBottom: "0.5rem",
+    fontSize: "0.95rem",
+  },
+  modalTextarea: {
+    width: "100%",
+    padding: "0.75rem",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    boxSizing: "border-box",
+    resize: "vertical",
+  },
+  modalActions: {
+    display: "flex",
+    gap: "1rem",
+    justifyContent: "flex-end",
+  },
+  modalCancelBtn: {
+    padding: "0.75rem 2rem",
+    background: "#fff",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "1rem",
+  },
+  modalSubmitBtn: {
+    padding: "0.75rem 2rem",
+    background: "#1f3d1a",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "1rem",
+    fontWeight: 600,
+  },
+  successTitle: {
+    fontSize: "1.5rem",
+    fontWeight: 700,
+    marginBottom: "1rem",
+    textAlign: "center",
+  },
+  successMessage: {
+    fontSize: "1rem",
+    color: "#555",
+    lineHeight: "1.6",
+    marginBottom: "2rem",
+  },
+  returnBtn: {
+    padding: "0.75rem 2rem",
+    background: "#1f3d1a",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "1rem",
+    fontWeight: 600,
+    width: "100%",
   },
 };

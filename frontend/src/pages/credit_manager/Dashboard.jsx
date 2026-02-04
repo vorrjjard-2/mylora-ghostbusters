@@ -56,7 +56,11 @@ export default function CreditManagerDashboard() {
         <p style={styles.empty}>No pending payments.</p>
       )}
       {payments.map((p) => (
-        <div key={p.payment_id} style={styles.listItem}>
+        <div
+          key={p.payment_id}
+          style={styles.listItem}
+          onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
+        >
           <div>
             <div style={styles.listOrderId}>{p.customer_name}</div>
             <div style={styles.listSub}>Amount paid: ₱ {fmt(p.amount_paid)}</div>
