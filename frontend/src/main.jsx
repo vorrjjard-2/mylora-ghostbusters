@@ -34,6 +34,7 @@ import PaymentSuccess from "./pages/customer/PaymentSuccess";
 // Upper Management pages
 import UpperDashboard from "./pages/upper_management/Dashboard";
 import EnrollmentReview from "./pages/upper_management/EnrollmentReview";
+import OverrideReview from "./pages/upper_management/OverrideReview";
 
 // Credit Manager pages
 import CreditDashboard from "./pages/credit_manager/Dashboard";
@@ -77,6 +78,14 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="upper_management">
                 <EnrollmentReview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/override/:overrideId"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <OverrideReview />
               </ProtectedRoute>
             }
           />

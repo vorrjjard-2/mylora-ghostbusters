@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const user = { username: "UM1234" };
 
   const [enrollments, setEnrollments] = useState([]);
+  const [overrideRequests, setOverrideRequests] = useState([]);
+  const [activeTab, setActiveTab] = useState("enrollments");
 
   useEffect(() => {
     fetch("http://localhost:8000/api/enrollments/pending/", {
@@ -22,58 +25,22 @@ export default function Dashboard() {
       .then(data => setEnrollments(data))
       .catch(err => {
         console.error("Failed to load enrollments", err);
-        alert(err.message);
+      });
+
+    fetch("http://localhost:8000/api/um/pending-overrides/", {
+      credentials: "include"
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to load overrides: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => setOverrideRequests(data))
+      .catch(err => {
+        console.error("Failed to load override requests", err);
       });
   }, []);
-  
-  // ORIGINAL HTML
-  /*
-  return (
-    <div style={{ display: "flex" }}>
-      <Sidebar />
-
-      <main style={{ padding: "2rem", width: "100%" }}>
-        <header style={{ display: "flex", justifyContent: "space-between" }}>
-          <h1>Hello, {user.username}</h1>
-          <button>Logout</button>
-        </header>
-
-        <h2>Enrolment Requests</h2>
-
-        <div style={{ marginTop: "1rem" }}>
-          {enrollments.length === 0 && <p>No pending requests.</p>}
-
-          {enrollments.map((e) => (
-            <div
-              key={e.application_id}
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: 8,
-                padding: "1rem",
-                marginBottom: "1rem",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div>
-                <Link
-                    to={`/upper-management/enrollments/${e.application_id}`}
-                    style={{ fontWeight: "bold", textDecoration: "none", color: "#1f3d1a" }}
-                    >
-                    {e.application_id.slice(0, 8).toUpperCase()}
-                    </Link>
-                <div>Submitted by: {e.name}</div>
-                <div>{e.email}</div>
-              </div>
-              <div>Date Submitted: {e.date}</div>
-            </div>
-          ))}
-        </div>
-      </main>
-    </div>
-  ); 
-} 
-*/
 
  return (
     <div className="um-dashboard-wrapper">
@@ -84,7 +51,7 @@ export default function Dashboard() {
             <span className="um-system-title">Web Credit System</span>
           </div>
           <div className="um-header-actions">
-            <button className="um-logout-btn">
+            <button className="um-logout-btn" onClick={() => navigate("/login")}>
               Logout
             </button>
           </div>
@@ -99,44 +66,88 @@ export default function Dashboard() {
 
             {/* SECTION 3: STAT CARDS */}
             <div className="um-stats-container">
-              <div className="um-stat-card active-card">
+              <div 
+                className={`um-stat-card ${activeTab === "enrollments" ? "active-card" : ""}`}
+                onClick={() => setActiveTab("enrollments")}
+                style={{ cursor: "pointer" }}
+              >
                 <span className="um-stat-label">Enrolment Requests</span>
-                <span className="um-stat-number">3</span>
+                <span className="um-stat-number">{enrollments.length}</span>
               </div>
-              <div className="um-stat-card">
-                <span className="um-stat-label">Credit Approval</span>
-                <span className="um-stat-number">3</span>
+              <div 
+                className={`um-stat-card ${activeTab === "overrides" ? "active-card" : ""}`}
+                onClick={() => setActiveTab("overrides")}
+                style={{ cursor: "pointer" }}
+              >
+                <span className="um-stat-label">Credit Override</span>
+                <span className="um-stat-number">{overrideRequests.length}</span>
               </div>
               <div className="um-stat-card">
                 <span className="um-stat-label">Order Processing</span>
-                <span className="um-stat-number">5</span>
+                <span className="um-stat-number">0</span>
               </div>
             </div>
 
-            {/* SECTION 4: TABS (Placeholder for now) */}
+            {/* SECTION 4: TABS */}
             <div className="um-tabs-row">
-              <button className="um-tab active-tab">Enrolment Requests</button>
-              <button className="um-tab">Credit Approval</button>
-              <button className="um-tab">Order Processing</button>
+              <button 
+                className={`um-tab ${activeTab === "enrollments" ? "active-tab" : ""}`}
+                onClick={() => setActiveTab("enrollments")}
+              >
+                Enrolment Requests
+              </button>
+              <button 
+                className={`um-tab ${activeTab === "overrides" ? "active-tab" : ""}`}
+                onClick={() => setActiveTab("overrides")}
+              >
+                Credit Override
+              </button>
+              <button className="um-tab">
+                Order Processing
+              </button>
             </div>
 
             {/* SECTION 5: LIST */}
             <div className="um-list-container">
-              {enrollments.map((e) => (
-                <div key={e.application_id} className="um-request-item">
-                  <div className="um-request-info">
-                    <Link to={`/upper-management/enrollments/${e.application_id}`} className="um-request-id">
-                      {e.application_id.slice(0, 8).toUpperCase()}
-                    </Link>
-                    <div className="um-request-sub">Submitted by: {e.name}</div>
-                  </div>
-                  <div className="um-request-date">Date Submitted: {e.date}</div>
-                </div>
-              ))}
+              {activeTab === "enrollments" && (
+                <>
+                  {enrollments.length === 0 && <p style={{ color: "#888", padding: "1rem" }}>No pending enrollment requests.</p>}
+                  {enrollments.map((e) => (
+                    <div key={e.application_id} className="um-request-item">
+                      <div className="um-request-info">
+                        <Link to={`/upper-management/enrollments/${e.application_id}`} className="um-request-id">
+                          {e.application_id.slice(0, 8).toUpperCase()}
+                        </Link>
+                        <div className="um-request-sub">Submitted by: {e.name}</div>
+                      </div>
+                      <div className="um-request-date">Date Submitted: {e.date}</div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {activeTab === "overrides" && (
+                <>
+                  {overrideRequests.length === 0 && <p style={{ color: "#888", padding: "1rem" }}>No pending override requests.</p>}
+                  {overrideRequests.map((override) => (
+                    <div 
+                      key={override.override_id} 
+                      className="um-request-item"
+                      onClick={() => navigate(`/upper-management/override/${override.override_id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="um-request-info">
+                        <div className="um-request-id">ORDER ID XX{override.order_id}</div>
+                        <div className="um-request-sub">Customer: {override.customer_name}</div>
+                      </div>
+                      <div className="um-request-date">Date Submitted: {override.date_submitted}</div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </main>
       </div>
     </div>
   ); 
 }
-

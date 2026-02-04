@@ -40,6 +40,13 @@ export default function ReviewOrder() {
     return orderItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
   };
 
+  const exceedsCredit = () => {
+    if (!customerInfo) return false;
+    const total = calculateTotal();
+    const available = parseFloat(customerInfo.credit.available_credit);
+    return total > available;
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
 
@@ -90,7 +97,12 @@ export default function ReviewOrder() {
       localStorage.removeItem("delivery_details");
       
       // Navigate to success page
-      navigate("/orders/success", { state: { orderId: data.order_id } });
+      navigate("/orders/success", { 
+        state: { 
+          orderId: data.order_id,
+          exceedsCredit: data.exceeds_credit 
+        } 
+      });
     } catch (err) {
       alert(err.message);
     } finally {
@@ -112,6 +124,14 @@ export default function ReviewOrder() {
       </div>
 
       <div style={styles.content}>
+        {/* Credit Warning */}
+        {exceedsCredit() && (
+          <div style={styles.warningBox}>
+            <strong>⚠️ Notice:</strong> This order exceeds your available credit limit. 
+            Your order will be submitted for override approval by management.
+          </div>
+        )}
+
         {/* Customer Information */}
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Customer Information</h3>
@@ -227,6 +247,16 @@ const styles = {
   },
   content: {
     background: "#fff",
+  },
+  warningBox: {
+    background: "#fff3cd",
+    border: "2px solid #ffc107",
+    borderRadius: "6px",
+    padding: "1rem",
+    marginBottom: "1.5rem",
+    color: "#856404",
+    fontSize: "0.95rem",
+    lineHeight: "1.5",
   },
   section: {
     marginBottom: "2rem",

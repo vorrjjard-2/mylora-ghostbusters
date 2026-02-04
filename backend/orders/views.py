@@ -38,17 +38,8 @@ def create_order(request):
             unit_price = Decimal(str(item["unit_price"]))
             total_amount += quantity * unit_price
         
-        # Check if customer has enough available credit
-        if total_amount > credit_account.available_credit:
-            return Response(
-                {
-                    "error": "Insufficient credit",
-                    "message": f"Order total (₱{total_amount}) exceeds available credit (₱{credit_account.available_credit})",
-                    "required": str(total_amount),
-                    "available": str(credit_account.available_credit)
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # Allow orders that exceed credit limit - they will require override approval
+        exceeds_credit = total_amount > credit_account.available_credit
         
         # Create order and items in transaction
         with transaction.atomic():
@@ -73,6 +64,7 @@ def create_order(request):
                 )
             
             # Reduce available credit (reserve it)
+            # If order exceeds limit, available_credit may go negative
             credit_account.available_credit -= total_amount
             credit_account.save()
         
@@ -80,7 +72,8 @@ def create_order(request):
             "success": True,
             "order_id": order.order_id,
             "total_amount": str(total_amount),
-            "message": "Order created successfully"
+            "exceeds_credit": exceeds_credit,
+            "message": "Order created successfully" if not exceeds_credit else "Order submitted for override approval"
         }, status=status.HTTP_201_CREATED)
         
     except Customer.DoesNotExist:
@@ -103,6 +96,7 @@ def create_order(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
 
 
 @api_view(["GET"])
@@ -208,10 +202,20 @@ def cm_pending_orders(request):
     if not _require_role(request, "credit_manager"):
         return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
+    from .models import OverrideRequest
+
+    # Get all pending orders
     pending = Order.objects.filter(order_status="PENDING").select_related(
         "account__customer__user",
         "account__customer__application",
     ).order_by("-date_ordered")
+
+    # Exclude orders that have pending override requests
+    pending_override_order_ids = OverrideRequest.objects.filter(
+        override_status="PENDING"
+    ).values_list("order_id", flat=True)
+
+    pending = pending.exclude(order_id__in=pending_override_order_ids)
 
     orders_data = []
     for order in pending:
@@ -405,4 +409,209 @@ def cm_reject_order(request, order_id):
         "success": True,
         "order_id": order.order_id,
         "order_status": order.order_status,
+    })
+
+
+# ─── Upper Management Override Endpoints ──────────────────────────────────────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_pending_overrides(request):
+    """List of PENDING override requests for upper management"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import OverrideRequest
+    
+    pending = (
+        OverrideRequest.objects.filter(override_status="PENDING")
+        .select_related("order__account__customer__user", "requesting_user")
+        .order_by("-order__date_ordered")
+    )
+
+    data = []
+    for override_req in pending:
+        customer = override_req.order.account.customer
+        data.append({
+            "override_id": override_req.override_id,
+            "order_id": override_req.order.order_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "date_submitted": override_req.order.date_ordered.strftime("%B %d, %Y"),
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_override_detail(request, override_id):
+    """Get detailed override request information"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import OverrideRequest
+    
+    try:
+        override_req = OverrideRequest.objects.select_related(
+            "order__account__customer__user",
+            "order__account__customer__application",
+            "requesting_user"
+        ).get(override_id=override_id)
+    except OverrideRequest.DoesNotExist:
+        return Response({"error": "Override request not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    order = override_req.order
+    customer = order.account.customer
+    app = customer.application
+    credit = order.account
+
+    items_data = [
+        {
+            "name": item.product.name,
+            "quantity": str(item.quantity.normalize()),
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("product").all()
+    ]
+
+    return Response({
+        "override_id": override_req.override_id,
+        "order_id": order.order_id,
+        "customer_name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "date_submitted": override_req.order.date_ordered.strftime("%B %d, %Y"),
+        "order_date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+        "items": items_data,
+        "total_amount": str(order.total_amount),
+        "available_credit": str(credit.available_credit),
+        "credit_limit": str(credit.credit_limit),
+        "outstanding_balance": str(credit.outstanding_bal),
+        "reason": override_req.reason,
+        "requesting_user": override_req.requesting_user.username,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_approve_override(request, override_id):
+    """Approve an override request - directly approves the order"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not request.user.check_password(password):
+        return Response(
+            {"error": "Invalid password"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    from .models import OverrideRequest
+    from django.utils import timezone
+    
+    try:
+        override_req = OverrideRequest.objects.select_related("order__account").get(override_id=override_id)
+    except OverrideRequest.DoesNotExist:
+        return Response({"error": "Override request not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if override_req.override_status != "PENDING":
+        return Response(
+            {"error": "Only pending override requests can be approved"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    with transaction.atomic():
+        # Update override request
+        override_req.override_status = "APPROVED"
+        override_req.approving_user = request.user
+        override_req.override_date = timezone.now()
+        override_req.save()
+
+        # Approve the order directly
+        order = override_req.order
+        order.order_status = "APPROVED"
+        order.save()
+
+        # Move amount from reserved to outstanding balance
+        credit = order.account
+        credit.outstanding_bal += order.total_amount
+        credit.save()
+
+        # Record the approval
+        OrderApproval.objects.create(
+            user=request.user,
+            order=order,
+            approval_status="APPROVED",
+            approval_date=timezone.now(),
+        )
+
+    return Response({
+        "success": True,
+        "override_id": override_req.override_id,
+        "message": "Override request approved and order approved successfully",
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_reject_override(request, override_id):
+    """Reject an override request - order remains in pending with reserved negative credit"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not request.user.check_password(password):
+        return Response(
+            {"error": "Invalid password"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    from .models import OverrideRequest
+    from django.utils import timezone
+    
+    try:
+        override_req = OverrideRequest.objects.select_related("order__account").get(override_id=override_id)
+    except OverrideRequest.DoesNotExist:
+        return Response({"error": "Override request not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if override_req.override_status != "PENDING":
+        return Response(
+            {"error": "Only pending override requests can be rejected"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    with transaction.atomic():
+        # Update override request
+        override_req.override_status = "REJECTED"
+        override_req.approving_user = request.user
+        override_req.override_date = timezone.now()
+        override_req.save()
+
+        # Reject the order and return reserved credit
+        order = override_req.order
+        order.order_status = "REJECTED"
+        order.save()
+
+        # Return the reserved credit
+        credit = order.account
+        credit.available_credit += order.total_amount
+        credit.save()
+
+    return Response({
+        "success": True,
+        "override_id": override_req.override_id,
+        "message": "Override request rejected",
     })

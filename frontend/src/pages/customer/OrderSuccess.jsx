@@ -5,6 +5,7 @@ export default function OrderSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
   const orderId = location.state?.orderId;
+  const exceedsCredit = location.state?.exceedsCredit || false;
 
   useEffect(() => {
     if (!orderId) {
@@ -25,9 +26,21 @@ export default function OrderSuccess() {
           <strong>ORDER ID: XX{orderId}</strong>
         </p>
 
-        <p style={styles.description}>
-          Your purchase request has been sent to the office and will be reviewed shortly.
-        </p>
+        {exceedsCredit ? (
+          <>
+            <p style={styles.warningText}>
+              ⚠️ This order exceeds your available credit limit and requires override approval.
+            </p>
+            <p style={styles.description}>
+              Your purchase request will be reviewed by management for credit limit override approval.
+              You will be notified once a decision has been made.
+            </p>
+          </>
+        ) : (
+          <p style={styles.description}>
+            Your purchase request has been sent to the office and will be reviewed shortly.
+          </p>
+        )}
 
         <p style={styles.description}>
           You may check the status of your order through your order history.
@@ -94,6 +107,15 @@ const styles = {
     fontSize: "1.125rem",
     marginBottom: "1rem",
     color: "#1f3d1a",
+  },
+  warningText: {
+    fontSize: "1rem",
+    marginBottom: "1rem",
+    color: "#856404",
+    background: "#fff3cd",
+    padding: "0.75rem",
+    borderRadius: "6px",
+    border: "1px solid #ffc107",
   },
   description: {
     color: "#666",
