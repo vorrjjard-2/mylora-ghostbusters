@@ -25,7 +25,7 @@ export default function ApplyStep2() {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [applicationId, setApplicationId] = useState(null);
+  const [applicationId, setApplicationId] = useState(null); 
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -320,6 +320,10 @@ export default function ApplyStep2() {
             {submitting ? "Submitting..." : "Next"}
           </button>
         </div>
+
+        <div className="form-footer">
+</div>
+
       </form> {/* Closing the enroll-form */}
     </div> {/* Closing the apply-container */}
   </div> {/* Closing the apply2-page-wrapper */}
