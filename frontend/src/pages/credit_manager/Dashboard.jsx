@@ -9,8 +9,8 @@ export default function CreditManagerDashboard() {
   const [payments, setPayments]     = useState([]);         // from /api/cm/pending-payments/
   const [loading, setLoading]       = useState(true);
 
-  // UI
-  const [activeTab, setActiveTab] = useState("dashboard");
+  // UI - start with credit approval tab
+  const [activeTab, setActiveTab] = useState("credit");
 
   /* ── fetch both lists in parallel ── */
   useEffect(() => {
@@ -105,7 +105,7 @@ export default function CreditManagerDashboard() {
           </div>
           <div
             style={{ ...styles.sideItem, ...(activeTab === "adjustment" ? styles.sideItemActive : {}) }}
-            onClick={() => setActiveTab("adjustment")}
+            onClick={() => navigate("/credit-manager/adjustment")}
           >
             Credit Adjustment
           </div>
@@ -117,17 +117,28 @@ export default function CreditManagerDashboard() {
 
           {/* summary cards — always visible */}
           <div style={styles.cardRow}>
-            <div style={styles.card}>
+            <div 
+              style={{
+                ...styles.card,
+                ...(activeTab === "credit" ? {} : styles.cardOutline)
+              }}
+              onClick={() => setActiveTab("credit")}
+            >
               <div style={styles.cardLabel}>Pending Credit Approval</div>
               <div style={styles.cardCount}>{creditData?.pending_credit_count ?? 0}</div>
             </div>
-            <div style={styles.cardOutline}>
+            <div 
+              style={{
+                ...(activeTab === "payment" ? styles.card : styles.cardOutline)
+              }}
+              onClick={() => setActiveTab("payment")}
+            >
               <div style={styles.cardLabel}>Pending Payment Review</div>
               <div style={styles.cardCount}>{creditData?.pending_payment_count ?? 0}</div>
             </div>
           </div>
 
-          {/* ── Dashboard view: both tabs side by side ── */}
+          {/* ── Dashboard view: show both tabs ── */}
           {activeTab === "dashboard" && (
             <>
               <div style={styles.tabRow}>
@@ -211,10 +222,14 @@ const styles = {
   card: {
     flex: 1, background: "#1f3d1a", color: "#fff",
     borderRadius: "8px", padding: "1.25rem 1.5rem",
+    cursor: "pointer",
+    transition: "opacity 0.2s ease",
   },
   cardOutline: {
     flex: 1, background: "#fff", color: "#333",
     border: "2px solid #333", borderRadius: "8px", padding: "1.25rem 1.5rem",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   cardLabel: { fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.4rem" },
   cardCount: { fontSize: "2.25rem", fontWeight: 700 },

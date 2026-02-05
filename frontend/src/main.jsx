@@ -20,7 +20,7 @@ import ActivateAccount from "./pages/shared/ActivateAccount";
 // Customer pages
 import CustomerLanding from "./pages/customer/CustomerLanding";
 import CustomerOrders from "./pages/customer/CustomerOrders";
-import CustomerAccount from "./pages/customer/CustomerAccount";
+import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerDashboard from "./pages/customer/Dashboard";
 import CreateOrder from "./pages/customer/CreateOrder";
 import DeliveryDetails from "./pages/customer/DeliveryDetails";
@@ -41,6 +41,7 @@ import CreditDashboard from "./pages/credit_manager/Dashboard";
 import PaymentReview from "./pages/credit_manager/PaymentReview";
 import CreditApproval from "./pages/credit_manager/CreditApproval";
 import CreditApprovalSuccess from "./pages/credit_manager/CreditApprovalSuccess";
+import CreditAdjustment from "./pages/credit_manager/CreditAdjustment";
 
 // Order Processor pages
 import OrderDashboard from "./pages/order_processor/Dashboard";
@@ -96,6 +97,14 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="credit_manager">
                 <CreditDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-manager/adjustment"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <CreditAdjustment />
               </ProtectedRoute>
             }
           />
@@ -208,7 +217,7 @@ function Layout() {
               </ProtectedRoute>
             }
           />
-          <Route path="/account" element={<CustomerAccount />} />
+          <Route path="/account" element={<CustomerProfile />} />
           
           {/* Legacy routes - redirect to new structure */}
           <Route path="/internal/dashboard" element={<Navigate to="/upper-management/dashboard" replace />} />

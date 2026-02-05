@@ -615,3 +615,132 @@ def um_reject_override(request, override_id):
         "override_id": override_req.override_id,
         "message": "Override request rejected",
     })
+
+
+# ─── Credit Manager - Customer Management ────────────────────────────────────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cm_customers_list(request):
+    """List all customers with their credit account details"""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from accounts.models import Customer
+    
+    customers = Customer.objects.select_related(
+        "user", "credit_account", "application"
+    ).all()
+
+    data = []
+    for customer in customers:
+        app = customer.application
+        credit = customer.credit_account
+        data.append({
+            "customer_id": customer.customer_id,
+            "name": customer.user.get_full_name() or customer.user.username,
+            "phone": app.phone_number if app else "",
+            "email": app.email if app else customer.user.email,
+            "address1": app.address1 if app else "",
+            "address2": app.address2 if app else "",
+            "barangay": app.barangay if app else "",
+            "city": app.city if app else "",
+            "zipcode": app.zipcode if app else "",
+            "credit_limit": str(credit.credit_limit),
+            "available_credit": str(credit.available_credit),
+            "outstanding_balance": str(credit.outstanding_bal),
+        })
+
+    return Response(data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cm_adjust_customer_balance(request, customer_id):
+    """Manually adjust a customer's outstanding balance"""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not request.user.check_password(password):
+        return Response(
+            {"error": "Invalid password"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    from accounts.models import Customer
+    from payments.models import PaymentRequest
+    from django.utils import timezone
+    from decimal import Decimal
+
+    try:
+        customer = Customer.objects.select_related("credit_account").get(customer_id=customer_id)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Get adjustment details
+    balance_paid = request.data.get("balance_paid")
+    date_of_payment = request.data.get("date_of_payment")
+    invoice_number = request.data.get("invoice_number", "")
+    proof_of_payment = request.FILES.get("proof_of_payment")
+
+    if not balance_paid or not date_of_payment:
+        return Response(
+            {"error": "Balance paid and date of payment are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        amount_decimal = Decimal(str(balance_paid))
+        date_obj = datetime.strptime(date_of_payment, "%Y-%m-%d").date()
+    except:
+        return Response(
+            {"error": "Invalid amount or date format"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    with transaction.atomic():
+        # Create a payment request record for audit trail
+        payment = PaymentRequest.objects.create(
+            account=customer.credit_account,
+            inv_number=invoice_number,
+            amount_paid=amount_decimal,
+            date_paid=date_obj,
+            proof_payment=proof_of_payment,
+            payment_status="VERIFIED",
+            approved_by=request.user,
+        )
+
+        # Update credit account
+        credit = customer.credit_account
+        credit.outstanding_bal -= amount_decimal
+        credit.available_credit += amount_decimal
+        credit.save()
+
+    # Return updated customer data
+    app = customer.application
+    return Response({
+        "success": True,
+        "message": "Balance adjusted successfully",
+        "customer": {
+            "customer_id": customer.customer_id,
+            "name": customer.user.get_full_name() or customer.user.username,
+            "phone": app.phone_number if app else "",
+            "email": app.email if app else customer.user.email,
+            "address1": app.address1 if app else "",
+            "address2": app.address2 if app else "",
+            "barangay": app.barangay if app else "",
+            "city": app.city if app else "",
+            "zipcode": app.zipcode if app else "",
+            "credit_limit": str(credit.credit_limit),
+            "available_credit": str(credit.available_credit),
+            "outstanding_balance": str(credit.outstanding_bal),
+        }
+    })

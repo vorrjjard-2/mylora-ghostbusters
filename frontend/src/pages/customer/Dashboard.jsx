@@ -36,6 +36,10 @@ export default function CustomerDashboard() {
       100
     : 0;
 
+  const exceedsCreditLimit = data.credit
+    ? parseFloat(data.credit.outstanding_balance) > parseFloat(data.credit.credit_limit)
+    : false;
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -43,8 +47,8 @@ export default function CustomerDashboard() {
           <h1 style={styles.title}>Hello, {data.user.name}</h1>
         </div>
         <div style={styles.headerButtons}>
-          <button style={styles.button}>Profile</button>
-          <button style={{ ...styles.button, ...styles.logoutButton }}>
+          <button style={styles.button} onClick={() => navigate("/account")}>Profile</button>
+          <button style={{ ...styles.button, ...styles.logoutButton }} onClick={() => navigate("/login")}>
             Logout
           </button>
         </div>
@@ -97,7 +101,10 @@ export default function CustomerDashboard() {
           <div
             style={{
               ...styles.progressBar,
-              width: `${creditUtilization}%`,
+              width: `${Math.min(creditUtilization, 100)}%`,
+              background: exceedsCreditLimit 
+                ? "linear-gradient(90deg, #c62828 0%, #e53935 100%)" 
+                : "linear-gradient(90deg, #6a9955 0%, #8db873 100%)",
             }}
           />
         </div>
@@ -281,8 +288,7 @@ const styles = {
   },
   progressBar: {
     height: "100%",
-    background: "linear-gradient(90deg, #6a9955 0%, #8db873 100%)",
-    transition: "width 0.3s ease",
+    transition: "width 0.3s ease, background 0.3s ease",
   },
   balanceAmount: {
     fontSize: "2rem",

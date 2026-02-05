@@ -134,3 +134,97 @@ def customer_dashboard(request):
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def customer_profile(request):
+    """Get customer profile information"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+        app = customer.application
+        
+        return Response({
+            'name': request.user.get_full_name() or request.user.username,
+            'phone': app.phone_number if app else "",
+            'email': app.email if app else request.user.email,
+            'address1': app.address1 if app else "",
+            'address2': app.address2 if app else "",
+            'barangay': app.barangay if app else "",
+            'city': app.city if app else "",
+            'zipcode': app.zipcode if app else "",
+        })
+        
+    except Customer.DoesNotExist:
+        return Response(
+            {'error': 'Customer profile not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """Change customer password"""
+    current_password = request.data.get("current_password")
+    new_password = request.data.get("new_password")
+    
+    if not current_password or not new_password:
+        return Response(
+            {"error": "Both current and new password are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Verify current password
+    if not request.user.check_password(current_password):
+        return Response(
+            {"error": "Current password is incorrect"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    # Set new password
+    request.user.set_password(new_password)
+    request.user.save()
+    
+    return Response({"success": True, "message": "Password changed successfully"})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def update_address(request):
+    """Update customer address details"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+        app = customer.application
+        
+        if not app:
+            return Response(
+                {"error": "Application not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Update address fields
+        app.address1 = request.data.get("address1", app.address1)
+        app.address2 = request.data.get("address2", app.address2)
+        app.barangay = request.data.get("barangay", app.barangay)
+        app.city = request.data.get("city", app.city)
+        app.zipcode = request.data.get("zipcode", app.zipcode)
+        app.save()
+        
+        return Response({"success": True, "message": "Address updated successfully"})
+        
+    except Customer.DoesNotExist:
+        return Response(
+            {'error': 'Customer profile not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
