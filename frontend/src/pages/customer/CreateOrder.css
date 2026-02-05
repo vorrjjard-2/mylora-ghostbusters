@@ -1,0 +1,207 @@
+.order-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%; 
+    background-color: #FCFCFC;
+    margin: 0;
+    padding: 0;    
+    font-family: 'Arimo', sans-serif;
+}
+
+.activate-page-wrapper .system-title {
+    color: #395A31;
+    font-weight: 700;
+    font-size: 32px;
+    font-family: 'Arimo', sans-serif;
+    letter-spacing: -0.64px;
+    line-height: 38.4px;
+}
+
+.um-cancel-btn {
+    background: #183112;
+    border: 1.3px solid #183112; 
+    color: white;
+    padding: 6px 30px; 
+    height: 41px;
+    width: 186px;
+    margin-right: -40px;
+    border-radius: 10px; 
+    font-weight: 600;
+    font-size: 20px;
+    cursor: pointer;    
+}
+
+
+.order-header {
+    font-size: 34px; 
+    font-weight: 700;
+    color: black;
+    margin-bottom: 10px;
+    margin-top: -40px;
+    margin-left: 70px;
+}
+
+.order-subheader {
+    font-size: 20px; 
+    font-weight: 700;
+    color: black;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    margin-left: 5px;
+}
+
+
+.order-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.order-left-panel {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-left: 70px;
+}
+
+.order-search-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.order-product-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.order-product-card {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e0e0e0;
+}
+
+.order-product-name {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.order-product-price {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.order-add-btn {
+  padding: 0.5rem 1rem;
+  background: #1f3d1a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.order-right-panel {
+  background: #fff;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-right: 70px;
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.order-th {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 2px solid #e0e0e0;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.order-td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-td.empty-msg {
+  text-align: center;
+  color: #999;
+}
+
+.order-item-unit {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.order-quantity-input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.order-remove-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+}
+
+.order-total-section {
+  border-top: 2px solid #333;
+  padding-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.order-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-total-label {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.order-total-amount {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #1f3d1a;
+}
+
+.order-continue-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #1f3d1a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.order-continue-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
