@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 
 export default function CreditAdjustment() {
   const navigate = useNavigate();
@@ -8,20 +7,6 @@ export default function CreditAdjustment() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // Modal states
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [password, setPassword] = useState("");
-  const [processing, setProcessing] = useState(false);
-
-  // Adjustment form
-  const [adjustmentForm, setAdjustmentForm] = useState({
-    invoice_number: "",
-    balance_paid: "",
-    date_of_payment: "",
-    proof_of_payment: null,
-  });
 
   useEffect(() => {
     // Fetch all customers with credit accounts
@@ -42,86 +27,6 @@ export default function CreditAdjustment() {
 
   const handleCustomerSelect = (customer) => {
     setSelectedCustomer(customer);
-    setAdjustmentForm({
-      invoice_number: "",
-      balance_paid: "",
-      date_of_payment: "",
-      proof_of_payment: null,
-    });
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setAdjustmentForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e) => {
-    setAdjustmentForm((prev) => ({ ...prev, proof_of_payment: e.target.files[0] }));
-  };
-
-  const handleSubmit = () => {
-    if (!adjustmentForm.balance_paid || !adjustmentForm.date_of_payment) {
-      alert("Please fill in balance paid and date of payment");
-      return;
-    }
-
-    setShowPasswordModal(true);
-  };
-
-  const handleConfirmAdjustment = async () => {
-    if (!password) {
-      alert("Please enter your password");
-      return;
-    }
-
-    setProcessing(true);
-    const csrfToken = getCookie("csrftoken");
-
-    try {
-      const formData = new FormData();
-      formData.append("password", password);
-      formData.append("invoice_number", adjustmentForm.invoice_number);
-      formData.append("balance_paid", adjustmentForm.balance_paid);
-      formData.append("date_of_payment", adjustmentForm.date_of_payment);
-      if (adjustmentForm.proof_of_payment) {
-        formData.append("proof_of_payment", adjustmentForm.proof_of_payment);
-      }
-
-      const response = await fetch(
-        `http://localhost:8000/api/cm/customer/${selectedCustomer.customer_id}/adjust-balance/`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "X-CSRFToken": csrfToken,
-          },
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to adjust balance");
-      }
-
-      // Update customer in list
-      const updatedCustomer = await response.json();
-      setCustomers((prev) =>
-        prev.map((c) =>
-          c.customer_id === selectedCustomer.customer_id ? updatedCustomer.customer : c
-        )
-      );
-      setSelectedCustomer(updatedCustomer.customer);
-
-      setShowPasswordModal(false);
-      setShowSuccessModal(true);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Failed to adjust balance");
-    } finally {
-      setProcessing(false);
-      setPassword("");
-    }
   };
 
   const filteredCustomers = customers.filter((c) =>
@@ -193,7 +98,7 @@ export default function CreditAdjustment() {
           {!selectedCustomer ? (
             <div style={styles.placeholder}>
               <h1>Credit Adjustment</h1>
-              <p>Select a customer from the list to adjust their balance</p>
+              <p>Select a customer from the list to view their details</p>
             </div>
           ) : (
             <>
@@ -226,7 +131,7 @@ export default function CreditAdjustment() {
                 </div>
               </div>
 
-              {/* Adjustment Buttons */}
+              {/* Action Buttons */}
               <div style={styles.buttonRow}>
                 <button
                   style={styles.adjustBtn}
@@ -234,7 +139,12 @@ export default function CreditAdjustment() {
                 >
                   📋 View Credit History
                 </button>
-                <button style={styles.adjustBtn}>✏️ Adjust Balance</button>
+                <button 
+                  style={styles.adjustBtn}
+                  onClick={() => navigate(`/credit-manager/customer/${selectedCustomer.customer_id}/update-balance`)}
+                >
+                  ✏️ Update Credit Balance
+                </button>
               </div>
 
               {/* Contact Information */}
@@ -277,129 +187,10 @@ export default function CreditAdjustment() {
                   {!selectedCustomer.address1 && <div>No address on file</div>}
                 </div>
               </div>
-
-              {/* Adjustment Form */}
-              <div style={styles.section}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Invoice Number</label>
-                  <input
-                    type="text"
-                    name="invoice_number"
-                    value={adjustmentForm.invoice_number}
-                    onChange={handleFormChange}
-                    style={styles.input}
-                    placeholder="Enter invoice number"
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Balance Paid</label>
-                  <input
-                    type="number"
-                    name="balance_paid"
-                    value={adjustmentForm.balance_paid}
-                    onChange={handleFormChange}
-                    style={styles.input}
-                    placeholder="₱ 0.00"
-                    step="0.01"
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Date of Payment</label>
-                  <input
-                    type="date"
-                    name="date_of_payment"
-                    value={adjustmentForm.date_of_payment}
-                    onChange={handleFormChange}
-                    style={styles.input}
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Proof of Payment</label>
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    style={styles.fileInput}
-                    accept="image/*,.pdf"
-                  />
-                  {adjustmentForm.proof_of_payment && (
-                    <div style={styles.fileName}>{adjustmentForm.proof_of_payment.name}</div>
-                  )}
-                </div>
-
-                <div style={styles.submitRow}>
-                  <button style={styles.submitBtn} onClick={handleSubmit}>
-                    Save
-                  </button>
-                </div>
-              </div>
             </>
           )}
         </main>
       </div>
-
-      {/* Password Modal */}
-      {showPasswordModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.modalTitle}>Please enter user password to proceed.</h3>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••"
-              style={styles.passwordInput}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleConfirmAdjustment();
-              }}
-            />
-            <div style={styles.modalButtonRow}>
-              <button
-                style={styles.modalCancelBtn}
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setPassword("");
-                }}
-                disabled={processing}
-              >
-                Cancel
-              </button>
-              <button
-                style={styles.modalConfirmBtn}
-                onClick={handleConfirmAdjustment}
-                disabled={processing}
-              >
-                {processing ? "Processing..." : "Update Balance"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.successTitle}>Balance payment successfully updated!</h3>
-            <button
-              style={styles.returnBtn}
-              onClick={() => {
-                setShowSuccessModal(false);
-                setAdjustmentForm({
-                  invoice_number: "",
-                  balance_paid: "",
-                  date_of_payment: "",
-                  proof_of_payment: null,
-                });
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

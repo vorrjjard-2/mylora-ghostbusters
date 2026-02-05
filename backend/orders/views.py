@@ -634,22 +634,31 @@ def cm_customers_list(request):
 
     data = []
     for customer in customers:
-        app = customer.application
-        credit = customer.credit_account
-        data.append({
-            "customer_id": customer.customer_id,
-            "name": customer.user.get_full_name() or customer.user.username,
-            "phone": app.phone_number if app else "",
-            "email": app.email if app else customer.user.email,
-            "address1": app.address1 if app else "",
-            "address2": app.address2 if app else "",
-            "barangay": app.barangay if app else "",
-            "city": app.city if app else "",
-            "zipcode": app.zipcode if app else "",
-            "credit_limit": str(credit.credit_limit),
-            "available_credit": str(credit.available_credit),
-            "outstanding_balance": str(credit.outstanding_bal),
-        })
+        try:
+            # Skip customers without credit accounts
+            if not hasattr(customer, 'credit_account') or not customer.credit_account:
+                continue
+                
+            app = customer.application
+            credit = customer.credit_account
+            data.append({
+                "customer_id": customer.id,
+                "name": customer.user.get_full_name() or customer.user.username,
+                "phone": app.phone_number if app else "",
+                "email": app.email if app else customer.user.email,
+                "address1": app.address1 if app else "",
+                "address2": app.address2 if app else "",
+                "barangay": app.barangay if app else "",
+                "city": app.city if app else "",
+                "zipcode": app.zipcode if app else "",
+                "credit_limit": str(credit.credit_limit),
+                "available_credit": str(credit.available_credit),
+                "outstanding_balance": str(credit.outstanding_bal),
+            })
+        except Exception as e:
+            # Skip customers with errors
+            print(f"Error loading customer {customer.id}: {str(e)}")
+            continue
 
     return Response(data)
 
@@ -681,7 +690,7 @@ def cm_adjust_customer_balance(request, customer_id):
     from decimal import Decimal
 
     try:
-        customer = Customer.objects.select_related("credit_account").get(customer_id=customer_id)
+        customer = Customer.objects.select_related("credit_account").get(id=customer_id)
     except Customer.DoesNotExist:
         return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -730,7 +739,7 @@ def cm_adjust_customer_balance(request, customer_id):
         "success": True,
         "message": "Balance adjusted successfully",
         "customer": {
-            "customer_id": customer.customer_id,
+            "customer_id": customer.id,
             "name": customer.user.get_full_name() or customer.user.username,
             "phone": app.phone_number if app else "",
             "email": app.email if app else customer.user.email,

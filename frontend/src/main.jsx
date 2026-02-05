@@ -42,6 +42,7 @@ import PaymentReview from "./pages/credit_manager/PaymentReview";
 import CreditApproval from "./pages/credit_manager/CreditApproval";
 import CreditApprovalSuccess from "./pages/credit_manager/CreditApprovalSuccess";
 import CreditAdjustment from "./pages/credit_manager/CreditAdjustment";
+import UpdateBalance from "./pages/credit_manager/UpdateBalance";
 
 // Order Processor pages
 import OrderDashboard from "./pages/order_processor/Dashboard";
@@ -105,6 +106,14 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="credit_manager">
                 <CreditAdjustment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-manager/customer/:customerId/update-balance"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <UpdateBalance />
               </ProtectedRoute>
             }
           />

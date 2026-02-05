@@ -4,6 +4,7 @@ from django.conf import settings
 
 class Customer(models.Model):
     """Extended user profile for customers"""
+    # Django automatically creates 'id' as primary key - we'll use that
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
