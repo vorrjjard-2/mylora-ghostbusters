@@ -19,12 +19,12 @@ export default function DeliveryDetails() {
   useEffect(() => {
     // Check if there are items in the cart
     const items = localStorage.getItem("order_items");
-    /*
+    
     if (!items) {
-      navigate("/orders/create");   // RETURN BEFORE COMMITTING 
+      navigate("/orders/create");   
       return;
     }
-*/
+
     // Load saved delivery details if returning to this page
     const savedDelivery = localStorage.getItem("delivery_details");
     if (savedDelivery) {
