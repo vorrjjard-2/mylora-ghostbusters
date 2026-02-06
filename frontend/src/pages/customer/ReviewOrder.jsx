@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import "./ReviewOrder.css";
 
 export default function ReviewOrder() {
   const navigate = useNavigate();
@@ -10,7 +12,7 @@ export default function ReviewOrder() {
 
   useEffect(() => {
     // Load order items from localStorage
-    const items = localStorage.getItem("order_items");
+    const items = localStorage.getItem("order_items");   
     if (!items) {
       navigate("/orders/create");
       return;
@@ -33,7 +35,7 @@ export default function ReviewOrder() {
       .then((data) => {
         setCustomerInfo(data);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err)); 
   }, [navigate]);
 
   const calculateTotal = () => {
@@ -111,258 +113,147 @@ export default function ReviewOrder() {
   };
 
   if (orderItems.length === 0 || !deliveryDetails) {
-    return <div style={styles.container}>Loading...</div>;
+    return <div style={styles.container}>Loading...</div>; 
   }
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h1>Review your purchase request</h1>
-        <button onClick={() => navigate("/customer/dashboard")} style={styles.cancelBtn}>
+return (
+  <div className="review-container">
+    {/* Header Section */}
+    <header className="review-main-header">
+      <div className="review-brand-group">
+        <img src={logo} alt="Mylora Logo" className="review-logo-img" />
+        <span className="review-system-title">Web Credit System</span>
+      </div>
+      <div className="review-header-actions">
+        <button className="review-cancel-btn" onClick={() => navigate("/customer/dashboard")}>
           Cancel
-        </button>
+        </button> 
+      </div>
+    </header>
+
+    {/* Page Title Section */}
+    <div className="review-page-title-section">
+      <h1>Review purchase request</h1>
+    </div>
+
+    <div className="review-content">
+      {/* Credit Warning */}
+      {exceedsCredit() && (
+        <div className="review-warning-box">
+          <strong>⚠️ Notice:</strong> This order exceeds your available credit limit. 
+          Your order will be submitted for override approval by management.
+        </div>
+      )}
+
+      {/* Customer Information */}
+      <div className="review-section">
+        <h3 className="review-section-title">Customer Information</h3>
+        
+        <div className="review-field-group">
+          <label className="review-field-label">Name</label>
+          <div className="review-readonly-box">
+            {customerInfo.user.name}
+          </div>
+        </div>
+
+        <div className="review-field-group">
+          <label className="review-field-label">Available Credit</label>
+          <div className="review-readonly-box">
+            ₱{parseFloat(customerInfo.credit.available_credit).toLocaleString()}
+            </div>
+        </div>
       </div>
 
-      <div style={styles.content}>
-        {/* Credit Warning */}
-        {exceedsCredit() && (
-          <div style={styles.warningBox}>
-            <strong>⚠️ Notice:</strong> This order exceeds your available credit limit. 
-            Your order will be submitted for override approval by management.
-          </div>
-        )}
-
-        {/* Customer Information */}
-        <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>Customer Information</h3>
-          {customerInfo && (
-            <div>
-              <p><strong>{customerInfo.user.name}</strong></p>
-              <p>Available Credit: ₱{parseFloat(customerInfo.credit.available_credit).toLocaleString()}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Delivery Details */}
-        <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>Delivery Details</h3>
-          <p><strong>Mode:</strong> {deliveryDetails.deliveryMode === "DELIVERY" ? "Delivery" : "Pick up in-store"}</p>
-          {deliveryDetails.deliveryMode === "DELIVERY" && (
-            <div style={{ marginTop: "0.5rem" }}>
-              <p>{deliveryDetails.address1}</p>
-              {deliveryDetails.address2 && <p>{deliveryDetails.address2}</p>}
-              <p>{deliveryDetails.barangay}, {deliveryDetails.city} {deliveryDetails.zipCode}</p>
-            </div>
-          )}
-          <button
-            onClick={() => navigate("/orders/delivery")}
-            style={styles.editBtn}
-          >
-            Edit Delivery Details
-          </button>
-        </div>
-
-        {/* Order Items */}
-        <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>Your order</h3>
-          <table style={styles.table}>
+      {/* Order Items */}
+      <div className="review-section">
+        <h3 className="review-section-title">Your order</h3>
+        
+        <div className="review-table-wrapper">
+          <table className="review-table">
             <thead>
               <tr>
-                <th style={styles.th}>ITEM</th>
-                <th style={styles.th}>QUANTITY</th>
-                <th style={styles.th}>AMOUNT</th>
+                <th className="review-th">ITEM</th>
+                <th className="review-th review-text-center">QUANTITY</th>
+                <th className="review-th review-text-right">AMOUNT</th>
               </tr>
             </thead>
             <tbody>
               {orderItems.map((item, index) => (
-                <tr key={index}>
-                  <td style={styles.td}>
-                    <div>{item.name}</div>
-                    <div style={styles.itemUnit}>
-                      ₱{item.unit_price.toFixed(2)}/{item.unit}
+                <tr key={index} className="review-tr">
+                  <td className="review-td">
+                    <div className="review-item-name">{item.name}</div>
+                    <div className="review-item-unit">
+                     {/* ₱{item.unit_price.toFixed(2)} / {item.unit} */}
                     </div>
                   </td>
-                  <td style={styles.td}>{item.quantity}</td>
-                  <td style={styles.td}>
-                    ₱{(item.unit_price * item.quantity).toFixed(2)}
+                  <td className="review-td review-text-center">{item.quantity}</td>
+                  <td className="review-td review-text-right">
+                    ₱{(item.unit_price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
               ))}
+              
+              {/* Total Row with emphasis */}
+              <tr className="review-total-row">
+                <td colSpan="2" className="review-total-label">TOTAL</td>
+                <td className="review-total-amount">
+                  ₱{calculateTotal().toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+              </tr>
             </tbody>
           </table>
+        </div>
+      </div>
 
-          <div style={styles.totalSection}>
-            <div style={styles.totalRow}>
-              <span style={styles.totalLabel}>TOTAL</span>
-              <span style={styles.totalAmount}>
-                ₱{calculateTotal().toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
+      {/* Delivery Details */}
+      <div className="review-section">
+        <div className="review-section-header">
+          <h3 className="review-section-title">Delivery Details</h3>
+          <button
+            onClick={() => navigate("/orders/delivery")}
+            className="review-edit-link"
+          >
+            Edit Details
+          </button>
+        </div>
+
+        <div className="review-field-group">
+          <label className="review-field-label">Mode</label>
+          <div className="review-readonly-box">
+            {deliveryDetails.deliveryMode === "DELIVERY" ? "Delivery" : "Pick up in-store"}
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={styles.actions}>
-          <button
-            onClick={() => navigate("/orders/create")}
-            style={styles.backBtn}
-          >
-            Back to Edit Order
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            style={{
-              ...styles.submitBtn,
-              opacity: submitting ? 0.5 : 1,
-              cursor: submitting ? "not-allowed" : "pointer",
-            }}
-          >
-            {submitting ? "Submitting..." : "Submit Purchase Request"}
-          </button>
-        </div>
+        {deliveryDetails.deliveryMode === "DELIVERY" && (
+          <div className="review-field-group">
+            <label className="review-field-label">Shipping Address</label>
+            <div className="review-readonly-box review-address-multi-line">
+              <p>{deliveryDetails.address1}</p>
+              {deliveryDetails.address2 && <p>{deliveryDetails.address2}</p>}
+              <p>{deliveryDetails.barangay}, {deliveryDetails.city} {deliveryDetails.zipCode}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="review-actions">
+        <button
+          onClick={() => navigate("/orders/create")}
+          className="review-back-link"
+        >
+          Back to Edit Order
+        </button>
+        
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          className={`review-submit-btn ${submitting ? "disabled" : ""}`}
+        >
+          {submitting ? "Submitting..." : "Submit Purchase Request"}
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
 }
-
-const styles = {
-  container: {
-    padding: "2rem",
-    maxWidth: "900px",
-    margin: "0 auto",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "2rem",
-  },
-  cancelBtn: {
-    padding: "0.5rem 1.5rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  content: {
-    background: "#fff",
-  },
-  warningBox: {
-    background: "#fff3cd",
-    border: "2px solid #ffc107",
-    borderRadius: "6px",
-    padding: "1rem",
-    marginBottom: "1.5rem",
-    color: "#856404",
-    fontSize: "0.95rem",
-    lineHeight: "1.5",
-  },
-  section: {
-    marginBottom: "2rem",
-    padding: "1.5rem",
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-  },
-  sectionTitle: {
-    marginBottom: "1rem",
-    fontSize: "1.125rem",
-    fontWeight: "600",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-  th: {
-    textAlign: "left",
-    padding: "0.75rem",
-    borderBottom: "2px solid #e0e0e0",
-    fontWeight: "600",
-    fontSize: "0.875rem",
-    color: "#666",
-  },
-  td: {
-    padding: "1rem 0.75rem",
-    borderBottom: "1px solid #f0f0f0",
-  },
-  itemUnit: {
-    fontSize: "0.875rem",
-    color: "#666",
-    marginTop: "0.25rem",
-  },
-  totalSection: {
-    borderTop: "2px solid #333",
-    paddingTop: "1rem",
-    marginTop: "1rem",
-  },
-  totalRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  totalLabel: {
-    fontWeight: "600",
-    fontSize: "1.125rem",
-  },
-  totalAmount: {
-    fontWeight: "700",
-    fontSize: "1.5rem",
-    color: "#1f3d1a",
-  },
-  radioGroup: {
-    display: "flex",
-    gap: "2rem",
-  },
-  radioLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-    cursor: "pointer",
-  },
-  label: {
-    display: "block",
-    marginBottom: "0.5rem",
-    fontWeight: "500",
-  },
-  textarea: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-    fontSize: "1rem",
-    fontFamily: "inherit",
-    resize: "vertical",
-  },
-  actions: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "flex-end",
-  },
-  backBtn: {
-    padding: "0.75rem 1.5rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontSize: "1rem",
-  },
-  editBtn: {
-    marginTop: "1rem",
-    padding: "0.5rem 1rem",
-    background: "#fff",
-    border: "1px solid #1f3d1a",
-    color: "#1f3d1a",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-  },
-  submitBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "1rem",
-    fontWeight: "500",
-  },
-};
