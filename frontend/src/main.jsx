@@ -146,25 +146,25 @@ function Layout() {
           <Route
             path="/orders/create"
             element={
-              /* <ProtectedRoute> */
+               <ProtectedRoute> 
                 <CreateOrder />
-              /* </ProtectedRoute> */
+               </ProtectedRoute> 
             }
           />
           <Route
             path="/orders/delivery"
             element={
-              <ProtectedRoute>
+              /*<ProtectedRoute>*/
                 <DeliveryDetails />
-              </ProtectedRoute>
+              /*</ProtectedRoute>*/
             }
           />
           <Route
             path="/orders/review"
             element={
-              <ProtectedRoute>
+              /*<ProtectedRoute>*/
                 <ReviewOrder />
-              </ProtectedRoute>
+              /*</ProtectedRoute>*/
             }
           />
           <Route

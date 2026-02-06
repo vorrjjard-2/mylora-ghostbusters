@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import deliveryWhite from "../../assets/deliver_white.png";
+import deliveryGreen from "../../assets/deliver_green.png";
+import pickupWhite from "../../assets/pickup_white.png";
+import pickupGreen from "../../assets/pickup_green.png";
+import "./DeliveryDetails.css";
 
 export default function DeliveryDetails() {
   const navigate = useNavigate();
@@ -13,11 +19,12 @@ export default function DeliveryDetails() {
   useEffect(() => {
     // Check if there are items in the cart
     const items = localStorage.getItem("order_items");
+    /*
     if (!items) {
-      navigate("/orders/create");
+      navigate("/orders/create");   // RETURN BEFORE COMMITTING 
       return;
     }
-
+*/
     // Load saved delivery details if returning to this page
     const savedDelivery = localStorage.getItem("delivery_details");
     if (savedDelivery) {
@@ -54,263 +61,142 @@ export default function DeliveryDetails() {
     navigate("/orders/review");
   };
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
-        </div>
-        <button onClick={() => navigate("/customer/dashboard")} style={styles.cancelBtn}>
-          Cancel
-        </button>
+return (
+  <div className="delivery-container">
+    <header className="um-header-section">
+      <div className="um-brand-group">
+        <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+        <span className="um-system-title">Web Credit System</span>
       </div>
-
-      <div style={styles.content}>
-        <h1 style={styles.title}>Create a purchase request</h1>
-
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Delivery Details</h2>
-
-          {/* Delivery Mode Buttons */}
-          <div style={styles.modeButtons}>
-            <button
-              onClick={() => setDeliveryMode("DELIVERY")}
-              style={{
-                ...styles.modeButton,
-                ...(deliveryMode === "DELIVERY" ? styles.modeButtonActive : {}),
-              }}
-            >
-              <span style={styles.modeIcon}>🚚</span>
+      <div className="um-header-actions">
+        <button className="um-cancel-btn" onClick={() => navigate("/customer/dashboard")}>
+          Cancel
+        </button> 
+      </div>
+    </header>
+      <div className="order-header">
+        <h1>Create a purchase request</h1>
+        <div className="order-subheader">
+          <h2>Delivery Details</h2>
+        </div>
+      </div>
+    <div className="delivery-content">
+      <div className="delivery-section">
+        {/* Delivery Mode Buttons */}
+        <div className="delivery-mode-buttons">
+          <button
+            onClick={() => setDeliveryMode("DELIVERY")}
+            className={`delivery-mode-button ${deliveryMode === "DELIVERY" ? "active" : ""}`}
+          >
+            <img 
+                src={deliveryMode === "DELIVERY" ? deliveryWhite : deliveryGreen} 
+                alt="Delivery" 
+                className="delivery-mode-img" 
+              />            
               Delivery
-            </button>
-            <button
-              onClick={() => setDeliveryMode("PICKUP")}
-              style={{
-                ...styles.modeButton,
-                ...(deliveryMode === "PICKUP" ? styles.modeButtonActive : {}),
-              }}
-            >
-              <span style={styles.modeIcon}>🏪</span>
-              Pick up in-store
-            </button>
-          </div>
+          </button>
+          <button
+            onClick={() => setDeliveryMode("PICKUP")}
+            className={`delivery-mode-button ${deliveryMode === "PICKUP" ? "active" : ""}`}
+          >
+            <img 
+              src={deliveryMode === "PICKUP" ? pickupWhite : pickupGreen} 
+              alt="Pickup" 
+              className="delivery-mode-img" 
+            />            
+            Pick up in-store
+          </button>
+        </div>
 
-          {/* Delivery Address Fields */}
-          {deliveryMode === "DELIVERY" && (
-            <div style={styles.form}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
-                  Address 1<span style={styles.required}>*</span>
+        {/* Delivery Address Fields */}
+        {deliveryMode === "DELIVERY" && (
+          <div className="delivery-form">
+            <div className="delivery-form-group">
+              <label className="delivery-label">
+                Address 1<span className="delivery-required">*</span>
+              </label>
+              <input
+                type="text"
+                value={address1}
+                onChange={(e) => setAddress1(e.target.value)}
+                placeholder="UNIT 123, ABC STREET"
+                className="delivery-input"
+              />
+            </div>
+
+            <div className="delivery-form-group">
+              <label className="delivery-label">Address 2</label>
+              <input
+                type="text"
+                value={address2}
+                onChange={(e) => setAddress2(e.target.value)}
+                placeholder="LANDMARK STATUE"
+                className="delivery-input"
+              />
+            </div>
+
+            <div className="delivery-form-row">
+              <div className="delivery-form-group">
+                <label className="delivery-label">
+                  Barangay<span className="delivery-required">*</span>
                 </label>
                 <input
                   type="text"
-                  value={address1}
-                  onChange={(e) => setAddress1(e.target.value)}
-                  placeholder="UNIT 123, ABC STREET"
-                  style={styles.input}
+                  value={barangay}
+                  onChange={(e) => setBarangay(e.target.value)}
+                  placeholder="BRGY SAN JOSE"
+                  className="delivery-input"
                 />
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Address 2</label>
+              <div className="delivery-form-group">
+                <label className="delivery-label">
+                  City<span className="delivery-required">*</span>
+                </label>
                 <input
                   type="text"
-                  value={address2}
-                  onChange={(e) => setAddress2(e.target.value)}
-                  placeholder="LANDMARK STATUE"
-                  style={styles.input}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="CEBU CITY"
+                  className="delivery-input"
                 />
               </div>
 
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>
-                    Barangay<span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={barangay}
-                    onChange={(e) => setBarangay(e.target.value)}
-                    placeholder="BRGY SAN JOSE"
-                    style={styles.input}
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>
-                    City<span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="CEBU CITY"
-                    style={styles.input}
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>
-                    Zip Code<span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    placeholder="9876"
-                    style={styles.input}
-                  />
-                </div>
+              <div className="delivery-form-group">
+                <label className="delivery-label">
+                  Zip Code<span className="delivery-required">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="9876"
+                  value={zipCode}
+                  onChange={e => {
+                    // Remove anything that isn't a number
+                    const value = e.target.value.replace(/\D/g, "");
+                        
+                    // Only update state if it's 4 digits or less
+                    if (value.length <= 4) {
+                      setZipCode(value);
+                    }
+                  }} 
+                  className="delivery-input"
+                />
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {deliveryMode === "PICKUP" && (
-            <p style={styles.pickupMessage}>
-              Your order will be ready for pickup at your designated branch.
-            </p>
-          )}
-        </div>
-
-        <button onClick={handleNext} style={styles.nextBtn}>
-          Next
-        </button>
+        {deliveryMode === "PICKUP" && (
+          <p className="delivery-pickup-message">
+            Your order will be ready for pickup at your designated branch.
+          </p>
+        )}
       </div>
-    </div>
-  );
-}
 
-const styles = {
-  container: {
-    minHeight: "100vh",
-    background: "#f5f5f5",
-    padding: "2rem",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "2rem",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  logoIcon: {
-    fontSize: "1.5rem",
-  },
-  logoText: {
-    fontSize: "1.25rem",
-    fontWeight: "500",
-  },
-  cancelBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "500",
-  },
-  content: {
-    maxWidth: "800px",
-    margin: "0 auto",
-    background: "white",
-    borderRadius: "12px",
-    padding: "3rem",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-  },
-  title: {
-    fontSize: "2rem",
-    fontWeight: "600",
-    marginBottom: "2rem",
-  },
-  section: {
-    marginBottom: "2rem",
-  },
-  sectionTitle: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    marginBottom: "1.5rem",
-  },
-  modeButtons: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "1rem",
-    marginBottom: "2rem",
-  },
-  modeButton: {
-    padding: "1.25rem",
-    background: "white",
-    border: "2px solid #ccc",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "500",
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-    transition: "all 0.2s",
-  },
-  modeButtonActive: {
-    background: "#1f3d1a",
-    color: "white",
-    borderColor: "#1f3d1a",
-  },
-  modeIcon: {
-    fontSize: "1.5rem",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1.5rem",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-    flex: 1,
-  },
-  formRow: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
-    gap: "1rem",
-  },
-  label: {
-    fontWeight: "500",
-    fontSize: "0.95rem",
-  },
-  required: {
-    color: "#e53e3e",
-    marginLeft: "0.25rem",
-  },
-  input: {
-    padding: "0.875rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    fontFamily: "inherit",
-  },
-  pickupMessage: {
-    padding: "1.5rem",
-    background: "#f9f9f9",
-    borderRadius: "8px",
-    color: "#666",
-    textAlign: "center",
-  },
-  nextBtn: {
-    width: "100%",
-    padding: "1rem",
-    background: "#1f3d1a",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "1.125rem",
-    fontWeight: "600",
-    cursor: "pointer",
-    marginTop: "2rem",
-  },
-};
+      <button onClick={handleNext} className="delivery-next-btn">
+        Next
+      </button>
+    </div>
+  </div>
+);
+}
