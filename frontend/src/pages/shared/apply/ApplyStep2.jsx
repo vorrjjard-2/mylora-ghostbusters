@@ -25,7 +25,7 @@ export default function ApplyStep2() {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [applicationId, setApplicationId] = useState(null);
+  const [applicationId, setApplicationId] = useState(null); 
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -34,11 +34,21 @@ export default function ApplyStep2() {
     if (
       !firstName || !lastName || !phone ||
       !address1 || !barangay || !city || !zipCode ||
-      !branch || !creditAmount || !creditTerm
+      !branch || !creditAmount || !creditTerm ||
+      supportingDocs.length < 2. // ADDED TO CHECK FOR AT LEAST 2 DOCS
     ) {
-      setError("Please complete all required fields.");
-      return;
+    if (supportingDocs.length < 2) {
+            setError("Please upload at least 2 supporting documents.");  // ADDED ERROR MESSAGE FOR LACKING DOCS
+        } else {
+            setError("Please complete all required fields.");
+        }
+        return;
     }
+
+    if (!govId) {
+        setError("Please upload a Government-Issued ID.");  // ADDED ERROR MESSAGE FOR NO GOV ID
+        return;
+      }
 
     const step1 = JSON.parse(localStorage.getItem("application_step_1"));
     if (!step1) {
@@ -92,6 +102,16 @@ export default function ApplyStep2() {
     }
   }
 
+  // For currency formatting
+  const formatAsCurrency = (value) => {
+      if (!value) return "";
+      // Remove all non-digits
+      const number = value.toString().replace(/\D/g, "");
+      if (!number) return "";
+      // Format with commas and add the Peso sign
+      return "₱" + Number(number).toLocaleString("en-PH");
+    };
+
  return (
    <>
      <div className="apply2-page-wrapper">
@@ -112,17 +132,17 @@ export default function ApplyStep2() {
              <div className="input-group">
                <label>First Name<span className="required">*</span></label>
                 <input 
-                      type="text" 
-                      value={firstName} 
-                      onChange={e => {
-                        const value = e.target.value;
-                        // allows letters (a-z) and spaces, but blocks numbers/symbols
-                        if (value === '' || /^[a-zA-Z\s]+$/.test(value)) {
-                          setFirstName(value);
-                        }
-                      }} 
-                      required 
-                    />
+                  type="text" 
+                  value={firstName} 
+                  onChange={e => {
+                    const value = e.target.value.toUpperCase(); 
+                    // allows letters (a-z) and spaces, but blocks numbers/symbols
+                    if (value === '' || /^[A-Z\s]+$/.test(value)) {
+                      setFirstName(value);
+                    }
+                  }} 
+                  required 
+                />
            </div>
            <div className="input-group">
                <label>Last Name<span className="required">*</span></label>
@@ -130,7 +150,7 @@ export default function ApplyStep2() {
                       type="text" 
                       value={lastName}
                       onChange={e => {
-                        const value = e.target.value;
+                        const value = e.target.value.toUpperCase();
                         // allows letters (a-z) and spaces, but blocks numbers/symbols
                         if (value === '' || /^[a-zA-Z\s]+$/.test(value)) {
                           setLastName(value);
@@ -177,21 +197,42 @@ export default function ApplyStep2() {
            <h2 className="section-title">02 Delivery Address</h2>
            <div className="input-group full-width">
              <label>Address 1<span className="required">*</span></label>
-             <input type="text" placeholder="UNIT NO., BLDG NAME, STREET" onChange={e => setAddress1(e.target.value)} required />
-           </div>
+              <input 
+                  type="text" 
+                  placeholder="UNIT NO., BLDG NAME, STREET" 
+                  value={address1} 
+                  onChange={e => setAddress1(e.target.value.toUpperCase())} 
+                  required 
+                />           
+              </div>
            <div className="input-group full-width">
              <label>Address 2</label>
-             <input type="text" placeholder="LANDMARK STATUE" onChange={e => setAddress2(e.target.value)} />
-           </div>
+                <input 
+                    type="text" 
+                    placeholder="LANDMARK STATUE" 
+                    value={address2}
+                    onChange={e => setAddress2(e.target.value.toUpperCase())} 
+                  />           
+              </div>
            <div className="input-grid three-col">
              <div className="input-group">
                <label>Barangay<span className="required">*</span></label>
-               <input type="text" onChange={e => setBarangay(e.target.value)} required />
+                <input 
+                    type="text" 
+                    value={barangay}
+                    onChange={e => setBarangay(e.target.value.toUpperCase())} 
+                    required
+                  />                
              </div>
              <div className="input-group">
                <label>City<span className="required">*</span></label>
-               <input type="text" onChange={e => setCity(e.target.value)} required />
-             </div>
+                <input 
+                    type="text" 
+                    value={city}
+                    onChange={e => setCity(e.target.value.toUpperCase())} 
+                    required
+                  />                 
+                </div>
              <div className="input-group">
                <label>Zip Code<span className="required">*</span></label>
                 <input 
@@ -223,10 +264,20 @@ export default function ApplyStep2() {
          {/* Section 3 */}
          <section className="form-section">
            <h2 className="section-title">03 Credit Line Application</h2>
-           <div className="input-group full-width">
-             <label>How much credit are you applying for?</label>
-             <input type="number" placeholder="Enter your amount here" onChange={e => setCreditAmount(e.target.value)} />
-           </div>
+            <div className="input-group full-width">
+                <label>How much credit are you applying for?</label>
+                <input 
+                  type="text" 
+                  placeholder="₱0" 
+                  // Display the formatted version 
+                  value={formatAsCurrency(creditAmount)}
+                  onChange={(e) => {
+                    // Strip everything except numbers before saving to state 
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    setCreditAmount(rawValue);
+                  }} 
+                />
+              </div>
            <div className="input-group">
              <label>What is your preferred credit term?</label>
              <select onChange={e => setCreditTerm(e.target.value)}>
@@ -320,6 +371,10 @@ export default function ApplyStep2() {
             {submitting ? "Submitting..." : "Next"}
           </button>
         </div>
+
+        <div className="form-footer">
+</div>
+
       </form> {/* Closing the enroll-form */}
     </div> {/* Closing the apply-container */}
   </div> {/* Closing the apply2-page-wrapper */}

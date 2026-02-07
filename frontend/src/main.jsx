@@ -55,7 +55,7 @@ function Layout() {
 
   return (
     <>
-      <div style={{ padding: "2rem" }}>
+      <div style={{ padding: "2rem", backgroundColor: "#FCFCFC" }}>
         <Routes>
           {/* 👇 default redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -70,9 +70,9 @@ function Layout() {
           <Route
             path="/upper-management/dashboard"
             element={
-              <ProtectedRoute requiredRole="upper_management">
+               <ProtectedRoute requiredRole="upper_management"> 
                 <UpperDashboard />
-              </ProtectedRoute>
+               </ProtectedRoute> 
             }
           />
           <Route
@@ -96,9 +96,9 @@ function Layout() {
           <Route
             path="/credit-manager/dashboard"
             element={
-              <ProtectedRoute requiredRole="credit_manager">
+              <ProtectedRoute requiredRole="credit_manager"> 
                 <CreditDashboard />
-              </ProtectedRoute>
+              </ProtectedRoute> 
             }
           />
           <Route
@@ -156,31 +156,31 @@ function Layout() {
           <Route
             path="/customer/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute> 
                 <CustomerDashboard />
-              </ProtectedRoute>
+              </ProtectedRoute> 
             }
           />
           <Route
             path="/orders/create"
             element={
-              <ProtectedRoute>
+               <ProtectedRoute> 
                 <CreateOrder />
-              </ProtectedRoute>
+               </ProtectedRoute> 
             }
           />
           <Route
             path="/orders/delivery"
             element={
               <ProtectedRoute>
-                <DeliveryDetails />
+                <DeliveryDetails/>
               </ProtectedRoute>
             }
           />
           <Route
             path="/orders/review"
             element={
-              <ProtectedRoute>
+               <ProtectedRoute>
                 <ReviewOrder />
               </ProtectedRoute>
             }

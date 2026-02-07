@@ -1,0 +1,123 @@
+.success-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%; 
+    background-color: #FCFCFC;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arimo', sans-serif;
+}
+
+.success-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    margin-bottom: 2rem;
+}
+
+.success-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.success-logo-img {
+    height: 50px;
+    width: auto;
+}
+
+.success-system-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.64px;
+    color: #395A31;
+}
+
+.success-card {
+    width: 100%;
+    margin-left: 70px;
+}
+
+
+.success-icon-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.success-check-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: #1f3d1a;
+    color: white;
+    font-size: 3rem;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.success-title {
+    font-size: 64px; 
+    font-weight: 700;
+    color: black;
+    margin-bottom: 10px;
+    margin-top: -5px;
+}
+
+
+.success-message {
+    font-size: 32px;
+    margin-bottom: 1rem;
+    color: #1f3d1a;
+}
+
+.success-warning-text {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #856404;
+    background: #fff3cd;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #ffc107;
+    width: 1225px;
+}
+
+.success-description {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+    font-size: 20px;
+}
+
+.success-actions {
+    display: flex;
+    gap: 600px;
+    justify-content: center;
+    margin-top: 100px;
+}
+
+.success-dashboard-btn {
+    padding: 6px 80px; 
+    background: #fff;
+    border: 2px solid #1f3d1a;
+    color: #1f3d1a;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-left: -110px;
+    
+}
+
+.success-orders-btn {
+    padding: 10px 100px; 
+    background: #1f3d1a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+}
