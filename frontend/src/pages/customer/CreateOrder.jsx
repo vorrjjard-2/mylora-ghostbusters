@@ -110,7 +110,6 @@ export default function CreateOrder() {
             <div className="order-subheader">
               <h2>Your order</h2>
             </div>
-
           </div>
 
           <div className="order-content">
@@ -132,8 +131,11 @@ export default function CreateOrder() {
                       <div>
                         <div className="order-product-name">{product.name}</div>
                         <div className="order-product-price">
-                          ₱{parseFloat(product.unit_price).toFixed(2)}/{product.unit}
-                        </div>
+                          ₱{parseFloat(product.unit_price).toLocaleString("en-PH", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}/{product.unit}                        
+                          </div>
                       </div>
                       <button
                         onClick={() => handleAddProduct(product)}

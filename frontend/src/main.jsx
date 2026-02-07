@@ -53,7 +53,7 @@ function Layout() {
 
   return (
     <>
-      <div style={{ padding: "0rem" }}>
+      <div style={{ padding: "2rem", backgroundColor: "#FCFCFC" }}>
         <Routes>
           {/* 👇 default redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -155,14 +155,14 @@ function Layout() {
             path="/orders/delivery"
             element={
               <ProtectedRoute>
-                <DeliveryDetails />
+                <DeliveryDetails/>
               </ProtectedRoute>
             }
           />
           <Route
             path="/orders/review"
             element={
-              <ProtectedRoute>
+               <ProtectedRoute>
                 <ReviewOrder />
               </ProtectedRoute>
             }

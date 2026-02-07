@@ -128,17 +128,30 @@ export default function Login() {
              />
            </div>
 
-           {/* Password Group */}
-           <div className="form-group">
-             <label className="form-label">Password</label>
-             <input
-               type="password"
-               className="form-input"
-               value={password}
-               onChange={(e) => setPassword(e.target.value)}
-               required
-             />
-           </div>
+    {/* Password Group */}
+    <div className="form-group">
+      <div className="label-wrapper">
+        <label className="form-label">Password</label>
+        
+        {error && (
+          <button 
+            type="button" 
+            className="forgot-password-link"
+            /* onClick={() => navigate("/forgot-password")} */
+          >
+            Forgot Password?
+          </button>
+        )}
+      </div>
+
+      <input
+        type="password"
+        className="form-input"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+    </div>
 
            {error && <p className="error-message">{error}</p>}
 
