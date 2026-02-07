@@ -43,6 +43,8 @@ import CreditApproval from "./pages/credit_manager/CreditApproval";
 import CreditApprovalSuccess from "./pages/credit_manager/CreditApprovalSuccess";
 import CreditAdjustment from "./pages/credit_manager/CreditAdjustment";
 import UpdateBalance from "./pages/credit_manager/UpdateBalance";
+import CustomerHistory from "./pages/credit_manager/CustomerHistory";
+import CustomerDetails from "./pages/credit_manager/CustomerDetails";
 
 // Order Processor pages
 import OrderDashboard from "./pages/order_processor/Dashboard";
@@ -110,10 +112,26 @@ function Layout() {
             }
           />
           <Route
+            path="/credit-manager/customer/:customerId/details"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <CustomerDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/credit-manager/customer/:customerId/update-balance"
             element={
               <ProtectedRoute requiredRole="credit_manager">
                 <UpdateBalance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-manager/customer/:customerId/history"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <CustomerHistory />
               </ProtectedRoute>
             }
           />

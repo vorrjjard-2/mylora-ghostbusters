@@ -663,6 +663,40 @@ def cm_customers_list(request):
     return Response(data)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cm_customer_history(request, customer_id):
+    """Get payment history for a specific customer"""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from accounts.models import Customer
+    from payments.models import PaymentRequest
+    
+    try:
+        customer = Customer.objects.select_related("credit_account").get(id=customer_id)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Get all payment requests for this customer's credit account
+    payments = PaymentRequest.objects.filter(
+        account=customer.credit_account
+    ).select_related("approved_by").order_by("-date_paid")
+
+    data = []
+    for payment in payments:
+        data.append({
+            "payment_id": payment.payment_id,
+            "inv_number": payment.inv_number,
+            "amount_paid": str(payment.amount_paid),
+            "date_paid": payment.date_paid.strftime("%B %d, %Y"),
+            "payment_status": payment.payment_status,
+            "approved_by": payment.approved_by.username if payment.approved_by else None,
+        })
+
+    return Response(data)
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def cm_adjust_customer_balance(request, customer_id):

@@ -13,6 +13,7 @@ from .views import (
     um_approve_override,
     um_reject_override,
     cm_customers_list,
+    cm_customer_history,
     cm_adjust_customer_balance,
 )
 
@@ -28,6 +29,7 @@ urlpatterns = [
     path('api/cm/order/<int:order_id>/reject/', cm_reject_order),
     path('api/cm/order/<int:order_id>/request-override/', cm_request_override),
     path('api/cm/customers/', cm_customers_list),
+    path('api/cm/customer/<int:customer_id>/history/', cm_customer_history),
     path('api/cm/customer/<int:customer_id>/adjust-balance/', cm_adjust_customer_balance),
     
     # Upper Management endpoints
