@@ -53,7 +53,7 @@ export default function Login() {
       } else if (me.roles.includes("credit_manager")) {
         navigate("/credit-manager/dashboard");
       } else if (me.roles.includes("order_processor")) {
-        navigate("/order_processor/dashboard");
+        navigate("/order-processor/dashboard");
       } else {
         navigate("/customer/dashboard");
       }

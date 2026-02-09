@@ -48,6 +48,9 @@ import CustomerDetails from "./pages/credit_manager/CustomerDetails";
 
 // Order Processor pages
 import OrderDashboard from "./pages/order_processor/Dashboard";
+import OrderCompletion from "./pages/order_processor/OrderCompletion";
+import ProcessorOrderHistory from "./pages/order_processor/ProcessorOrderHistory";
+import ProcessorOrderView from "./pages/order_processor/ProcessorOrderView";
 
 
 
@@ -57,7 +60,7 @@ function Layout() {
 
   return (
     <>
-      <div style={{ padding: "2rem", backgroundColor: "#FCFCFC" }}>
+      <div style={{ padding: "2rem" }}>
         <Routes>
           {/* 👇 default redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -72,9 +75,9 @@ function Layout() {
           <Route
             path="/upper-management/dashboard"
             element={
-               <ProtectedRoute requiredRole="upper_management"> 
+              <ProtectedRoute requiredRole="upper_management">
                 <UpperDashboard />
-               </ProtectedRoute> 
+              </ProtectedRoute>
             }
           />
           <Route
@@ -98,9 +101,9 @@ function Layout() {
           <Route
             path="/credit-manager/dashboard"
             element={
-              <ProtectedRoute requiredRole="credit_manager"> 
+              <ProtectedRoute requiredRole="credit_manager">
                 <CreditDashboard />
-              </ProtectedRoute> 
+              </ProtectedRoute>
             }
           />
           <Route
@@ -169,36 +172,60 @@ function Layout() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/order-processor/order/:orderId"
+            element={
+              <ProtectedRoute requiredRole="order_processor">
+                <OrderCompletion />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/order-processor/history"
+            element={
+              <ProtectedRoute requiredRole="order_processor">
+                <ProcessorOrderHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/order-processor/order/:orderId/view"
+            element={
+              <ProtectedRoute requiredRole="order_processor">
+                <ProcessorOrderView />
+              </ProtectedRoute>
+            }
+          />
           
           {/* Customer routes */}
           <Route
             path="/customer/dashboard"
             element={
-              <ProtectedRoute> 
+              <ProtectedRoute>
                 <CustomerDashboard />
-              </ProtectedRoute> 
+              </ProtectedRoute>
             }
           />
           <Route
             path="/orders/create"
             element={
-               <ProtectedRoute> 
+              <ProtectedRoute>
                 <CreateOrder />
-               </ProtectedRoute> 
+              </ProtectedRoute>
             }
           />
           <Route
             path="/orders/delivery"
             element={
               <ProtectedRoute>
-                <DeliveryDetails/>
+                <DeliveryDetails />
               </ProtectedRoute>
             }
           />
           <Route
             path="/orders/review"
             element={
-               <ProtectedRoute>
+              <ProtectedRoute>
                 <ReviewOrder />
               </ProtectedRoute>
             }

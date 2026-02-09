@@ -119,7 +119,7 @@ def order_detail(request, order_id):
         for item in items:
             items_data.append({
                 'name': item.product.name,
-                'quantity': str(item.quantity.normalize()),
+                'quantity': f'{item.quantity:.10g}',
                 'unit_price': str(item.unit_price),
                 'subtotal': str(item.subtotal),
             })
@@ -259,7 +259,7 @@ def cm_order_detail(request, order_id):
     items_data = [
         {
             "name": item.product.name,
-            "quantity": str(item.quantity.normalize()),
+            "quantity": f'{item.quantity:.10g}',
             "subtotal": str(item.subtotal),
         }
         for item in order.items.select_related("product").all()
@@ -468,7 +468,7 @@ def um_override_detail(request, override_id):
     items_data = [
         {
             "name": item.product.name,
-            "quantity": str(item.quantity.normalize()),
+            "quantity": f'{item.quantity:.10g}',
             "subtotal": str(item.subtotal),
         }
         for item in order.items.select_related("product").all()
@@ -786,4 +786,242 @@ def cm_adjust_customer_balance(request, customer_id):
             "available_credit": str(credit.available_credit),
             "outstanding_balance": str(credit.outstanding_bal),
         }
+    })
+
+
+# ─── Order Processor Endpoints ────────────────────────────────────────────────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def op_pending_orders(request):
+    """List of APPROVED orders ready for processing"""
+    if not _require_role(request, "order_processor"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Get all approved orders that haven't been completed
+    from .models import OrderCompletion
+    
+    approved_orders = Order.objects.filter(order_status="APPROVED").select_related(
+        "account__customer__user"
+    ).order_by("-date_ordered")
+
+    # Exclude orders that are already completed
+    completed_order_ids = OrderCompletion.objects.filter(
+        completion_status="COMPLETED"
+    ).values_list("order_id", flat=True)
+
+    approved_orders = approved_orders.exclude(order_id__in=completed_order_ids)
+
+    data = []
+    for order in approved_orders:
+        customer = order.account.customer
+        data.append({
+            "order_id": order.order_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "order_status": order.order_status,
+            "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def op_order_detail(request, order_id):
+    """Get order details for processing"""
+    if not _require_role(request, "order_processor"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        order = Order.objects.select_related(
+            "account__customer__user",
+            "account__customer__application"
+        ).get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if order.order_status != "APPROVED":
+        return Response(
+            {"error": "Only approved orders can be processed"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    customer = order.account.customer
+    app = customer.application
+
+    items_data = [
+        {
+            "name": item.product.name,
+            "quantity": f'{item.quantity:.10g}',
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("product").all()
+    ]
+
+    # Get approval info
+    approval = OrderApproval.objects.filter(order=order, approval_status="APPROVED").first()
+
+    return Response({
+        "order_id": order.order_id,
+        "customer_name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+        "items": items_data,
+        "total_amount": str(order.total_amount),
+        "shipping_address": order.shipping_address,
+        "delivery_mode": order.delivery_mode,
+        "approval_date": approval.approval_date.strftime("%B %d, %Y") if approval else "",
+        "approved_by": approval.user.username if approval else "",
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def op_complete_order(request, order_id):
+    """Mark an order as completed"""
+    if not _require_role(request, "order_processor"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response(
+            {"error": "Password is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not request.user.check_password(password):
+        return Response(
+            {"error": "Invalid password"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    from .models import OrderCompletion
+    from django.utils import timezone
+    
+    try:
+        order = Order.objects.get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if order.order_status != "APPROVED":
+        return Response(
+            {"error": "Only approved orders can be completed"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Check if already completed
+    existing_completion = OrderCompletion.objects.filter(order=order).first()
+    if existing_completion:
+        return Response(
+            {"error": "Order is already marked as completed"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    with transaction.atomic():
+        # Create completion record
+        OrderCompletion.objects.create(
+            order=order,
+            user=request.user,
+            completion_status="COMPLETED",
+            completion_date=timezone.now(),
+        )
+
+        # Update order status
+        order.order_status = "COMPLETED"
+        order.save()
+
+    return Response({
+        "success": True,
+        "order_id": order.order_id,
+        "message": "Order marked as completed successfully",
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def op_completed_orders(request):
+    """List of completed orders"""
+    if not _require_role(request, "order_processor"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import OrderCompletion
+    
+    # Get all completed orders
+    completed_order_ids = OrderCompletion.objects.filter(
+        completion_status="COMPLETED"
+    ).values_list("order_id", flat=True)
+
+    completed_orders = Order.objects.filter(
+        order_id__in=completed_order_ids
+    ).select_related("account__customer__user").order_by("-date_ordered")
+
+    data = []
+    for order in completed_orders:
+        customer = order.account.customer
+        completion = OrderCompletion.objects.get(order=order)
+        
+        data.append({
+            "order_id": order.order_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "completion_date": completion.completion_date.strftime("%B %d, %Y"),
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def op_order_view(request, order_id):
+    """View completed order details"""
+    if not _require_role(request, "order_processor"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import OrderCompletion
+    
+    try:
+        order = Order.objects.select_related(
+            "account__customer__user",
+            "account__customer__application"
+        ).get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Check if order is completed
+    try:
+        completion = OrderCompletion.objects.select_related("user").get(order=order)
+    except OrderCompletion.DoesNotExist:
+        return Response(
+            {"error": "Order has not been completed"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    customer = order.account.customer
+    app = customer.application
+
+    items_data = [
+        {
+            "name": item.product.name,
+            "quantity": f'{item.quantity:.10g}',
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("product").all()
+    ]
+
+    # Get approval info
+    approval = OrderApproval.objects.filter(order=order, approval_status="APPROVED").first()
+
+    return Response({
+        "order_id": order.order_id,
+        "customer_name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+        "items": items_data,
+        "total_amount": str(order.total_amount),
+        "shipping_address": order.shipping_address,
+        "delivery_mode": order.delivery_mode,
+        "approval_date": approval.approval_date.strftime("%B %d, %Y") if approval else "",
+        "approved_by": approval.user.username if approval else "",
+        "completion_date": completion.completion_date.strftime("%B %d, %Y"),
+        "processed_by": completion.user.username,
     })

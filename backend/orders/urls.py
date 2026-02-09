@@ -15,6 +15,11 @@ from .views import (
     cm_customers_list,
     cm_customer_history,
     cm_adjust_customer_balance,
+    op_pending_orders,
+    op_order_detail,
+    op_complete_order,
+    op_completed_orders,
+    op_order_view,
 )
 
 urlpatterns = [
@@ -37,4 +42,11 @@ urlpatterns = [
     path('api/um/override/<int:override_id>/', um_override_detail),
     path('api/um/override/<int:override_id>/approve/', um_approve_override),
     path('api/um/override/<int:override_id>/reject/', um_reject_override),
+    
+    # Order Processor endpoints
+    path('api/op/pending-orders/', op_pending_orders),
+    path('api/op/order/<int:order_id>/', op_order_detail),
+    path('api/op/order/<int:order_id>/complete/', op_complete_order),
+    path('api/op/completed-orders/', op_completed_orders),
+    path('api/op/order/<int:order_id>/view/', op_order_view),
 ]
