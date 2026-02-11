@@ -38,6 +38,11 @@ import OverrideReview from "./pages/upper_management/OverrideReview";
 import CustomerDatabase from "./pages/upper_management/CustomerDatabase";
 import UMCustomerDetail from "./pages/upper_management/UMCustomerDetail";
 import UMCustomerHistory from "./pages/upper_management/UMCustomerHistory";
+import AllOrders from "./pages/upper_management/AllOrders";
+import EmployeeDatabase from "./pages/upper_management/EmployeeDatabase";
+import EmployeeProfile from "./pages/upper_management/EmployeeProfile";
+import EmployeeEdit from "./pages/upper_management/EmployeeEdit";
+import EmployeeCreate from "./pages/upper_management/EmployeeCreate";
 
 // Credit Manager pages
 import CreditDashboard from "./pages/credit_manager/Dashboard";
@@ -84,6 +89,14 @@ function Layout() {
             }
           />
           <Route
+            path="/upper-management/all-orders"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <AllOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/upper-management/enrollments/:applicationId"
             element={
               <ProtectedRoute requiredRole="upper_management">
@@ -104,6 +117,38 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="upper_management">
                 <CustomerDatabase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/employees"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <EmployeeDatabase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/employee/create"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <EmployeeCreate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/employee/:userId"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <EmployeeProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/employee/:userId/edit"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <EmployeeEdit />
               </ProtectedRoute>
             }
           />

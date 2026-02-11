@@ -1264,3 +1264,30 @@ def um_customer_orders(request, customer_id):
         })
 
     return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_all_orders(request):
+    """Get all orders in the system for upper management"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Get all orders with related customer data
+    orders = Order.objects.select_related(
+        "account__customer__user",
+        "account__customer__application"
+    ).order_by("-date_ordered")
+
+    data = []
+    for order in orders:
+        customer = order.account.customer
+        data.append({
+            "order_id": order.order_id,
+            "amount": str(order.total_amount),
+            "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+            "ordered_by": customer.user.get_full_name() or customer.user.username,
+            "status": order.order_status,
+        })
+
+    return Response(data)

@@ -25,6 +25,7 @@ from .views import (
     um_update_customer_balance,
     um_delete_customer,
     um_customer_orders,
+    um_all_orders,
 )
 
 urlpatterns = [
@@ -52,6 +53,7 @@ urlpatterns = [
     path('api/um/customer/<int:customer_id>/update-balance/', um_update_customer_balance),
     path('api/um/customer/<int:customer_id>/delete/', um_delete_customer),
     path('api/um/customer/<int:customer_id>/orders/', um_customer_orders),
+    path('api/um/all-orders/', um_all_orders),
     
     # Order Processor endpoints
     path('api/op/pending-orders/', op_pending_orders),

@@ -228,3 +228,195 @@ def update_address(request):
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+# Employee Management endpoints
+
+def _require_role(request, role_name):
+    """Return True if the user has the given group."""
+    return request.user.groups.filter(name=role_name).exists()
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_employees_list(request):
+    """Get all employees (users with groups) for upper management"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from django.contrib.auth.models import Group
+    
+    # Get only credit managers and order processors
+    allowed_groups = Group.objects.filter(name__in=['credit_manager', 'order_processor'])
+    employees = User.objects.filter(groups__in=allowed_groups).distinct().order_by('username')
+    
+    data = []
+    for emp in employees:
+        groups = list(emp.groups.values_list('name', flat=True))
+        # Get the primary role (first group)
+        role = groups[0] if groups else "No Role"
+        
+        data.append({
+            "user_id": emp.id,
+            "name": emp.get_full_name() or emp.username,
+            "username": emp.username,
+            "email": emp.email,
+            "role": role,
+            "date_joined": emp.date_joined.strftime("%B %d, %Y") if emp.date_joined else "Unknown"
+        })
+    
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_employee_detail(request, user_id):
+    """Get employee details"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        emp = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    groups = list(emp.groups.values_list('name', flat=True))
+    role = groups[0] if groups else "No Role"
+    
+    return Response({
+        "user_id": emp.id,
+        "name": emp.get_full_name() or emp.username,
+        "first_name": emp.first_name,
+        "last_name": emp.last_name,
+        "username": emp.username,
+        "email": emp.email,
+        "phone": "",  # Django user model doesn't have phone by default
+        "role": role,
+        "all_roles": groups,
+        "date_joined": emp.date_joined.strftime("%B %d, %Y") if emp.date_joined else "Unknown"
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_create_employee(request):
+    """Create a new employee"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from django.contrib.auth.models import Group
+    
+    username = request.data.get("username")
+    password = request.data.get("password")
+    email = request.data.get("email", "")
+    first_name = request.data.get("first_name", "")
+    last_name = request.data.get("last_name", "")
+    role = request.data.get("role")
+    
+    if not username or not password or not role:
+        return Response(
+            {"error": "Username, password, and role are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if User.objects.filter(username=username).exists():
+        return Response(
+            {"error": "Username already exists"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=email,
+            first_name=first_name,
+            last_name=last_name
+        )
+        
+        # Add to group
+        group, _ = Group.objects.get_or_create(name=role)
+        user.groups.add(group)
+        
+        return Response({
+            "success": True,
+            "message": "Employee created successfully",
+            "user_id": user.id
+        })
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_update_employee(request, user_id):
+    """Update employee details"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from django.contrib.auth.models import Group
+    
+    try:
+        emp = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Update basic info
+    if "email" in request.data:
+        emp.email = request.data["email"]
+    if "first_name" in request.data:
+        emp.first_name = request.data["first_name"]
+    if "last_name" in request.data:
+        emp.last_name = request.data["last_name"]
+    
+    # Update password if provided
+    if "password" in request.data and request.data["password"]:
+        emp.set_password(request.data["password"])
+    
+    # Update role if provided
+    if "role" in request.data:
+        emp.groups.clear()
+        group, _ = Group.objects.get_or_create(name=request.data["role"])
+        emp.groups.add(group)
+    
+    emp.save()
+    
+    return Response({
+        "success": True,
+        "message": "Employee updated successfully"
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_delete_employee(request, user_id):
+    """Delete an employee"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not request.user.check_password(password):
+        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    try:
+        emp = User.objects.get(id=user_id)
+        
+        # Prevent deleting yourself
+        if emp.id == request.user.id:
+            return Response(
+                {"error": "Cannot delete your own account"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        emp.delete()
+        return Response({"success": True, "message": "Employee deleted successfully"})
+    except User.DoesNotExist:
+        return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)

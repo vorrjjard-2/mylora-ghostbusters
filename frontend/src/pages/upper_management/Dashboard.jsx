@@ -66,19 +66,11 @@ export default function Dashboard() {
 
             {/* SECTION 3: STAT CARDS */}
             <div className="um-stats-container">
-              <div 
-                className={`um-stat-card ${activeTab === "enrollments" ? "active-card" : ""}`}
-                onClick={() => setActiveTab("enrollments")}
-                style={{ cursor: "pointer" }}
-              >
+              <div className="um-stat-card">
                 <span className="um-stat-label">Enrolment Requests</span>
                 <span className="um-stat-number">{enrollments.length}</span>
               </div>
-              <div 
-                className={`um-stat-card ${activeTab === "overrides" ? "active-card" : ""}`}
-                onClick={() => setActiveTab("overrides")}
-                style={{ cursor: "pointer" }}
-              >
+              <div className="um-stat-card">
                 <span className="um-stat-label">Credit Override</span>
                 <span className="um-stat-number">{overrideRequests.length}</span>
               </div>

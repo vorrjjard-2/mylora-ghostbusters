@@ -8,6 +8,11 @@ from .views import (
     customer_profile,
     change_password,
     update_address,
+    um_employees_list,
+    um_employee_detail,
+    um_create_employee,
+    um_update_employee,
+    um_delete_employee,
 )
 
 urlpatterns = [
@@ -19,4 +24,11 @@ urlpatterns = [
     path("api/customer/profile/", customer_profile),
     path("api/customer/change-password/", change_password),
     path("api/customer/update-address/", update_address),
+    
+    # Employee management endpoints
+    path("api/um/employees/", um_employees_list),
+    path("api/um/employee/<int:user_id>/", um_employee_detail),
+    path("api/um/employee/create/", um_create_employee),
+    path("api/um/employee/<int:user_id>/update/", um_update_employee),
+    path("api/um/employee/<int:user_id>/delete/", um_delete_employee),
 ]

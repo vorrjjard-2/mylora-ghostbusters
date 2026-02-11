@@ -1,53 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 
 export default function Sidebar() {
-  /*
-  return (
-    <aside
-      style={{
-        width: 220,
-        padding: "1.5rem",
-        background: "#f2f2f2",
-        minHeight: "100vh",
-      }}
-    >
-      <nav>
-        <MenuItem active>Dashboard</MenuItem>
-        <MenuItem>New Account Requests</MenuItem>
-        <MenuItem>All Orders</MenuItem>
-        <MenuItem>Customer Database</MenuItem>
-        <MenuItem>Employee Database</MenuItem>
-        <MenuItem>Audit Log</MenuItem>
-      </nav>
-    </aside>
-  );
-}
-
-function MenuItem({ children, active }) {
-  return (
-    <div
-      style={{
-        padding: "0.75rem 1rem",
-        borderRadius: 6,
-        marginBottom: 6,
-        background: active ? "#d9dfd1" : "transparent",
-        cursor: "pointer",
-      }}
-    >
-      {children}
-    </div>
-  );
-  */
+  const location = useLocation();
 
   return (
     <aside className="um-sidebar">
       <nav className="um-sidebar-nav">
-        <MenuItem to="/upper-management/dashboard" active>Dashboard</MenuItem>
-        <MenuItem>New Account Requests</MenuItem>
-        <MenuItem>All Orders</MenuItem>
-        <MenuItem to="/upper-management/customers">Customer Database</MenuItem>
-        <MenuItem>Employee Database</MenuItem>
+        <MenuItem to="/upper-management/dashboard" active={location.pathname === "/upper-management/dashboard"}>Dashboard</MenuItem>
+        <MenuItem to="/upper-management/all-orders" active={location.pathname === "/upper-management/all-orders"}>All Orders</MenuItem>
+        <MenuItem to="/upper-management/customers" active={location.pathname.includes("/upper-management/customer")}>Customer Database</MenuItem>
+        <MenuItem to="/upper-management/employees" active={location.pathname.includes("/upper-management/employee")}>Employee Database</MenuItem>
         <MenuItem>Audit Log</MenuItem>
       </nav>
     </aside>
