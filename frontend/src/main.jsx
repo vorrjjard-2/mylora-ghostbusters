@@ -35,6 +35,9 @@ import PaymentSuccess from "./pages/customer/PaymentSuccess";
 import UpperDashboard from "./pages/upper_management/Dashboard";
 import EnrollmentReview from "./pages/upper_management/EnrollmentReview";
 import OverrideReview from "./pages/upper_management/OverrideReview";
+import CustomerDatabase from "./pages/upper_management/CustomerDatabase";
+import UMCustomerDetail from "./pages/upper_management/UMCustomerDetail";
+import UMCustomerHistory from "./pages/upper_management/UMCustomerHistory";
 
 // Credit Manager pages
 import CreditDashboard from "./pages/credit_manager/Dashboard";
@@ -93,6 +96,30 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="upper_management">
                 <OverrideReview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/customers"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <CustomerDatabase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/customer/:customerId"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <UMCustomerDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/customer/:customerId/history"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <UMCustomerHistory />
               </ProtectedRoute>
             }
           />

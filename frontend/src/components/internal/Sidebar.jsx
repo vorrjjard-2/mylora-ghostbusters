@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./Sidebar.css";
 
 export default function Sidebar() {
@@ -42,10 +43,10 @@ function MenuItem({ children, active }) {
   return (
     <aside className="um-sidebar">
       <nav className="um-sidebar-nav">
-        <MenuItem active>Dashboard</MenuItem>
+        <MenuItem to="/upper-management/dashboard" active>Dashboard</MenuItem>
         <MenuItem>New Account Requests</MenuItem>
         <MenuItem>All Orders</MenuItem>
-        <MenuItem>Customer Database</MenuItem>
+        <MenuItem to="/upper-management/customers">Customer Database</MenuItem>
         <MenuItem>Employee Database</MenuItem>
         <MenuItem>Audit Log</MenuItem>
       </nav>
@@ -53,10 +54,16 @@ function MenuItem({ children, active }) {
   );
 }
 
-function MenuItem({ children, active }) {
-  return (
+function MenuItem({ children, active, to }) {
+  const content = (
     <div className={`um-sidebar-item ${active ? "active" : ""}`}>
       {children}
     </div>
   );
+
+  if (to) {
+    return <Link to={to} style={{ textDecoration: "none", color: "inherit" }}>{content}</Link>;
+  }
+
+  return content;
 }

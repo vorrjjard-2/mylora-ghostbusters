@@ -1025,3 +1025,242 @@ def op_order_view(request, order_id):
         "completion_date": completion.completion_date.strftime("%B %d, %Y"),
         "processed_by": completion.user.username,
     })
+
+
+# ─── Upper Management Customer Endpoints ───────────────────────────────────────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_customers_list(request):
+    """Get list of all customers for upper management"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from accounts.models import Customer
+    
+    customers = Customer.objects.select_related(
+        "credit_account", "application"
+    ).all()
+
+    data = []
+    for customer in customers:
+        try:
+            if not hasattr(customer, 'credit_account') or not customer.credit_account:
+                continue
+                
+            app = customer.application
+            credit = customer.credit_account
+            data.append({
+                "customer_id": customer.id,
+                "name": customer.user.get_full_name() or customer.user.username,
+                "phone": app.phone_number if app else "",
+                "email": app.email if app else customer.user.email,
+                "credit_limit": str(credit.credit_limit),
+                "outstanding_balance": str(credit.outstanding_bal),
+            })
+        except Exception as e:
+            print(f"Error loading customer {customer.id}: {str(e)}")
+            continue
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_customer_detail(request, customer_id):
+    """Get detailed customer information"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from accounts.models import Customer
+    
+    try:
+        customer = Customer.objects.select_related("credit_account", "application").get(id=customer_id)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if not hasattr(customer, 'credit_account') or not customer.credit_account:
+        return Response({"error": "Customer has no credit account"}, status=status.HTTP_400_BAD_REQUEST)
+
+    app = customer.application
+    credit = customer.credit_account
+
+    return Response({
+        "customer_id": customer.id,
+        "name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "email": app.email if app else customer.user.email,
+        "address1": app.address1 if app else "",
+        "address2": app.address2 if app else "",
+        "barangay": app.barangay if app else "",
+        "city": app.city if app else "",
+        "zipcode": app.zipcode if app else "",
+        "credit_limit": str(credit.credit_limit),
+        "available_credit": str(credit.available_credit),
+        "outstanding_balance": str(credit.outstanding_bal),
+        "credit_term": str(credit.credit_term) if credit.credit_term else None,
+        "credit_type": app.credit_amt_request if app else None,
+        "documents": [],
+        "gov_id": None,
+        "notes": None,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_update_customer_balance(request, customer_id):
+    """Update customer balance (same as credit manager)"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not request.user.check_password(password):
+        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    from accounts.models import Customer
+    from payments.models import PaymentRequest
+    from decimal import Decimal
+    from django.utils import timezone
+    
+    try:
+        customer = Customer.objects.select_related("credit_account").get(id=customer_id)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if not customer.credit_account:
+        return Response({"error": "Customer has no credit account"}, status=status.HTTP_400_BAD_REQUEST)
+
+    credit = customer.credit_account
+    invoice_number = request.data.get("invoice_number", "")
+    balance_paid = request.data.get("balance_paid")
+    date_of_payment = request.data.get("date_of_payment")
+
+    if not balance_paid or not date_of_payment:
+        return Response(
+            {"error": "Balance paid and date of payment are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        amount = Decimal(str(balance_paid))
+        if amount <= 0:
+            raise ValueError("Amount must be positive")
+    except (ValueError, TypeError):
+        return Response({"error": "Invalid amount"}, status=status.HTTP_400_BAD_REQUEST)
+
+    with transaction.atomic():
+        # Create payment request record (auto-verified by upper management)
+        PaymentRequest.objects.create(
+            account=credit,
+            inv_number=invoice_number,
+            amount_paid=amount,
+            date_paid=date_of_payment,
+            proof_payment=request.FILES.get("proof_of_payment"),
+            approved_by=request.user,
+            timestamp=timezone.now(),
+            payment_status="VERIFIED",
+        )
+
+        # Update credit account
+        credit.outstanding_bal -= amount
+        credit.available_credit += amount
+        credit.save()
+
+    # Return updated customer data
+    app = customer.application
+    return Response({
+        "success": True,
+        "message": "Balance updated successfully",
+        "customer": {
+            "customer_id": customer.id,
+            "name": customer.user.get_full_name() or customer.user.username,
+            "phone": app.phone_number if app else "",
+            "email": app.email if app else customer.user.email,
+            "address1": app.address1 if app else "",
+            "address2": app.address2 if app else "",
+            "barangay": app.barangay if app else "",
+            "city": app.city if app else "",
+            "zipcode": app.zipcode if app else "",
+            "credit_limit": str(credit.credit_limit),
+            "available_credit": str(credit.available_credit),
+            "outstanding_balance": str(credit.outstanding_bal),
+            "credit_term": str(credit.credit_term) if credit.credit_term else None,
+            "credit_type": app.credit_amt_request if app else None,
+        }
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_delete_customer(request, customer_id):
+    """Delete a customer account"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not request.user.check_password(password):
+        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    from accounts.models import Customer
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    try:
+        customer = Customer.objects.select_related("user", "credit_account").get(id=customer_id)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Check if customer has outstanding balance
+    if customer.credit_account and customer.credit_account.outstanding_bal > 0:
+        return Response(
+            {"error": "Cannot delete customer with outstanding balance"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    with transaction.atomic():
+        user = customer.user
+        # Delete customer (cascade will handle related records)
+        customer.delete()
+        # Delete user account
+        user.delete()
+
+    return Response({"success": True, "message": "Customer deleted successfully"})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_customer_orders(request, customer_id):
+    """Get all orders for a customer"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from accounts.models import Customer
+    
+    try:
+        customer = Customer.objects.get(id=customer_id)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if not customer.credit_account:
+        return Response([])
+
+    orders = Order.objects.filter(account=customer.credit_account).order_by("-date_ordered")
+
+    data = []
+    for order in orders:
+        data.append({
+            "order_id": order.order_id,
+            "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
+            "total_amount": str(order.total_amount),
+            "order_status": order.order_status,
+        })
+
+    return Response(data)
