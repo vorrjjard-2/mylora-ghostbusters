@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import logo from "../../assets/mylora-logo.png";
+import "./PaymentRequest.css";
 
 export default function PaymentRequest() {
   const navigate = useNavigate();
@@ -134,340 +136,162 @@ export default function PaymentRequest() {
   };
 
   if (loading) {
-    return <div style={styles.container}>Loading...</div>;
+    return <div className="pr-container">Loading...</div>;
   }
 
-  return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
-        </div>
-        <button style={styles.logoutBtn} onClick={() => navigate("/login")}>
+return (
+  <div className="pr-container">
+    {/* Header Section */}
+    <header className="pr-main-header">
+      <div className="pr-brand-group">
+        <img src={logo} alt="Mylora Logo" className="pr-logo-img" />
+        <span className="pr-system-title">Web Credit System</span>
+      </div>
+      <div className="pr-header-actions">
+        <button className="pr-logout-btn" onClick={() => navigate("/login")}>
           Logout
         </button>
       </div>
+    </header>
 
-      {/* Page Title */}
-      <h1 style={styles.pageTitle}>Update Credit Balance</h1>
-
+    <main className="pr-content">
       {/* User Info */}
-      <h2 style={styles.userName}>Alex Fernandez</h2>
+      <h1 className="pr-user-name">Alex Fernandez</h1>
 
       {/* Credit Balance Section */}
-      <div style={styles.creditSection}>
-        <h3 style={styles.sectionTitle}>Credit Balance</h3>
-        <div style={styles.creditRow}>
-          <span>Available Credit:</span>
-          <span style={styles.creditValue}>
+      <section className="pr-credit-section">
+        <h2 className="pr-section-title">Credit Balance</h2>
+        
+        <div className="pr-credit-header">
+          <span className="pr-credit-label">Available Credit:</span>
+          <span className="pr-credit-value">
             ₱ {creditInfo ? parseFloat(creditInfo.available_credit).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </span>
         </div>
+
         {/* Progress bar */}
-        <div style={styles.progressContainer}>
+        <div className="pr-progress-container">
           <div
+            className="pr-progress-bar"
             style={{
-              ...styles.progressBar,
               width: creditInfo 
                 ? `${((parseFloat(creditInfo.credit_limit) - parseFloat(creditInfo.available_credit)) / parseFloat(creditInfo.credit_limit)) * 100}%`
                 : '0%'
             }}
           />
         </div>
-        <div style={styles.creditRow}>
-          <span>Credit Limit:</span>
-          <span style={styles.creditLimit}>
+
+        <div className="pr-credit-footer">
+          <span className="pr-limit-label">Credit Limit:</span>
+          <span className="pr-limit-value">
             ₱ {creditInfo ? parseFloat(creditInfo.credit_limit).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </span>
         </div>
-      </div>
+      </section>
 
       {/* Outstanding Balance */}
-      <div style={styles.balanceSection}>
-        <div style={styles.balanceRow}>
-          <span style={styles.balanceLabel}>Outstanding Balance</span>
-          <span style={styles.balanceAmount}>
+      <section className="pr-balance-section">
+        <div className="pr-balance-row">
+          <span className="pr-balance-label">Outstanding Balance</span>
+          <span className="pr-balance-amount">
             ₱ {creditInfo ? parseFloat(creditInfo.outstanding_balance).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </span>
         </div>
-      </div>
+      </section>
 
       {/* Payment Form */}
-      <form onSubmit={handleSubmit}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Invoice Number</label>
-          <input
-            type="text"
-            name="inv_number"
-            value={formData.inv_number}
-            onChange={handleChange}
-            style={styles.input}
-            placeholder="INV1234"
-          />
+      <form onSubmit={handleSubmit} className="pr-payment-form">
+        <div className="pr-form-row">
+          <div className="pr-form-group">
+            <label className="pr-label">Invoice Number</label>
+            <input
+              type="text"
+              name="inv_number"
+              value={formData.inv_number}
+              onChange={handleChange}
+              className="pr-input"
+              placeholder="INV1234"
+            />
+          </div>
+
+          <div className="pr-form-group">
+            <label className="pr-label">Balance Paid</label>
+            <div className="pr-input-with-icon">
+              <input
+                type="number"
+                name="amount_paid"
+                value={formData.amount_paid}
+                onChange={handleChange}
+                className={`pr-input ${errors.amount_paid ? 'pr-input-error' : ''}`}
+                placeholder="₱"
+                step="0.01"
+              />
+            </div>
+            {errors.amount_paid && <span className="pr-error">{errors.amount_paid}</span>}
+          </div>
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Balance Paid</label>
-          <input
-            type="number"
-            name="amount_paid"
-            value={formData.amount_paid}
-            onChange={handleChange}
-            style={{
-              ...styles.input,
-              ...(errors.amount_paid ? styles.inputError : {}),
-            }}
-            placeholder="₱"
-            step="0.01"
-          />
-          {errors.amount_paid && <span style={styles.error}>{errors.amount_paid}</span>}
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Date of Payment</label>
+        <div className="pr-form-group full-width">
+          <label className="pr-label">Date of Payment</label>
           <input
             type="date"
             name="date_paid"
             value={formData.date_paid}
             onChange={handleChange}
-            style={{
-              ...styles.input,
-              ...(errors.date_paid ? styles.inputError : {}),
-            }}
+            className={`pr-input ${errors.date_paid ? 'pr-input-error' : ''}`}
           />
-          {errors.date_paid && <span style={styles.error}>{errors.date_paid}</span>}
+          {errors.date_paid && <span className="pr-error">{errors.date_paid}</span>}
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Upload Proof of Payment</label>
-          <p style={styles.helpText}>
-            Please make sure that uploaded image is clear.
-          </p>
-          <div style={styles.fileUploadBox}>
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png"
-              onChange={handleFileChange}
-              style={styles.fileInput}
-              id="fileUpload"
-            />
-            <label htmlFor="fileUpload" style={styles.fileLabel}>
-              <span style={styles.uploadIcon}>⬇</span>
-              <span>Upload file here.</span>
+        {/* Section: Upload Proof of Payment */}
+        <div className="pr-form-group full-width">
+          <label className="pr-label">Upload Proof of Payment</label>
+          <p className="pr-help-text">Please make sure that uploaded image is clear.</p>
+
+          {formData.proof_payment ? (
+            /* File display when a file is selected */
+            <div className="file-list-container">
+              <div className="file-display-badge">
+                <img src={fileIcon} alt="File Icon" className="custom-file-icon" />                  
+                <span className="file-name">{formData.proof_payment.name}</span>
+                <button 
+                  type="button" 
+                  className="remove-file" 
+                  onClick={() => setFormData(prev => ({ ...prev, proof_payment: null }))}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Upload zone when no file is selected */
+            <label className="upload-zone">
+              <div className="upload-content">
+                <p className="upload-icon">↑ Upload file here.</p>
+                <small className="upload-hint">Supported formats are .jpg, .jpeg, and .png. Max file size is 10mb</small>
+              </div>
+              <input
+                type="file"
+                accept=".jpg, .jpeg, .png"
+                onChange={handleFileChange}
+                className="hidden-file-input"
+              />
             </label>
-            {formData.proof_payment && (
-              <div style={styles.fileName}>{formData.proof_payment.name}</div>
-            )}
-          </div>
-          <p style={styles.helpText}>
-            Supported formats are .jpg, .jpeg, and .png.
-            <br />
-            Max file size is 10mb
-          </p>
-          {errors.proof_payment && <span style={styles.error}>{errors.proof_payment}</span>}
+          )}
+          {errors.proof_payment && <span className="pr-error">{errors.proof_payment}</span>}
         </div>
 
         {/* Action Buttons */}
-        <div style={styles.buttonRow}>
-          <button
-            type="button"
-            onClick={handleCancel}
-            style={styles.cancelBtn}
-            disabled={submitting}
-          >
+        <div className="pr-form-footer">
+          <button type="button" onClick={handleCancel} className="pr-btn-cancel">
             Cancel
           </button>
-          <button
-            type="submit"
-            style={styles.submitBtn}
-            disabled={submitting}
-          >
+          <button type="submit" className="pr-btn-submit" disabled={submitting}>
             {submitting ? "Submitting..." : "Update Balance"}
           </button>
         </div>
       </form>
-    </div>
-  );
-}
-
-const styles = {
-  container: {
-    padding: "2rem",
-    maxWidth: "800px",
-    margin: "0 auto",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "2rem",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  logoIcon: {
-    fontSize: "1.5rem",
-  },
-  logoText: {
-    fontSize: "1.25rem",
-    fontWeight: 500,
-  },
-  logoutBtn: {
-    padding: "0.5rem 1.25rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-  },
-  pageTitle: {
-    fontSize: "1.5rem",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-    color: "#888",
-  },
-  userName: {
-    fontSize: "2.5rem",
-    fontWeight: 700,
-    marginBottom: "2rem",
-  },
-  creditSection: {
-    marginBottom: "1.5rem",
-  },
-  sectionTitle: {
-    fontSize: "1.1rem",
-    fontWeight: 600,
-    marginBottom: "1rem",
-  },
-  creditRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "0.5rem",
-    fontSize: "0.95rem",
-  },
-  creditValue: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-  },
-  creditLimit: {
-    fontSize: "0.95rem",
-  },
-  progressContainer: {
-    width: "100%",
-    height: "30px",
-    background: "#e0e0e0",
-    borderRadius: "4px",
-    overflow: "hidden",
-    marginBottom: "0.5rem",
-  },
-  progressBar: {
-    height: "100%",
-    background: "#6a9955",
-    transition: "width 0.3s ease",
-  },
-  balanceSection: {
-    borderTop: "2px solid #000",
-    paddingTop: "1rem",
-    marginBottom: "2rem",
-  },
-  balanceRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  balanceLabel: {
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  balanceAmount: {
-    fontSize: "1.75rem",
-    fontWeight: 700,
-    color: "#b03a2e",
-  },
-  formGroup: {
-    marginBottom: "1.5rem",
-  },
-  label: {
-    display: "block",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-    fontSize: "0.95rem",
-  },
-  input: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-  },
-  inputError: {
-    borderColor: "#dc3545",
-  },
-  error: {
-    color: "#dc3545",
-    fontSize: "0.85rem",
-    marginTop: "0.25rem",
-    display: "block",
-  },
-  helpText: {
-    fontSize: "0.85rem",
-    color: "#666",
-    marginBottom: "0.5rem",
-  },
-  fileUploadBox: {
-    border: "2px dashed #ccc",
-    borderRadius: "6px",
-    padding: "2rem",
-    textAlign: "center",
-    marginBottom: "0.5rem",
-  },
-  fileInput: {
-    display: "none",
-  },
-  fileLabel: {
-    cursor: "pointer",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  uploadIcon: {
-    fontSize: "2rem",
-  },
-  fileName: {
-    marginTop: "1rem",
-    color: "#1f3d1a",
-    fontWeight: 500,
-  },
-  buttonRow: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "flex-end",
-    marginTop: "2rem",
-  },
-  cancelBtn: {
-    padding: "0.75rem 2rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-  },
-  submitBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
+    </main>
+  </div>
+);
 };
