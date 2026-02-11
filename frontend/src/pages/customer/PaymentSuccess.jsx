@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import "./PaymentSuccess.css";
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
-
+/*
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
@@ -71,3 +72,25 @@ const styles = {
     width: "100%",
   },
 };
+*/
+
+return (
+    <div className="ps-overlay">
+      <div className="ps-modal">
+        <div className="ps-modal-content">
+          <h2 className="ps-title">Balance payment has been sent!</h2>
+          <p className="ps-message">
+            Your payment has been sent and will be reviewed for verification. 
+            Your credit balance will automatically update once payment has been verified.
+          </p>
+          <button
+            className="ps-button"
+            onClick={() => navigate("/customer/dashboard")}
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
