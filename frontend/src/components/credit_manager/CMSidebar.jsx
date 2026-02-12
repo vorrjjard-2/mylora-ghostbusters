@@ -32,7 +32,12 @@ export default function CMSidebar({ activeTab, setActiveTab }) {
         >
           Payment Review
         </MenuItem>
-        <MenuItem>Credit Adjustment</MenuItem>
+        <MenuItem 
+          active={isOnDashboard && activeTab === "adjustment"} 
+          onClick={() => handleClick("adjustment")}
+        >
+          Credit Adjustment
+        </MenuItem>
       </nav>
     </aside>
   );

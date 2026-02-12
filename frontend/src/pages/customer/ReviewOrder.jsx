@@ -112,8 +112,8 @@ export default function ReviewOrder() {
     }
   };
 
-  if (orderItems.length === 0 || !deliveryDetails) {
-    return <div style={styles.container}>Loading...</div>; 
+  if (orderItems.length === 0 || !deliveryDetails || !customerInfo) {
+    return <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>; 
   }
 
 return (
