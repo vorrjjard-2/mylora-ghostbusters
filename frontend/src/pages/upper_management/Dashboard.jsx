@@ -10,6 +10,7 @@ export default function Dashboard() {
 
   const [enrollments, setEnrollments] = useState([]);
   const [overrideRequests, setOverrideRequests] = useState([]);
+  const [pendingOrders, setPendingOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("enrollments");
 
   useEffect(() => {
@@ -39,6 +40,20 @@ export default function Dashboard() {
       .then(data => setOverrideRequests(data))
       .catch(err => {
         console.error("Failed to load override requests", err);
+      });
+
+    fetch("http://localhost:8000/api/um/pending-orders/", {
+      credentials: "include"
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to load pending orders: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => setPendingOrders(data))
+      .catch(err => {
+        console.error("Failed to load pending orders", err);
       });
   }, []);
 
@@ -76,7 +91,7 @@ export default function Dashboard() {
               </div>
               <div className="um-stat-card">
                 <span className="um-stat-label">Order Processing</span>
-                <span className="um-stat-number">0</span>
+                <span className="um-stat-number">{pendingOrders.length}</span>
               </div>
             </div>
 
@@ -94,7 +109,10 @@ export default function Dashboard() {
               >
                 Credit Override
               </button>
-              <button className="um-tab">
+              <button 
+                className={`um-tab ${activeTab === "orders" ? "active-tab" : ""}`}
+                onClick={() => setActiveTab("orders")}
+              >
                 Order Processing
               </button>
             </div>
@@ -133,6 +151,27 @@ export default function Dashboard() {
                         <div className="um-request-sub">Customer: {override.customer_name}</div>
                       </div>
                       <div className="um-request-date">Date Submitted: {override.date_submitted}</div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {activeTab === "orders" && (
+                <>
+                  {pendingOrders.length === 0 && <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>}
+                  {pendingOrders.map((order) => (
+                    <div 
+                      key={order.order_id} 
+                      className="um-request-item"
+                      style={{ cursor: "default" }}
+                    >
+                      <div className="um-request-info">
+                        <div className="um-request-id">ORDER ID XX{order.order_id}</div>
+                        <div className="um-request-sub">Customer: {order.customer_name} | Amount: ₱{parseFloat(order.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                      </div>
+                      <div className="um-request-date">
+                        Status: {order.status === "PENDING" ? "Pending Credit Approval" : "Pending Processing"} | {order.date_submitted}
+                      </div>
                     </div>
                   ))}
                 </>

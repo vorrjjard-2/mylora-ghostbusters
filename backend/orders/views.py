@@ -444,6 +444,34 @@ def um_pending_overrides(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def um_pending_orders(request):
+    """List of orders pending credit approval or processing"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Get orders that are PENDING (need credit approval) or APPROVED (need processing)
+    pending_orders = Order.objects.filter(
+        order_status__in=["PENDING", "APPROVED"]
+    ).select_related(
+        "account__customer__user"
+    ).order_by("-date_ordered")
+
+    data = []
+    for order in pending_orders:
+        customer = order.account.customer
+        data.append({
+            "order_id": order.order_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+            "status": order.order_status,
+            "amount": str(order.total_amount),
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def um_override_detail(request, override_id):
     """Get detailed override request information"""
     if not _require_role(request, "upper_management"):
