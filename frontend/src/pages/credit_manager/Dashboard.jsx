@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import CMSidebar from "../../components/credit_manager/CMSidebar";
+import logo from "../../assets/mylora-logo.png";
+import "../upper_management/Dashboard.css";
 
 export default function CreditManagerDashboard() {
   const navigate = useNavigate();
+  const user = { username: "CM1234" };
 
-  // data
-  const [creditData, setCreditData] = useState(null);       // from /api/cm/pending-orders/
-  const [payments, setPayments]     = useState([]);         // from /api/cm/pending-payments/
-  const [loading, setLoading]       = useState(true);
+  const [creditData, setCreditData] = useState(null);
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(null); // null = dashboard view
 
-  // UI - start with credit approval tab
-  const [activeTab, setActiveTab] = useState("credit");
-
-  /* ── fetch both lists in parallel ── */
   useEffect(() => {
     Promise.all([
-      fetch("http://localhost:8000/api/cm/pending-orders/",  { credentials: "include" }).then((r) => r.json()),
+      fetch("http://localhost:8000/api/cm/pending-orders/", { credentials: "include" }).then((r) => r.json()),
       fetch("http://localhost:8000/api/cm/pending-payments/", { credentials: "include" }).then((r) => r.json()),
     ])
       .then(([cd, pm]) => {
@@ -26,236 +26,111 @@ export default function CreditManagerDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div style={styles.container}>Loading...</div>;
-
-  /* ── shared sub-renderers ── */
-  const CreditList = () => (
-    <div style={styles.list}>
-      {creditData?.pending_orders.length === 0 && (
-        <p style={styles.empty}>No pending orders.</p>
-      )}
-      {creditData?.pending_orders.map((order) => (
-        <div
-          key={order.order_id}
-          style={styles.listItem}
-          onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
-        >
-          <div>
-            <div style={styles.listOrderId}>ORDER ID XX{order.order_id}</div>
-            <div style={styles.listSub}>Ordered by: {order.customer_name}</div>
+  if (loading) {
+    return (
+      <div className="um-dashboard-wrapper">
+        <header className="um-header-section">
+          <div className="um-brand-group">
+            <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+            <span className="um-system-title">Web Credit System</span>
           </div>
-          <div style={styles.listDate}>Date Ordered: {order.date_ordered}</div>
-        </div>
-      ))}
-    </div>
-  );
+        </header>
+        <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>
+      </div>
+    );
+  }
 
-  const PaymentList = () => (
-    <div style={styles.list}>
-      {payments.length === 0 && (
-        <p style={styles.empty}>No pending payments.</p>
-      )}
-      {payments.map((p) => (
-        <div
-          key={p.payment_id}
-          style={styles.listItem}
-          onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
-        >
-          <div>
-            <div style={styles.listOrderId}>{p.customer_name}</div>
-            <div style={styles.listSub}>Amount paid: ₱ {fmt(p.amount_paid)}</div>
-          </div>
-          <div style={styles.listDate}>Date Paid: {p.date_paid}</div>
-        </div>
-      ))}
-    </div>
-  );
+  function fmt(n) {
+    return parseFloat(n).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
   return (
-    <div style={styles.container}>
-      {/* header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
+    <div className="um-dashboard-wrapper">
+      {/* HEADER */}
+      <header className="um-header-section">
+        <div className="um-brand-group">
+          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <span className="um-system-title">Web Credit System</span>
         </div>
-        <button style={styles.logoutBtn} onClick={() => navigate("/login")}>Logout</button>
-      </div>
+        <div className="um-header-actions">
+          <button className="um-logout-btn" onClick={() => navigate("/login")}>
+            Logout
+          </button>
+        </div>
+      </header>
 
-      <div style={styles.body}>
-        {/* sidebar */}
-        <aside style={styles.sidebar}>
-          <div
-            style={{ ...styles.sideItem, ...(activeTab === "dashboard" ? styles.sideItemActive : {}) }}
-            onClick={() => setActiveTab("dashboard")}
-          >
-            Dashboard
-          </div>
-          <div
-            style={{ ...styles.sideItem, ...(activeTab === "credit" ? styles.sideItemActive : {}) }}
-            onClick={() => setActiveTab("credit")}
-          >
-            Credit Approval
-          </div>
-          <div
-            style={{ ...styles.sideItem, ...(activeTab === "payment" ? styles.sideItemActive : {}) }}
-            onClick={() => setActiveTab("payment")}
-          >
-            Payment Review
-          </div>
-          <div
-            style={{ ...styles.sideItem, ...(activeTab === "adjustment" ? styles.sideItemActive : {}) }}
-            onClick={() => navigate("/credit-manager/adjustment")}
-          >
-            Credit Adjustment
-          </div>
-        </aside>
+      <div className="um-dashboard-body" style={{ display: "flex", flex: 1 }}>
+        <CMSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* main */}
-        <main style={styles.main}>
-          <h1 style={styles.greeting}>Hello, CM</h1>
+        <main className="um-dashboard-content">
+          {/* WELCOME BANNER */}
+          <h1 className="um-welcome-text">
+            {!activeTab && `Hello, ${user.username}`}
+            {activeTab === "credit" && "Credit Approval"}
+            {activeTab === "payment" && "Payment Review"}
+          </h1>
 
-          {/* summary cards — always visible */}
-          <div style={styles.cardRow}>
-            <div 
-              style={{
-                ...styles.card,
-                ...(activeTab === "credit" ? {} : styles.cardOutline)
-              }}
-              onClick={() => setActiveTab("credit")}
-            >
-              <div style={styles.cardLabel}>Pending Credit Approval</div>
-              <div style={styles.cardCount}>{creditData?.pending_credit_count ?? 0}</div>
-            </div>
-            <div 
-              style={{
-                ...(activeTab === "payment" ? styles.card : styles.cardOutline)
-              }}
-              onClick={() => setActiveTab("payment")}
-            >
-              <div style={styles.cardLabel}>Pending Payment Review</div>
-              <div style={styles.cardCount}>{creditData?.pending_payment_count ?? 0}</div>
-            </div>
-          </div>
-
-          {/* ── Dashboard view: show both tabs ── */}
-          {activeTab === "dashboard" && (
-            <>
-              <div style={styles.tabRow}>
-                <span style={styles.tabHeading}>Pending Credit Approval</span>
-                <span style={styles.tabHeading}>Pending Payment Review</span>
+          {/* STAT CARDS - Only show on dashboard view */}
+          {!activeTab && (
+            <div className="um-stats-container">
+              <div className="um-stat-card">
+                <span className="um-stat-label">Pending Credit Approval</span>
+                <span className="um-stat-number">{creditData?.pending_credit_count ?? 0}</span>
               </div>
-              <div style={styles.twoCol}>
-                <div style={styles.col}><CreditList /></div>
-                <div style={styles.col}><PaymentList /></div>
+              <div className="um-stat-card">
+                <span className="um-stat-label">Pending Payment Review</span>
+                <span className="um-stat-number">{creditData?.pending_payment_count ?? 0}</span>
               </div>
-            </>
+            </div>
           )}
 
-          {/* ── Credit Approval view ── */}
+          {/* CREDIT APPROVAL LIST */}
           {activeTab === "credit" && (
-            <>
-              <div style={styles.tabRow}>
-                <span style={{ ...styles.tabHeading, ...styles.tabHeadingActive }}>Pending Credit Approval</span>
-              </div>
-              <CreditList />
-            </>
+            <div className="um-list-container">
+              {creditData?.pending_orders.length === 0 && (
+                <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
+              )}
+              {creditData?.pending_orders.map((order) => (
+                <div
+                  key={order.order_id}
+                  className="um-request-item"
+                  onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="um-request-info">
+                    <div className="um-request-id">ORDER ID XX{order.order_id}</div>
+                    <div className="um-request-sub">Ordered by: {order.customer_name}</div>
+                  </div>
+                  <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
+                </div>
+              ))}
+            </div>
           )}
 
-          {/* ── Payment Review view ── */}
+          {/* PAYMENT REVIEW LIST */}
           {activeTab === "payment" && (
-            <>
-              <div style={styles.tabRow}>
-                <span style={{ ...styles.tabHeading, ...styles.tabHeadingActive }}>Pending Payment Review</span>
-              </div>
-              <PaymentList />
-            </>
-          )}
-
-          {/* ── Credit Adjustment — placeholder ── */}
-          {activeTab === "adjustment" && (
-            <p style={styles.empty}>Credit Adjustment coming soon.</p>
+            <div className="um-list-container">
+              {payments.length === 0 && (
+                <p style={{ color: "#888", padding: "1rem" }}>No pending payments.</p>
+              )}
+              {payments.map((p) => (
+                <div
+                  key={p.payment_id}
+                  className="um-request-item"
+                  onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="um-request-info">
+                    <div className="um-request-id">{p.customer_name}</div>
+                    <div className="um-request-sub">Amount paid: ₱ {fmt(p.amount_paid)}</div>
+                  </div>
+                  <div className="um-request-date">Date Paid: {p.date_paid}</div>
+                </div>
+              ))}
+            </div>
           )}
         </main>
       </div>
     </div>
   );
 }
-
-function fmt(n) {
-  return parseFloat(n).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-const styles = {
-  container: { padding: "2rem", maxWidth: "1100px", margin: "0 auto" },
-
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" },
-  logo: { display: "flex", alignItems: "center", gap: "0.5rem" },
-  logoIcon: { fontSize: "1.5rem" },
-  logoText: { fontSize: "1.25rem", fontWeight: 500 },
-  logoutBtn: {
-    padding: "0.5rem 1.25rem",
-    background: "#fff", border: "1px solid #ccc", borderRadius: "6px",
-    cursor: "pointer", fontSize: "0.9rem",
-  },
-
-  body: { display: "flex", gap: "1.5rem" },
-
-  /* sidebar */
-  sidebar: {
-    width: "160px", minWidth: "160px",
-    borderRight: "1px solid #e0e0e0",
-    paddingRight: "1rem",
-  },
-  sideItem: {
-    padding: "0.6rem 0.75rem", cursor: "pointer", borderRadius: "6px",
-    fontSize: "0.9rem", color: "#555", marginBottom: "0.25rem",
-  },
-  sideItemActive: { background: "#f0f0f0", fontWeight: 600, color: "#1f3d1a" },
-
-  /* main */
-  main: { flex: 1 },
-  greeting: { fontSize: "1.75rem", fontWeight: 700, marginBottom: "1rem" },
-
-  /* summary cards */
-  cardRow: { display: "flex", gap: "1rem", marginBottom: "1.5rem" },
-  card: {
-    flex: 1, background: "#1f3d1a", color: "#fff",
-    borderRadius: "8px", padding: "1.25rem 1.5rem",
-    cursor: "pointer",
-    transition: "opacity 0.2s ease",
-  },
-  cardOutline: {
-    flex: 1, background: "#fff", color: "#333",
-    border: "2px solid #333", borderRadius: "8px", padding: "1.25rem 1.5rem",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-  },
-  cardLabel: { fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.4rem" },
-  cardCount: { fontSize: "2.25rem", fontWeight: 700 },
-
-  /* tab headings */
-  tabRow: { display: "flex", gap: "2rem", borderBottom: "2px solid #e0e0e0", marginBottom: "1rem" },
-  tabHeading: {
-    flex: 1, fontSize: "1rem", fontWeight: 600, color: "#888",
-    paddingBottom: "0.5rem", textAlign: "center",
-  },
-  tabHeadingActive: { color: "#1f3d1a", borderBottom: "3px solid #1f3d1a", marginBottom: "-2px" },
-
-  /* two-column layout for dashboard view */
-  twoCol: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" },
-  col: {},
-
-  /* order / payment list */
-  list: { display: "flex", flexDirection: "column", gap: "0.5rem" },
-  listItem: {
-    display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-    padding: "1rem 1.25rem", border: "1px solid #e0e0e0", borderRadius: "8px",
-    cursor: "pointer", background: "#fff",
-  },
-  listOrderId: { fontWeight: 700, fontSize: "0.95rem", marginBottom: "0.2rem" },
-  listSub: { fontSize: "0.85rem", color: "#666" },
-  listDate: { fontSize: "0.85rem", color: "#666", whiteSpace: "nowrap" },
-
-  empty: { color: "#888", padding: "1rem 0" },
-};
