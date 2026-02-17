@@ -9,7 +9,7 @@ export default function CustomerDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    /*fetch("http://localhost:8000/api/customer/dashboard/", {
+    fetch("http://localhost:8000/api/customer/dashboard/", {
       credentials: "include",
     })
       .then((res) => {
@@ -21,22 +21,7 @@ export default function CustomerDashboard() {
         console.error(err);
         alert("Failed to load dashboard data");
       })
-      .finally(() => setLoading(false));*/ // RETURN BEFORE COMMITTING 
-
-      setData({ // REMOVE BEFORE COMMITTING
-      user: { name: "Alex Fernandez" },
-      credit: {
-        available_credit: "75000.00",
-        credit_limit: "100000.00",
-        outstanding_balance: "25000.00"
-      },
-      recent_orders: [
-        { order_id: "ORD-001", amount: "5000.00", date_ordered: "2026-02-10", status: "APPROVED", raw_id: 1 },
-        { order_id: "ORD-002", amount: "1200.00", date_ordered: "2026-02-12", status: "PENDING", raw_id: 2 },
-      ]
-    });
-    setLoading(false); // REMOVE BEFORE COMMITTING
-
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
