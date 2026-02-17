@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getCookie } from "../../utils/csrf";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
 import "../upper_management/Dashboard.css";
@@ -61,7 +62,7 @@ export default function EmployeeEdit() {
     fetch(`http://localhost:8000/api/um/employee/${userId}/update/`, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
       body: JSON.stringify(updateData),
     })
       .then((res) => {

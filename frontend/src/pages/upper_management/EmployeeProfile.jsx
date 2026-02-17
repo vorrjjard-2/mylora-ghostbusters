@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getCookie } from "../../utils/csrf";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
 import ConfirmPasswordModal from "../../components/internal/ConfirmPasswordModal";
@@ -33,7 +34,7 @@ export default function EmployeeProfile() {
     fetch(`http://localhost:8000/api/um/employee/${userId}/delete/`, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
       body: JSON.stringify({ password }),
     })
       .then((res) => {
