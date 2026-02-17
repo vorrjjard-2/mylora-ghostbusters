@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import "./OrderDetail.css";
+
 
 export default function OrderDetail() {
   const { orderId } = useParams();
@@ -24,172 +27,98 @@ export default function OrderDetail() {
         navigate(backTo);
       })
       .finally(() => setLoading(false));
-  }, [orderId, navigate, backTo]);
+  }, [orderId, navigate, backTo]); 
 
-  if (loading) return <div style={styles.container}>Loading...</div>;
+  if (loading) return <div className="order-detail-container">Loading...</div>;
   if (!order)  return null;
 
-  return (
-    <div style={styles.container}>
-      {/* header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
-        </div>
+    // FORMAT DATE
+    const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+};
+
+return (
+  <div className="order-detail-container">
+    {/* header */}
+    <header className="order-main-header">
+      <div className="order-brand-group">
+        <img src={logo} alt="Mylora Logo" className="order-logo-img" />
+        <span className="order-system-title">Web Credit System</span>
       </div>
+    </header>
 
-      {/* order ID + date */}
-      <h1 style={styles.title}>ORDER ID XX{order.order_id}</h1>
-      <p style={styles.meta}>
-        <strong>DATE SUBMITTED:</strong> {order.date_submitted}
-      </p>
+    {/* order ID + date */}
+  <main className="order-content">
+    <h1 className="order-detail-title">ORDER ID XX{order.order_id}</h1>
+    <p className="order-detail-date">
+      <span className="meta-label">DATE SUBMITTED:</span> 
+      <span className="meta-value">{formatDate(order.date_submitted)}</span>
+    </p>
 
-      {/* customer info */}
-      <p style={styles.meta}>
-        <strong>Customer:</strong> {order.customer_name}
-      </p>
-      <p style={styles.meta}>
-        <strong>Phone:</strong> {order.phone || "—"}
-      </p>
+    {/* customer info */}
+    <p className="order-detail-customer">
+      <span className="meta-label">Customer: </span> 
+      <span className="meta-value">{order.customer_name}</span>
+    </p>
+    <p className="order-detail-phone">
+      <span className="meta-label">Phone: </span> 
+      <span className="meta-value">{order.phone || "—"}</span>
+    </p>
 
-      <hr style={styles.divider} />
+    <hr className="order-detail-divider" />
 
-      {/* order form table */}
-      <h2 style={styles.subTitle}>Order Form</h2>
-      <div style={styles.tableWrapper}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>ITEM</th>
-              <th style={styles.th}>QUANTITY</th>
-              <th style={styles.th}>AMOUNT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.items.map((item, i) => (
-              <tr key={i}>
-                <td style={styles.td}>{item.name}</td>
-                <td style={styles.td}>{item.quantity}</td>
-                <td style={styles.td}>
-                  ₱ {parseFloat(item.subtotal).toLocaleString("en-PH", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={2} style={styles.totalLabel}>TOTAL</td>
-              <td style={styles.totalValue}>
-                ₱ {parseFloat(order.total_amount).toLocaleString("en-PH", {
+    {/* order form table */}
+    <h2 className="order-detail-subtitle">Order Form</h2>
+    <div className="order-detail-table-wrapper">
+      <table className="order-detail-table">
+        <thead>
+          <tr>
+            <th className="order-detail-th">ITEM</th>
+            <th className="order-detail-th">QUANTITY</th>
+            <th className="order-detail-th">AMOUNT</th>
+          </tr>
+        </thead>
+        <tbody>
+          {order.items.map((item, i) => (
+            <tr key={i}>
+              <td className="order-detail-td">{item.name}</td>
+              <td className="order-detail-td">{item.quantity}</td>
+              <td className="order-detail-td">
+                ₱ {parseFloat(item.subtotal).toLocaleString("en-PH", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </td>
             </tr>
-          </tfoot>
-        </table>
-      </div>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={2} className="order-detail-total-label">TOTAL</td>
+            <td className="order-detail-total-value">
+              ₱ {parseFloat(order.total_amount).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
 
-      {/* back button */}
-      <button style={styles.backBtn} onClick={() => navigate(backTo)}>
+    {/* back button */}
+    <div className="order-actions-container">
+      <button className="order-detail-back-btn" onClick={() => navigate(backTo)}>
         Back
       </button>
     </div>
-  );
-}
-
-const styles = {
-  container: {
-    padding: "2rem",
-    maxWidth: "580px",
-    margin: "0 auto",
-  },
-  header: {
-    marginBottom: "1.75rem",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  logoIcon: { fontSize: "1.5rem" },
-  logoText: { fontSize: "1.25rem", fontWeight: 500 },
-
-  title: {
-    fontSize: "2rem",
-    fontWeight: 700,
-    margin: "0 0 0.5rem",
-  },
-  meta: {
-    fontSize: "0.95rem",
-    margin: "0.25rem 0",
-    color: "#333",
-  },
-  divider: {
-    border: "none",
-    borderTop: "1px solid #ddd",
-    margin: "1.25rem 0",
-  },
-  subTitle: {
-    fontSize: "1.15rem",
-    fontWeight: 600,
-    marginBottom: "0.75rem",
-  },
-
-  /* table */
-  tableWrapper: {
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    overflow: "hidden",
-    marginBottom: "1.75rem",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-  th: {
-    background: "#f5f5f5",
-    padding: "0.75rem 1rem",
-    textAlign: "left",
-    borderBottom: "1px solid #ccc",
-    fontWeight: 600,
-    fontSize: "0.85rem",
-    color: "#555",
-  },
-  td: {
-    padding: "0.75rem 1rem",
-    borderBottom: "1px solid #eee",
-    fontSize: "0.95rem",
-  },
-  totalLabel: {
-    padding: "0.75rem 1rem",
-    fontWeight: 700,
-    textAlign: "right",
-    borderTop: "2px solid #333",
-    color: "#333",
-  },
-  totalValue: {
-    padding: "0.75rem 1rem",
-    fontWeight: 700,
-    borderTop: "2px solid #333",
-    fontSize: "1rem",
-  },
-
-  /* back */
-  backBtn: {
-    display: "block",
-    width: "100%",
-    padding: "0.85rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    fontWeight: 600,
-    cursor: "pointer",
-  },
+    </main>
+  </div>
+);
 };
