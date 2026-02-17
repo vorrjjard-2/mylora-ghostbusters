@@ -23,7 +23,7 @@ export default function CustomerDetails() {
       .catch((err) => {
         console.error(err);
         alert("Failed to load customer details");
-        navigate("/credit-manager/adjustment");
+        navigate("/credit-manager/dashboard");
       })
       .finally(() => setLoading(false));
   }, [customerId, navigate]);
@@ -46,7 +46,7 @@ export default function CustomerDetails() {
         </div>
         <button
           style={styles.logoutBtn}
-          onClick={() => navigate("/credit-manager/adjustment")}
+          onClick={() => navigate("/credit-manager/dashboard")}
         >
           Logout
         </button>

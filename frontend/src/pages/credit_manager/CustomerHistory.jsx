@@ -50,7 +50,7 @@ export default function CustomerHistory() {
         </div>
         <button
           style={styles.backBtn}
-          onClick={() => navigate("/credit-manager/adjustment")}
+          onClick={() => navigate("/credit-manager/dashboard")}
         >
           Back
         </button>

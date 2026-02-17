@@ -125,7 +125,7 @@ export default function UpdateBalance() {
           <span style={styles.logoIcon}>🌾</span>
           <span style={styles.logoText}>Web Credit System</span>
         </div>
-        <button style={styles.logoutBtn} onClick={() => navigate("/credit-manager/adjustment")}>
+        <button style={styles.logoutBtn} onClick={() => navigate("/credit-manager/dashboard")}>
           Logout
         </button>
       </div>
@@ -213,7 +213,7 @@ export default function UpdateBalance() {
         <div style={styles.buttonRow}>
           <button 
             style={styles.cancelBtn} 
-            onClick={() => navigate("/credit-manager/adjustment")}
+            onClick={() => navigate("/credit-manager/dashboard")}
           >
             Cancel
           </button>
@@ -268,7 +268,7 @@ export default function UpdateBalance() {
             <h3 style={styles.successTitle}>Balance payment successfully updated!</h3>
             <button
               style={styles.returnBtn}
-              onClick={() => navigate("/credit-manager/adjustment")}
+              onClick={() => navigate("/credit-manager/dashboard")}
             >
               Return to Credit Adjustment
             </button>
