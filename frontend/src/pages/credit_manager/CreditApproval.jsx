@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import "./CreditApproval.css";
+
 
 const getCookie = (name) => {
   const v = `; ${document.cookie}`;
@@ -28,7 +31,8 @@ export default function CreditApproval() {
       .then(setOrder)
       .catch(() => navigate("/credit-manager/dashboard"))
       .finally(() => setLoading(false));
-  }, [orderId, navigate]);
+  }, [orderId, navigate]); 
+
 
   const needsOverride = () => {
     if (!order) return false;
@@ -111,7 +115,7 @@ export default function CreditApproval() {
     }
   };
 
-  if (loading) return <div style={styles.container}>Loading...</div>;
+  if (loading) return <div className="approval-container">Loading...</div>;
   if (!order) return null;
 
   const fmt = (n) =>
@@ -123,42 +127,44 @@ export default function CreditApproval() {
     : 0;
 
   return (
-    <div style={styles.container}>
-      {/* header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
+    <div className="approval-container">
+      {/* HEADER */}
+      <header className="approval-header-section">
+        <div className="approval-brand-group">
+          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <span className="approval-system-title">Web Credit System</span>
         </div>
-        <button style={styles.cancelBtn} onClick={() => navigate("/credit-manager/dashboard")}>
+        <button className="cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
           Cancel
         </button>
-      </div>
+      </header>
 
-      <h1 style={styles.title}>ORDER ID XX{order.order_id}</h1>
+      <main className="approval-content">
 
-      {/* ── Customer Information ── */}
-      <h2 style={styles.subTitle}>Customer Information</h2>
-      <div style={styles.infoGrid}>
-        <div style={styles.infoGroup}>
-          <label style={styles.infoLabel}>Name</label>
-          <input style={styles.infoInput} readOnly value={order.customer_name} />
+      <h1 className="approval-title">ORDER ID XX{order.order_id}</h1>
+
+      {/* Customer Information */}
+      <h2 className="approval-subtitle">Customer Information</h2>
+      <div className="info-grid">
+        <div className="info-group">
+          <label className="info-label-">Name</label>
+          <input className="info-input-name" readOnly value={order.customer_name} />
         </div>
-        <div style={styles.infoRow}>
-          <div style={styles.infoGroup}>
-            <label style={styles.infoLabel}>Phone Number</label>
-            <input style={styles.infoInput} readOnly value={order.phone || "—"} />
+        <div className="info-row">
+          <div className="info-group">
+            <label className="info-label">Phone Number</label>
+            <input className="info-input" readOnly value={order.phone || "—"} />
           </div>
-          <div style={styles.infoGroup}>
-            <label style={styles.infoLabel}>Email</label>
-            <input style={styles.infoInput} readOnly value={order.email || "—"} />
+          <div className="info-group">
+            <label className="info-label">Email</label>
+            <input className="info-input" readOnly value={order.email || "—"} />
           </div>
         </div>
       </div>
 
       {/* Warning if override needed */}
       {requiresOverride && (
-        <div style={styles.warningBox}>
+        <div className="credit-warning-box">
           <strong>WARNING!</strong>
           <br />
           ORDER XX{order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
@@ -166,53 +172,53 @@ export default function CreditApproval() {
         </div>
       )}
 
-      {/* ── Order Form ── */}
-      <h2 style={styles.subTitle}>Order Form</h2>
-      <div style={styles.tableWrapper}>
-        <table style={styles.table}>
+      {/* Order Form */}
+      <h2 className="approval-subtitle">Order Form</h2>
+      <div className="table-wrapper">
+        <table className="approval-table">
           <thead>
             <tr>
-              <th style={styles.th}>ITEM</th>
-              <th style={styles.th}>QUANTITY</th>
-              <th style={styles.th}>AMOUNT</th>
+              <th className="approval-th">ITEM</th>
+              <th className="approval-th">QUANTITY</th>
+              <th className="approval-th">AMOUNT</th>
             </tr>
           </thead>
           <tbody>
             {order.items.map((item, i) => (
               <tr key={i}>
-                <td style={styles.td}>{item.name}</td>
-                <td style={styles.td}>{item.quantity}</td>
-                <td style={styles.td}>₱ {fmt(item.subtotal)}</td>
+                <td className="approval-td">{item.name}</td>
+                <td className="approval-td">{item.quantity}</td>
+                <td className="approval-td">₱ {fmt(item.subtotal)}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={2} style={styles.totalLabel}>TOTAL</td>
-              <td style={styles.totalValue}>₱ {fmt(order.total_amount)}</td>
+              <td colSpan={2} className="total-label">TOTAL</td>
+              <td className="total-value">₱ {fmt(order.total_amount)}</td>
             </tr>
           </tfoot>
         </table>
       </div>
 
-      <p style={styles.submittedOn}>Order submitted on {order.date_submitted}</p>
+      <p className="submitted-date">Order submitted on {order.date_submitted}</p>
 
-      {/* ── Credit Details ── */}
-      <h2 style={styles.subTitle}>Credit Details</h2>
-      <div style={styles.tableWrapper}>
-        <table style={styles.table}>
+      {/* Credit Details */}
+      <h2 className="approval-subtitle">Credit Details</h2>
+      <div className="table-wrapper">
+        <table className="approval-table">
           <thead>
             <tr>
-              <th style={styles.th}>AVAILABLE CREDIT</th>
-              <th style={styles.th}>CREDIT LIMIT</th>
-              <th style={styles.th}>OUTSTANDING BALANCE</th>
+              <th className="approval-th">AVAILABLE CREDIT</th>
+              <th className="approval-th">CREDIT LIMIT</th>
+              <th className="approval-th">OUTSTANDING BALANCE</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td style={styles.td}>₱ {fmt(order.available_credit)}</td>
-              <td style={styles.td}>₱ {fmt(order.credit_limit)}</td>
-              <td style={{ ...styles.td, color: "#b03a2e", fontWeight: 700 }}>
+              <td className="approval-td">₱ {fmt(order.available_credit)}</td>
+              <td className="approval-td">₱ {fmt(order.credit_limit)}</td>
+              <td className="approval-td" style={{ color: "#b03a2e", fontWeight: 700 }}>
                 ₱ {fmt(order.outstanding_balance)}
               </td>
             </tr>
@@ -220,10 +226,10 @@ export default function CreditApproval() {
         </table>
       </div>
 
-      {/* ── Action Buttons ── */}
-      <div style={styles.actions}>
+      {/* Action Buttons */}
+      <div className="approval-actions">
         <button
-          style={styles.rejectBtn}
+          className="reject-btn"
           disabled={acting}
           onClick={() => postAction("reject")}
         >
@@ -231,7 +237,7 @@ export default function CreditApproval() {
         </button>
         {requiresOverride ? (
           <button
-            style={styles.overrideBtn}
+            className="override-trigger-btn"
             disabled={acting}
             onClick={handleRequestOverride}
           >
@@ -239,7 +245,7 @@ export default function CreditApproval() {
           </button>
         ) : (
           <button
-            style={styles.approveBtn}
+            className="approve-btn"
             disabled={acting}
             onClick={() => postAction("approve")}
           >
@@ -250,33 +256,35 @@ export default function CreditApproval() {
 
       {/* Override Request Modal */}
       {showOverrideModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.modalTitle}>WARNING!</h3>
-            <p style={styles.modalWarning}>
-              ORDER XX{order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
-              credit limit. {order.customer_name} has insufficient credit balance.
-            </p>
-            <div style={styles.modalFormGroup}>
-              <label style={styles.modalLabel}>Please enter reason for override:</label>
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3 className="modal-title-warning">WARNING!</h3>
+              <p className="modal-text-body">
+                <span className="text-bold">ORDER XX{order.order_id}</span> amounting to{" "}
+                <span className="text-bold">₱ {fmt(order.total_amount)}</span> is over the available 
+                credit limit. {order.customer_name} has{" "}
+                <span className="text-warning-bold">insufficient credit balance</span>.
+              </p>
+            <div className="info-group">
+              <label className="info-label">Please enter reason for override:</label>
               <textarea
-                style={styles.modalTextarea}
+                className="modal-textarea"
                 placeholder="Enter reason here..."
                 value={overrideReason}
                 onChange={(e) => setOverrideReason(e.target.value)}
                 rows={4}
               />
             </div>
-            <div style={styles.modalActions}>
+            <div className="modal-button-row">
               <button
-                style={styles.modalCancelBtn}
+                className="reject-btn"
                 onClick={() => setShowOverrideModal(false)}
                 disabled={acting}
               >
                 Cancel
               </button>
               <button
-                style={styles.modalSubmitBtn}
+                className="modal-submit-btn"
                 onClick={submitOverrideRequest}
                 disabled={acting}
               >
@@ -289,16 +297,16 @@ export default function CreditApproval() {
 
       {/* Override Success Modal */}
       {showOverrideSuccess && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.successTitle}>Override request submitted for review.</h3>
-            <p style={styles.successMessage}>
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3 className="modal-success-title" style={{textAlign: 'center'}}>Override request submitted.</h3>
+            <p className="modal-text-body-success">
               Reason for override:
               <br />
-              {overrideReason}
+              <strong>{overrideReason}</strong>
             </p>
             <button
-              style={styles.returnBtn}
+              className="success-return-btn"
               onClick={() => navigate("/credit-manager/dashboard")}
             >
               Return to Dashboard
@@ -306,176 +314,7 @@ export default function CreditApproval() {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
-}
-
-const styles = {
-  container: { padding: "2rem", maxWidth: "720px", margin: "0 auto" },
-
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" },
-  logo: { display: "flex", alignItems: "center", gap: "0.5rem" },
-  logoIcon: { fontSize: "1.5rem" },
-  logoText: { fontSize: "1.25rem", fontWeight: 500 },
-  cancelBtn: {
-    padding: "0.6rem 1.75rem", background: "#1f3d1a", color: "#fff",
-    border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.9rem", fontWeight: 600,
-  },
-
-  title: { fontSize: "2rem", fontWeight: 700, marginBottom: "1.25rem" },
-  subTitle: { fontSize: "1.1rem", fontWeight: 600, marginBottom: "0.6rem", marginTop: "1.5rem" },
-
-  warningBox: {
-    background: "#fff3cd",
-    border: "2px solid #ffc107",
-    borderRadius: "6px",
-    padding: "1rem",
-    marginTop: "1rem",
-    marginBottom: "1rem",
-    color: "#856404",
-    fontSize: "0.95rem",
-    lineHeight: "1.5",
-  },
-
-  /* customer info */
-  infoGrid: { display: "flex", flexDirection: "column", gap: "0.75rem" },
-  infoRow: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" },
-  infoGroup: { display: "flex", flexDirection: "column", gap: "0.3rem" },
-  infoLabel: { fontSize: "0.82rem", fontWeight: 600, color: "#555" },
-  infoInput: {
-    padding: "0.65rem 0.75rem", border: "1px solid #ddd", borderRadius: "6px",
-    fontSize: "0.95rem", background: "#fafafa", color: "#333",
-  },
-
-  /* tables */
-  tableWrapper: { border: "1px solid #ccc", borderRadius: "8px", overflow: "hidden", marginBottom: "0.5rem" },
-  table: { width: "100%", borderCollapse: "collapse" },
-  th: {
-    background: "#f5f5f5", padding: "0.7rem 1rem", textAlign: "left",
-    borderBottom: "1px solid #ccc", fontWeight: 600, fontSize: "0.82rem", color: "#555",
-  },
-  td: { padding: "0.7rem 1rem", borderBottom: "1px solid #eee", fontSize: "0.95rem" },
-  totalLabel: {
-    padding: "0.7rem 1rem", fontWeight: 700, textAlign: "right",
-    borderTop: "2px solid #333", color: "#333",
-  },
-  totalValue: { padding: "0.7rem 1rem", fontWeight: 700, borderTop: "2px solid #333" },
-
-  submittedOn: { fontSize: "0.85rem", color: "#666", marginTop: "0.25rem" },
-
-  /* action buttons */
-  actions: { display: "flex", gap: "0.75rem", justifyContent: "flex-end", marginTop: "2rem" },
-  rejectBtn: {
-    padding: "0.75rem 1.75rem", background: "#fff", color: "#333",
-    border: "1px solid #ccc", borderRadius: "6px", cursor: "pointer",
-    fontSize: "0.95rem", fontWeight: 600,
-  },
-  approveBtn: {
-    padding: "0.75rem 1.75rem", background: "#1f3d1a", color: "#fff",
-    border: "none", borderRadius: "6px", cursor: "pointer",
-    fontSize: "0.95rem", fontWeight: 600,
-  },
-  overrideBtn: {
-    padding: "0.75rem 1.75rem", background: "#1f3d1a", color: "#fff",
-    border: "none", borderRadius: "6px", cursor: "pointer",
-    fontSize: "0.95rem", fontWeight: 600,
-  },
-
-  /* Modal styles */
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  modal: {
-    background: "#fff",
-    borderRadius: "8px",
-    maxWidth: "600px",
-    width: "90%",
-    padding: "2rem",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  },
-  modalTitle: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    marginBottom: "1rem",
-    color: "#d32f2f",
-  },
-  modalWarning: {
-    fontSize: "1rem",
-    lineHeight: "1.6",
-    marginBottom: "1.5rem",
-    color: "#555",
-  },
-  modalFormGroup: {
-    marginBottom: "1.5rem",
-  },
-  modalLabel: {
-    display: "block",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-    fontSize: "0.95rem",
-  },
-  modalTextarea: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    resize: "vertical",
-  },
-  modalActions: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "flex-end",
-  },
-  modalCancelBtn: {
-    padding: "0.75rem 2rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-  },
-  modalSubmitBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  successTitle: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    marginBottom: "1rem",
-    textAlign: "center",
-  },
-  successMessage: {
-    fontSize: "1rem",
-    color: "#555",
-    lineHeight: "1.6",
-    marginBottom: "2rem",
-  },
-  returnBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-    width: "100%",
-  },
 };
