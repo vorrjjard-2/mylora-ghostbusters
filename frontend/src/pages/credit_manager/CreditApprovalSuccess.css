@@ -1,0 +1,160 @@
+.success-wrap {
+    background-color: #FCFCFC;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    font-family: 'Arimo', sans-serif;
+}
+
+.success-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    margin-bottom: 2rem;
+}
+
+.success-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.success-logo-img {
+    height: 50px;
+    width: auto;
+}
+
+.success-system-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.64px;
+    color: #395A31;
+}
+
+.cancel-btn {
+  padding: 8px 70px;
+  background: #1f3d1a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.success-content{
+    display: block;
+    max-width: 90%;
+    margin: -20px auto;
+    padding: 0px 40px;
+}
+
+.success-title {
+    font-size: 64px;
+    font-weight: 700;
+    margin-top: 0px;
+    color: #000000;
+}
+
+.success-desc-id {
+  font-size: 25px;
+  color: #444;
+  padding-bottom: 15px;
+  margin-top: 40px;
+
+}
+
+.success-desc {
+  font-size: 25px;
+  color: #444;
+  margin: 0.25rem 0;
+}
+
+.success-divider {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 1.5rem 0;
+}
+
+.success-sub-heading {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.success-date-label {
+  font-size: 15px;
+  color: #666;
+  margin: 0 0 0.6rem;
+}
+
+/* Table Styles */
+.success-table-wrap {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.success-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.success-th {
+  background: #f5f5f5;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+  font-weight: 600;
+  font-size: 20px;
+  color: #555;
+}
+
+.success-td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+  color: #262626;
+}
+
+.success-total-label {
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  text-align: right;
+  border-top: 2px solid #333;
+  color: #333;
+}
+
+.success-total-val {
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  border-top: 2px solid #333;
+}
+
+.success-outstanding-val {
+  color: #b03a2e;
+  font-weight: 700;
+}
+
+/* Action Button */
+.success-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 40px;
+}
+
+.success-back-btn {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 100px;
+    background: #1f3d1a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
