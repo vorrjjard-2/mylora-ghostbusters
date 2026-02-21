@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import logo from "../../assets/mylora-logo.png";
+import "./PaymentReview.css";
+
 
 export default function PaymentReview() {
   const navigate = useNavigate();
@@ -14,7 +17,7 @@ export default function PaymentReview() {
   const [pendingAction, setPendingAction] = useState(null); // 'approve' or 'reject'
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/cm/payment/${paymentId}/`, {
+    fetch(`http://localhost:8000/api/cm/payment/${paymentId}/`, { 
       credentials: "include",
     })
       .then((res) => {
@@ -86,11 +89,11 @@ export default function PaymentReview() {
   };
 
   if (loading) {
-    return <div style={styles.container}>Loading...</div>;
+    return <div className="payment-review-container">Loading...</div>;
   }
 
   if (!payment) {
-    return <div style={styles.container}>Payment not found</div>;
+    return <div className="payment-review-container">Payment not found</div>;
   }
 
   const creditUtilization = payment.credit_limit
@@ -99,62 +102,61 @@ export default function PaymentReview() {
       100
     : 0;
 
+
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
+    <div className="payment-review-container">
+      {/* HEADER */}
+      <header className="payment-header-section">
+        <div className="payment-brand-group">
+          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <span className="payment-system-title">Web Credit System</span>
         </div>
-        <button style={styles.logoutBtn} onClick={() => navigate("/login")}>
+        <button className="payment-logout-btn" onClick={() => navigate("/login")}>
           Logout
         </button>
-      </div>
+      </header>
 
-      {/* Title */}
-      <h1 style={styles.title}>Payment Review</h1>
-
-      {/* Customer Name */}
-      <h2 style={styles.customerName}>{payment.customer_name}</h2>
+      <main className= "payment-content">
+    
+      {/*<h1 className="payment-title">Payment Review</h1>*/}
+      <h2 className="payment-customer-name">{payment.customer_name}</h2>
 
       {/* Credit Balance Section */}
-      <div style={styles.creditSection}>
-        <h3 style={styles.sectionTitle}>Credit Balance</h3>
-        <div style={styles.creditRow}>
+      <section className="credit-section">
+        <h3 className="section-title">Credit Balance</h3>
+        <div className="credit-row">
           <span>Available Credit:</span>
-          <span style={styles.creditValue}>
+          <span className="credit-value">
             ₱ {parseFloat(payment.available_credit).toLocaleString("en-PH", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
           </span>
         </div>
-        {/* Progress bar */}
-        <div style={styles.progressContainer}>
+
+        <div className="progress-container">
           <div
-            style={{
-              ...styles.progressBar,
-              width: `${creditUtilization}%`,
-            }}
+            className="progress-bar"
+            style={{ width: `${creditUtilization}%` }}
           />
         </div>
-        <div style={styles.creditRow}>
+
+        <div className="credit-row">
           <span>Credit Limit:</span>
-          <span style={styles.creditLimit}>
+          <span>
             ₱ {parseFloat(payment.credit_limit).toLocaleString("en-PH", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
           </span>
         </div>
-      </div>
+      </section>
 
       {/* Outstanding Balance */}
-      <div style={styles.balanceSection}>
-        <div style={styles.balanceRow}>
-          <span style={styles.balanceLabel}>Outstanding Balance</span>
-          <span style={styles.balanceAmount}>
+      <div className="balance-section">
+        <div className="balance-row">
+          <span className="balance-label">Outstanding Balance</span>
+          <span className="balance-amount">
             ₱ {parseFloat(payment.outstanding_balance).toLocaleString("en-PH", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -163,368 +165,83 @@ export default function PaymentReview() {
         </div>
       </div>
 
-      {/* Payment Form */}
-      <div style={styles.formGroup}>
-        <label style={styles.label}>Invoice Number</label>
-        <input
-          type="text"
-          value={payment.inv_number || ""}
-          readOnly
-          style={styles.input}
-        />
-      </div>
+      {/* Payment Form Fields */}
+      <div className="payment-form-row"> 
+        <div className="payment-form-group flex-1">
+          <label className="payment-label">Invoice Number</label>
+          <input className="payment-input" readOnly value={payment.inv_number || ""} />
+        </div>
 
-      <div style={styles.formGroup}>
-        <label style={styles.label}>Balance Paid</label>
-        <input
-          type="text"
-          value={`₱ ${parseFloat(payment.amount_paid).toLocaleString("en-PH", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`}
-          readOnly
-          style={styles.input}
-        />
-      </div>
-
-      <div style={styles.formGroup}>
-        <label style={styles.label}>Date of Payment</label>
-        <input
-          type="text"
-          value={payment.date_paid}
-          readOnly
-          style={styles.input}
-        />
-      </div>
-
-      <div style={styles.formGroup}>
-        <label style={styles.label}>Proof of Payment</label>
-        {payment.proof_payment_url ? (
-          <div style={styles.fileDisplay}>
-            <span style={styles.fileIcon}>📄</span>
-            <a
-              href={payment.proof_payment_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.fileLink}
-            >
-              {payment.proof_payment_url.split("/").pop()}
-            </a>
+        <div className="payment-form-group flex-1">
+          <label className="payment-label">Balance Paid</label>
+          <div className="payment-input-with-symbol"> 
+            <input 
+              className="payment-input" 
+              readOnly 
+              value={`₱ ${parseFloat(payment.amount_paid).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`} 
+            />
           </div>
-        ) : (
-          <div style={styles.fileDisplay}>No file uploaded</div>
-        )}
+        </div>
       </div>
 
-      {/* Action Buttons */}
-      <div style={styles.buttonRow}>
-        <button
-          style={styles.cancelBtn}
-          onClick={() => navigate("/credit-manager/dashboard")}
-        >
+      <div className="payment-form-group">
+        <label className="payment-label">Date of Payment</label>
+        <input className="payment-input" readOnly value={payment.date_paid} />
+      </div>
+
+      <div className="payment-form-group">
+        <label className="payment-label">Proof of Payment</label>
+        <div className="file-display">
+          {payment.proof_payment_url ? (
+            <a href={payment.proof_payment_url} target="_blank" className="file-link">
+              View Proof of Payment
+            </a>
+          ) : "No file uploaded"}
+        </div>
+      </div>
+
+      {/* Bottom Actions */}
+      <div className="payment-button-row">
+        <button className="payment-cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
           Cancel
         </button>
-        <button
-          style={styles.confirmBtn}
-          onClick={() => initiateAction("approve")}
-        >
+        <button className="payment-confirm-btn" onClick={() => initiateAction("approve")}>
           Confirm Payment
         </button>
       </div>
 
-      {/* Password Modal */}
+      {/* Modals remain structurally similar but use CSS classes */}
       {showPasswordModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.modalTitle}>Please enter user password to proceed.</h3>
+        <div className="modal-overlay">
+          <div className="payment-modal">
+            <h3 className="section-title">Please enter user password to proceed.</h3>
             <input
               type="password"
+              className="password-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
-              style={styles.passwordInput}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleConfirmAction();
-              }}
             />
-            <div style={styles.modalButtonRow}>
-              <button
-                style={styles.modalCancelBtn}
-                onClick={handleCancelPasswordModal}
-                disabled={processing}
-              >
-                Cancel
-              </button>
-              <button
-                style={styles.modalConfirmBtn}
-                onClick={handleConfirmAction}
-                disabled={processing}
-              >
-                {processing ? "Processing..." : "Confirm Payment"}
-              </button>
+            <div className="payment-button-row">
+              <button className="payment-cancel-btn" onClick={handleCancelPasswordModal}>Cancel</button>
+              <button className="payment-confirm-btn" onClick={handleConfirmAction}>Confirm Payment</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Success Modal */}
       {showSuccessModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.successTitle}>Balance payment successfully updated!</h3>
-            <p style={styles.successMessage}>
-              Balance payment has been confirmed and credit balance has been updated.
-            </p>
-            <button
-              style={styles.returnBtn}
-              onClick={() => navigate("/credit-manager/dashboard")}
-            >
+        <div className="modal-overlay">
+          <div className="payment-modal">
+            <h3 className="success-section-title" style={{textAlign: 'center'}}>Balance payment successfully updated!</h3>
+            <p className="success-message">Balance payment has been confirmed and credit balance updated.</p>
+            <button className="payment-return-btn" onClick={() => navigate("/credit-manager/dashboard")}>
               Return to Dashboard
             </button>
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    padding: "2rem",
-    maxWidth: "800px",
-    margin: "0 auto",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "2rem",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  logoIcon: {
-    fontSize: "1.5rem",
-  },
-  logoText: {
-    fontSize: "1.25rem",
-    fontWeight: 500,
-  },
-  logoutBtn: {
-    padding: "0.5rem 1.25rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-  },
-  title: {
-    fontSize: "1.5rem",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-    color: "#888",
-  },
-  customerName: {
-    fontSize: "2.5rem",
-    fontWeight: 700,
-    marginBottom: "2rem",
-  },
-  creditSection: {
-    marginBottom: "1.5rem",
-  },
-  sectionTitle: {
-    fontSize: "1.1rem",
-    fontWeight: 600,
-    marginBottom: "1rem",
-  },
-  creditRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "0.5rem",
-    fontSize: "0.95rem",
-  },
-  creditValue: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-  },
-  creditLimit: {
-    fontSize: "0.95rem",
-  },
-  progressContainer: {
-    width: "100%",
-    height: "30px",
-    background: "#e0e0e0",
-    borderRadius: "4px",
-    overflow: "hidden",
-    marginBottom: "0.5rem",
-  },
-  progressBar: {
-    height: "100%",
-    background: "#6a9955",
-    transition: "width 0.3s ease",
-  },
-  balanceSection: {
-    borderTop: "2px solid #000",
-    paddingTop: "1rem",
-    marginBottom: "2rem",
-  },
-  balanceRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  balanceLabel: {
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  balanceAmount: {
-    fontSize: "1.75rem",
-    fontWeight: 700,
-    color: "#b03a2e",
-  },
-  formGroup: {
-    marginBottom: "1.5rem",
-  },
-  label: {
-    display: "block",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-    fontSize: "0.95rem",
-  },
-  input: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    background: "#f9f9f9",
-  },
-  fileDisplay: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    background: "#f9f9f9",
-  },
-  fileIcon: {
-    fontSize: "1.25rem",
-  },
-  fileLink: {
-    color: "#1f3d1a",
-    textDecoration: "none",
-    fontWeight: 500,
-  },
-  buttonRow: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "flex-end",
-    marginTop: "2rem",
-  },
-  cancelBtn: {
-    padding: "0.75rem 2rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-  },
-  confirmBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  modal: {
-    background: "#fff",
-    borderRadius: "8px",
-    maxWidth: "500px",
-    width: "90%",
-    padding: "2rem",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  },
-  modalTitle: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-    marginBottom: "1.5rem",
-    textAlign: "center",
-  },
-  passwordInput: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    marginBottom: "1.5rem",
-  },
-  modalButtonRow: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "flex-end",
-  },
-  modalCancelBtn: {
-    padding: "0.75rem 2rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-  },
-  modalConfirmBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  successTitle: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    marginBottom: "1rem",
-    textAlign: "center",
-  },
-  successMessage: {
-    fontSize: "1rem",
-    color: "#555",
-    lineHeight: "1.6",
-    marginBottom: "2rem",
-    textAlign: "center",
-  },
-  returnBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-    width: "100%",
-  },
-};
