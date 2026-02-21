@@ -7,28 +7,10 @@ export default function CreditApprovalSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
 
-
-  const mockData = { // REMOVE
-    available_credit: 1250.00,
-    credit_limit: 50000.00,
-    outstanding_balance: 48750.00,
-    order: {
-      customer_name: "JUAN DE LA CRUZ",
-      total_amount: 18750.00,
-      items: [
-        { name: "Premium Rice (25kg)", quantity: 10, subtotal: 12500.00 },
-        { name: "Organic Fertilizer", quantity: 5, subtotal: 6250.00 },
-      ]
-    }
-  }; // REMOVE
-
-
   // The approve endpoint returns { order_id, order_status, available_credit, credit_limit, outstanding_balance }.
   // CreditApproval passes the original order object AND that response as location.state.
 
-  /* const credit = location.state || {}; */ // RETURN
-  const credit = (location.state && Object.keys(location.state).length > 0) ? location.state : mockData; // REMOVE
-  
+  const credit = location.state || {};   
   const order  = credit.order  || {};   // original order snapshot (has customer_name, items, etc.)
 
   const fmt = (n) =>
