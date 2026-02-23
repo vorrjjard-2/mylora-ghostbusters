@@ -1,285 +1,170 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import { getCookie } from "../../utils/csrf";
+import "./ProcessorOrderHistory.css";
 
 export default function ProcessorOrderHistory() {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("completed");
+  const [activeTab, setActiveTab] = useState("pending");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/op/completed-orders/", {
-      credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load orders");
-        return res.json();
-      })
-      .then(setOrders)
-      .catch((err) => {
+    const fetchBoth = async () => {
+      try {
+        const [pendingRes, completedRes] = await Promise.all([
+          fetch("http://localhost:8000/api/op/pending-orders/", { credentials: "include" }),
+          fetch("http://localhost:8000/api/op/completed-orders/", { credentials: "include" }),
+        ]);
+        if (!pendingRes.ok || !completedRes.ok) throw new Error("Failed to load orders");
+        const [pending, completed] = await Promise.all([pendingRes.json(), completedRes.json()]);
+        setPendingOrders(pending);
+        setCompletedOrders(completed);
+      } catch (err) {
         console.error(err);
         alert("Failed to load orders");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBoth();
   }, []);
 
-  const filteredOrders = orders.filter((order) =>
-    order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.order_id.toString().includes(searchTerm)
-  );
+  const handleLogout = async () => {
+    await fetch("http://localhost:8000/api/logout/", {
+      method: "POST",
+      credentials: "include",
+      headers: { "X-CSRFToken": getCookie("csrftoken") },
+    });
+    navigate("/login");
+  };
 
-  if (loading) return <div style={styles.container}>Loading...</div>;
+  const orders = activeTab === "pending" ? pendingOrders : completedOrders;
+
+  const filtered = orders.filter((o) => {
+    const name = (o.customer_name || "").toLowerCase();
+    const id = (o.order_id || "").toString();
+    const term = searchTerm.toLowerCase();
+    return name.includes(term) || id.includes(term);
+  });
+
+  const handleOrderClick = (order) => {
+    if (activeTab === "pending") {
+      navigate(`/order-processor/order/${order.order_id}`);
+    } else {
+      navigate(`/order-processor/order/${order.order_id}/view`);
+    }
+  };
 
   return (
-    <div style={styles.container}>
-      {/* header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
+    <div className="poh-root">
+      {/* HEADER */}
+      <header className="poh-header">
+        <div className="poh-brand">
+          <img src={logo} alt="Logo" className="poh-logo" />
+          <span className="poh-brand-name">Web Credit System</span>
         </div>
-        <button style={styles.logoutBtn} onClick={() => navigate("/login")}>
+        <button className="poh-logout-btn" onClick={handleLogout}>
           Logout
         </button>
-      </div>
+      </header>
 
-      <div style={styles.body}>
-        {/* sidebar */}
-        <aside style={styles.sidebar}>
+      <div className="poh-body">
+        {/* SIDEBAR */}
+        <aside className="poh-sidebar">
           <div
-            style={styles.sideItem}
+            className="poh-side-item"
             onClick={() => navigate("/order-processor/dashboard")}
           >
             Dashboard
           </div>
-          <div style={{ ...styles.sideItem, ...styles.sideItemActive }}>
-            Order History
-          </div>
+          <div className="poh-side-item poh-side-active">Order History</div>
         </aside>
 
-        {/* main */}
-        <main style={styles.main}>
-          <h1 style={styles.greeting}>View Orders</h1>
+        {/* MAIN */}
+        <main className="poh-main">
+          <h1 className="poh-title">View Orders</h1>
 
-          {/* Tabs */}
-          <div style={styles.tabRow}>
+          {/* TABS */}
+          <div className="poh-tabs">
             <button
-              style={{
-                ...styles.tab,
-                ...(activeTab === "pending" ? styles.tabActive : {}),
-              }}
-              onClick={() => setActiveTab("pending")}
+              className={`poh-tab ${activeTab === "pending" ? "poh-tab-active" : ""}`}
+              onClick={() => { setActiveTab("pending"); setSearchTerm(""); }}
             >
               Pending Orders
             </button>
             <button
-              style={{
-                ...styles.tab,
-                ...(activeTab === "completed" ? styles.tabActive : {}),
-              }}
-              onClick={() => setActiveTab("completed")}
+              className={`poh-tab ${activeTab === "completed" ? "poh-tab-active" : ""}`}
+              onClick={() => { setActiveTab("completed"); setSearchTerm(""); }}
             >
               Completed Orders
             </button>
           </div>
 
-          {/* Search and Sort */}
-          <div style={styles.controls}>
-            <div style={styles.searchBox}>
-              <span style={styles.searchIcon}>🔍</span>
+          {/* CONTROLS */}
+          <div className="poh-controls">
+            <div className="poh-search-wrap">
+              <span className="poh-search-icon">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <circle cx="6.5" cy="6.5" r="5.5" stroke="#888" strokeWidth="1.5" />
+                  <path d="M11 11L14 14" stroke="#888" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </span>
               <input
+                className="poh-search-input"
                 type="text"
                 placeholder="Search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={styles.searchInput}
               />
             </div>
-            <button style={styles.sortBtn}>⇅ Sort By</button>
+            <button className="poh-sort-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginRight: 6 }}>
+                <path d="M1 3h12M3 7h8M5 11h4" stroke="#444" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              Sort By
+            </button>
           </div>
 
-          {/* Order List */}
-          <div style={styles.list}>
-            {filteredOrders.length === 0 && (
-              <p style={styles.empty}>No completed orders found.</p>
-            )}
-            {filteredOrders.map((order) => (
-              <div
-                key={order.order_id}
-                style={styles.listItem}
-                onClick={() =>
-                  navigate(`/order-processor/order/${order.order_id}/view`)
-                }
-              >
-                <div style={styles.itemLeft}>
-                  <div style={styles.listOrderId}>ORDER ID XX{order.order_id}</div>
-                  <div style={styles.listSub}>Ordered by: {order.customer_name}</div>
-                </div>
-                <div style={styles.itemRight}>
-                  <div style={styles.statusBadges}>
-                    <span style={styles.statusApproved}>APPROVED</span>
-                    <span style={styles.statusCompleted}>COMPLETED</span>
+          {/* LIST */}
+          {loading ? (
+            <div className="poh-empty">Loading...</div>
+          ) : filtered.length === 0 ? (
+            <div className="poh-empty">No {activeTab} orders found.</div>
+          ) : (
+            <div className="poh-list">
+              {filtered.map((order) => (
+                <div
+                  key={order.order_id}
+                  className="poh-list-item"
+                  onClick={() => handleOrderClick(order)}
+                >
+                  <div className="poh-item-left">
+                    <div className="poh-order-id">ORDER ID XX{order.order_id}</div>
+                    <div className="poh-order-sub">Ordered by: {order.customer_name}</div>
                   </div>
-                  <div style={styles.listDate}>
-                    Date Completed: {order.completion_date}
+                  <div className="poh-item-right">
+                    <div className="poh-badges">
+                      <span className="poh-badge poh-badge-approved">APPROVED</span>
+                      {activeTab === "completed" && (
+                        <span className="poh-badge poh-badge-completed">COMPLETED</span>
+                      )}
+                    </div>
+                    <div className="poh-order-date">
+                      {activeTab === "pending"
+                        ? `Date Ordered: ${order.date_ordered}`
+                        : `Date Completed: ${order.completion_date}`}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </main>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: { padding: "2rem", maxWidth: "1100px", margin: "0 auto" },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "1.5rem",
-  },
-  logo: { display: "flex", alignItems: "center", gap: "0.5rem" },
-  logoIcon: { fontSize: "1.5rem" },
-  logoText: { fontSize: "1.25rem", fontWeight: 500 },
-  logoutBtn: {
-    padding: "0.5rem 1.25rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-  },
-
-  body: { display: "flex", gap: "1.5rem" },
-
-  /* sidebar */
-  sidebar: {
-    width: "160px",
-    minWidth: "160px",
-    borderRight: "1px solid #e0e0e0",
-    paddingRight: "1rem",
-  },
-  sideItem: {
-    padding: "0.6rem 0.75rem",
-    cursor: "pointer",
-    borderRadius: "6px",
-    fontSize: "0.9rem",
-    color: "#555",
-    marginBottom: "0.25rem",
-  },
-  sideItemActive: { background: "#f0f0f0", fontWeight: 600, color: "#1f3d1a" },
-
-  /* main */
-  main: { flex: 1 },
-  greeting: { fontSize: "1.75rem", fontWeight: 700, marginBottom: "1rem" },
-
-  /* tabs */
-  tabRow: {
-    display: "flex",
-    borderBottom: "2px solid #e0e0e0",
-    marginBottom: "1.5rem",
-  },
-  tab: {
-    padding: "0.75rem 1.5rem",
-    background: "none",
-    border: "none",
-    borderBottom: "3px solid transparent",
-    cursor: "pointer",
-    fontSize: "0.95rem",
-    fontWeight: 600,
-    color: "#888",
-    marginBottom: "-2px",
-  },
-  tabActive: {
-    color: "#1f3d1a",
-    borderBottomColor: "#1f3d1a",
-  },
-
-  /* controls */
-  controls: {
-    display: "flex",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-  },
-  searchBox: {
-    flex: 1,
-    position: "relative",
-    maxWidth: "350px",
-  },
-  searchIcon: {
-    position: "absolute",
-    left: "0.75rem",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "0.9rem",
-  },
-  searchInput: {
-    width: "100%",
-    padding: "0.6rem 0.75rem 0.6rem 2.25rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "0.9rem",
-    boxSizing: "border-box",
-  },
-  sortBtn: {
-    padding: "0.6rem 1.25rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-    fontWeight: 500,
-  },
-
-  /* order list */
-  list: { display: "flex", flexDirection: "column", gap: "0.5rem" },
-  listItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "1rem 1.25rem",
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    cursor: "pointer",
-    background: "#fff",
-  },
-  itemLeft: {
-    flex: 1,
-  },
-  listOrderId: { fontWeight: 700, fontSize: "0.95rem", marginBottom: "0.2rem" },
-  listSub: { fontSize: "0.85rem", color: "#666" },
-  itemRight: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end",
-    gap: "0.5rem",
-  },
-  statusBadges: {
-    display: "flex",
-    gap: "0.5rem",
-  },
-  statusApproved: {
-    padding: "0.25rem 0.75rem",
-    background: "#d4edda",
-    color: "#155724",
-    borderRadius: "4px",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-  },
-  statusCompleted: {
-    padding: "0.25rem 0.75rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    borderRadius: "4px",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-  },
-  listDate: { fontSize: "0.85rem", color: "#666", whiteSpace: "nowrap" },
-
-  empty: { color: "#888", padding: "1rem 0" },
-};
