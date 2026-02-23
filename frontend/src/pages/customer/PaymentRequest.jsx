@@ -8,6 +8,7 @@ import "./PaymentRequest.css";
 export default function PaymentRequest() {
   const navigate = useNavigate();
   const [creditInfo, setCreditInfo] = useState(null);
+  const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState({
@@ -21,13 +22,14 @@ export default function PaymentRequest() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Fetch credit info to display on the page
+    // Fetch credit info and user info to display on the page
     fetch("http://localhost:8000/api/customer/dashboard/", {
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
         setCreditInfo(data.credit);
+        setUserName(data.user?.name || "Customer");
       })
       .catch((err) => {
         console.error(err);
@@ -157,7 +159,7 @@ return (
 
     <main className="pr-content">
       {/* User Info */}
-      <h1 className="pr-user-name">Alex Fernandez</h1>
+      <h1 className="pr-user-name">{userName}</h1>
 
       {/* Credit Balance Section */}
       <section className="pr-credit-section">
