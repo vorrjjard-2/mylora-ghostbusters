@@ -38,7 +38,7 @@
     font-weight: 700;
     color: black;
     margin-bottom: 10px;
-    margin-top: -40px;
+    margin-top: 30px;
     margin-left: 70px;
 }
 
@@ -46,8 +46,8 @@
     font-size: 20px; 
     font-weight: 700;
     color: black;
-    margin-bottom: 10px;
-    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-top: 10px;
     margin-left: 5px;
 }
 
@@ -56,13 +56,19 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  padding: 0 70px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
 }
 
 .order-left-panel {
   background: #f9f9f9;
   padding: 1.5rem;
   border-radius: 8px;
-  margin-left: 70px;
 }
 
 .order-search-input {
@@ -72,6 +78,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .order-product-list {
@@ -110,12 +117,15 @@
   white-space: nowrap;
 }
 
+.order-add-btn:hover {
+  background: #2d5a27;
+}
+
 .order-right-panel {
   background: #fff;
   padding: 1.5rem;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  margin-right: 70px;
 }
 
 .order-table {
@@ -141,6 +151,7 @@
 .order-td.empty-msg {
   text-align: center;
   color: #999;
+  padding: 2rem;
 }
 
 .order-item-unit {
@@ -164,6 +175,10 @@
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0 0.5rem;
+}
+
+.order-remove-btn:hover {
+  color: #d32f2f;
 }
 
 .order-total-section {
@@ -199,6 +214,11 @@
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.order-continue-btn:hover:not(.disabled) {
+  background: #2d5a27;
 }
 
 .order-continue-btn.disabled {
