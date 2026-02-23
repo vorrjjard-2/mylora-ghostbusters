@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from django.db import transaction
 
@@ -50,7 +50,12 @@ def submit_payment(request):
         # Convert amount to Decimal
         try:
             amount_decimal = Decimal(str(amount_paid))
-        except:
+            if amount_decimal <= 0:
+                return Response(
+                    {"error": "Amount must be greater than zero"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except (InvalidOperation, ValueError):
             return Response(
                 {"error": "Invalid amount format"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -59,7 +64,7 @@ def submit_payment(request):
         # Parse date
         try:
             date_obj = datetime.strptime(date_paid, "%Y-%m-%d").date()
-        except:
+        except ValueError:
             return Response(
                 {"error": "Invalid date format. Use YYYY-MM-DD"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -187,21 +192,59 @@ def cm_approve_payment(request, payment_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    # Get credit account
+    credit = payment.account
+    
+    # Convert to Decimal for safe arithmetic
+    try:
+        payment_amount = Decimal(str(payment.amount_paid))
+        outstanding = Decimal(str(credit.outstanding_bal))
+        available = Decimal(str(credit.available_credit))
+        limit = Decimal(str(credit.credit_limit))
+    except (InvalidOperation, ValueError) as e:
+        return Response(
+            {"error": f"Invalid amount in database: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+    # Validate payment amount
+    if payment_amount <= 0:
+        return Response(
+            {"error": "Payment amount must be greater than zero"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Check if payment exceeds outstanding balance
+    if payment_amount > outstanding:
+        return Response(
+            {"error": f"Payment amount (₱{payment_amount}) exceeds outstanding balance (₱{outstanding})"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Calculate new balances
+    new_outstanding = outstanding - payment_amount
+    new_available = available + payment_amount
+    
+    # Ensure new_available doesn't exceed credit limit
+    if new_available > limit:
+        new_available = limit
+
     with transaction.atomic():
         payment.payment_status = "VERIFIED"
         payment.approved_by = request.user
         payment.save()
 
-        # Update credit account
-        credit = payment.account
-        credit.outstanding_bal -= payment.amount_paid
-        credit.available_credit += payment.amount_paid
+        # Update credit account with new calculated values
+        credit.outstanding_bal = new_outstanding
+        credit.available_credit = new_available
         credit.save()
 
     return Response({
         "success": True,
         "payment_id": payment.payment_id,
         "message": "Payment verified successfully",
+        "new_outstanding_balance": str(new_outstanding),
+        "new_available_credit": str(new_available),
     })
 
 

@@ -3,7 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from datetime import datetime
 
 from .models import Order, OrderItem, OrderApproval
 from accounts.models import Customer, CreditAccount
@@ -724,7 +725,6 @@ def cm_customer_history(request, customer_id):
 
     return Response(data)
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def cm_adjust_customer_balance(request, customer_id):
@@ -749,7 +749,6 @@ def cm_adjust_customer_balance(request, customer_id):
     from accounts.models import Customer
     from payments.models import PaymentRequest
     from django.utils import timezone
-    from decimal import Decimal
 
     try:
         customer = Customer.objects.select_related("credit_account").get(id=customer_id)
@@ -762,20 +761,62 @@ def cm_adjust_customer_balance(request, customer_id):
     invoice_number = request.data.get("invoice_number", "")
     proof_of_payment = request.FILES.get("proof_of_payment")
 
-    if not balance_paid or not date_of_payment:
+    # Validate required fields
+    if not balance_paid:
         return Response(
-            {"error": "Balance paid and date of payment are required"},
+            {"error": "Balance paid is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not date_of_payment:
+        return Response(
+            {"error": "Date of payment is required"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # Convert and validate amount
     try:
         amount_decimal = Decimal(str(balance_paid))
-        date_obj = datetime.strptime(date_of_payment, "%Y-%m-%d").date()
-    except:
+        if amount_decimal <= 0:
+            return Response(
+                {"error": "Amount must be greater than zero"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    except (InvalidOperation, ValueError):
         return Response(
-            {"error": "Invalid amount or date format"},
+            {"error": f"Invalid amount format: {balance_paid}"},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+    # Convert and validate date
+    try:
+        date_obj = datetime.strptime(date_of_payment, "%Y-%m-%d").date()
+    except ValueError:
+        return Response(
+            {"error": f"Invalid date format. Expected YYYY-MM-DD, got: {date_of_payment}"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Get credit account and validate
+    credit = customer.credit_account
+    outstanding = Decimal(str(credit.outstanding_bal))
+    available = Decimal(str(credit.available_credit))
+    limit = Decimal(str(credit.credit_limit))
+
+    # Check if payment exceeds outstanding balance
+    if amount_decimal > outstanding:
+        return Response(
+            {"error": f"Payment amount (₱{amount_decimal}) exceeds outstanding balance (₱{outstanding})"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Calculate new balances
+    new_outstanding = outstanding - amount_decimal
+    new_available = available + amount_decimal
+    
+    # Ensure available doesn't exceed limit
+    if new_available > limit:
+        new_available = limit
 
     with transaction.atomic():
         # Create a payment request record for audit trail
@@ -789,10 +830,9 @@ def cm_adjust_customer_balance(request, customer_id):
             approved_by=request.user,
         )
 
-        # Update credit account
-        credit = customer.credit_account
-        credit.outstanding_bal -= amount_decimal
-        credit.available_credit += amount_decimal
+        # Update credit account with new calculated values
+        credit.outstanding_bal = new_outstanding
+        credit.available_credit = new_available
         credit.save()
 
     # Return updated customer data
@@ -800,6 +840,9 @@ def cm_adjust_customer_balance(request, customer_id):
     return Response({
         "success": True,
         "message": "Balance adjusted successfully",
+        "payment_id": payment.payment_id,
+        "new_outstanding_balance": str(new_outstanding),
+        "new_available_credit": str(new_available),
         "customer": {
             "customer_id": customer.id,
             "name": customer.user.get_full_name() or customer.user.username,
@@ -810,12 +853,11 @@ def cm_adjust_customer_balance(request, customer_id):
             "barangay": app.barangay if app else "",
             "city": app.city if app else "",
             "zipcode": app.zipcode if app else "",
-            "credit_limit": str(credit.credit_limit),
-            "available_credit": str(credit.available_credit),
-            "outstanding_balance": str(credit.outstanding_bal),
+            "credit_limit": str(limit),
+            "available_credit": str(new_available),
+            "outstanding_balance": str(new_outstanding),
         }
     })
-
 
 # ─── Order Processor Endpoints ────────────────────────────────────────────────
 
