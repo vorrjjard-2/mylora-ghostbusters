@@ -13,7 +13,17 @@ export default function CreditManagerDashboard() {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(null); // null = dashboard view
+  const [activeTab, setActiveTab] = useState(null);
+  
+  // Sorting states
+  const [sortBy, setSortBy] = useState("date");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  
+  // Filtered and sorted data
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [filteredPayments, setFilteredPayments] = useState([]);
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -29,6 +39,198 @@ export default function CreditManagerDashboard() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  // Update filtered and sorted data whenever dependencies change
+  useEffect(() => {
+    // Credit Approval sorting
+    if (creditData?.pending_orders && (activeTab === "credit" || activeTab === "credit-all")) {
+      const sorted = [...creditData.pending_orders].sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "order_id") {
+          comparison = a.order_id - b.order_id;
+        } else if (sortBy === "status") {
+          comparison = (a.order_status || "").localeCompare(b.order_status || "");
+        } else if (sortBy === "date") {
+          const dateA = new Date(a.date_ordered);
+          const dateB = new Date(b.date_ordered);
+          comparison = dateA - dateB;
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setFilteredOrders(sorted);
+    }
+
+    // Payment Review sorting
+    if (payments && (activeTab === "payment" || activeTab === "payment-all")) {
+      const sorted = [...payments].sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "customer") {
+          comparison = (a.customer_name || "").localeCompare(b.customer_name || "");
+        } else if (sortBy === "amount") {
+          comparison = parseFloat(a.amount_paid) - parseFloat(b.amount_paid);
+        } else if (sortBy === "date") {
+          const dateA = new Date(a.date_paid);
+          const dateB = new Date(b.date_paid);
+          comparison = dateA - dateB;
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setFilteredPayments(sorted);
+    }
+
+    // Credit Adjustment (customers) sorting + search
+    if (customers && activeTab === "adjustment") {
+      let filtered = customers.filter((c) =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      const sorted = [...filtered].sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "name") {
+          comparison = (a.name || "").localeCompare(b.name || "");
+        } else if (sortBy === "credit_limit") {
+          comparison = parseFloat(a.credit_limit) - parseFloat(b.credit_limit);
+        } else if (sortBy === "outstanding") {
+          comparison = parseFloat(a.outstanding_balance) - parseFloat(b.outstanding_balance);
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setFilteredCustomers(sorted);
+    }
+  }, [activeTab, creditData, payments, customers, sortBy, sortDirection, searchTerm]);
+
+  const handleSortChange = (newSortBy) => {
+    if (newSortBy === sortBy) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(newSortBy);
+      setSortDirection(newSortBy === "date" ? "desc" : "asc");
+    }
+    setShowSortMenu(false);
+  };
+
+  const getSortLabel = () => {
+    if (activeTab === "credit" || activeTab === "credit-all") {
+      if (sortBy === "date") return "Date Ordered";
+      if (sortBy === "status") return "Status";
+      if (sortBy === "order_id") return "Order ID";
+    } else if (activeTab === "payment" || activeTab === "payment-all") {
+      if (sortBy === "date") return "Date Paid";
+      if (sortBy === "customer") return "Customer Name";
+      if (sortBy === "amount") return "Amount Paid";
+    } else if (activeTab === "adjustment") {
+      if (sortBy === "name") return "Customer Name";
+      if (sortBy === "credit_limit") return "Credit Limit";
+      if (sortBy === "outstanding") return "Outstanding Balance";
+    }
+    return "Date";
+  };
+
+  const getSortOptions = () => {
+    if (activeTab === "credit" || activeTab === "credit-all") {
+      return [
+        { value: "date", label: "Date Ordered" },
+        { value: "status", label: "Status" },
+        { value: "order_id", label: "Order ID" }
+      ];
+    } else if (activeTab === "payment" || activeTab === "payment-all") {
+      return [
+        { value: "date", label: "Date Paid" },
+        { value: "customer", label: "Customer Name" },
+        { value: "amount", label: "Amount Paid" }
+      ];
+    } else if (activeTab === "adjustment") {
+      return [
+        { value: "name", label: "Customer Name" },
+        { value: "credit_limit", label: "Credit Limit" },
+        { value: "outstanding", label: "Outstanding Balance" }
+      ];
+    }
+    return [];
+  };
+
+  const renderSortDropdown = () => (
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={() => setShowSortMenu(!showSortMenu)}
+        style={{
+          padding: "10px 20px",
+          fontSize: "16px",
+          border: "1px solid #262626",
+          borderRadius: "8px",
+          backgroundColor: "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          fontWeight: "600"
+        }}
+      >
+        <span>↕</span>
+        <span>Sort By: {getSortLabel()}</span>
+        <span style={{ fontSize: "12px", color: "#666" }}>
+          {sortDirection === "asc" ? "↑" : "↓"}
+        </span>
+      </button>
+      
+      {showSortMenu && (
+        <div style={{
+          position: "absolute",
+          top: "calc(100% + 5px)",
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #262626",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          minWidth: "200px",
+          zIndex: 1000
+        }}>
+          {getSortOptions().map((option, index) => (
+            <div
+              key={option.value}
+              onClick={() => handleSortChange(option.value)}
+              style={{
+                padding: "12px 16px",
+                cursor: "pointer",
+                borderBottom: index < getSortOptions().length - 1 ? "1px solid #e0e0e0" : "none",
+                backgroundColor: sortBy === option.value ? "#f5f5f5" : "white",
+                fontWeight: sortBy === option.value ? "600" : "400",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderRadius: index === getSortOptions().length - 1 ? "0 0 8px 8px" : "0"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === option.value ? "#f5f5f5" : "white"}
+            >
+              <span>{option.label}</span>
+              {sortBy === option.value && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSortIndicator = () => (
+    <div style={{ marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>
+      <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
+      <span style={{
+        padding: "6px 12px",
+        backgroundColor: "#1E2D1A",
+        color: "white",
+        borderRadius: "20px",
+        fontSize: "14px",
+        fontWeight: "600",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px"
+      }}>
+        {getSortLabel()}
+        <span style={{ fontSize: "12px" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
+      </span>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -47,10 +249,6 @@ export default function CreditManagerDashboard() {
   function fmt(n) {
     return parseFloat(n).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-
-  const filteredCustomers = customers.filter((c) =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="um-dashboard-wrapper">
@@ -150,7 +348,7 @@ export default function CreditManagerDashboard() {
             </>
           )}
 
-          {/* CREDIT APPROVAL LIST */}
+          {/* CREDIT APPROVAL LIST - PENDING */}
           {activeTab === "credit" && (
             <>
               {/* Tabs */}
@@ -188,7 +386,7 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
+              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -204,29 +402,17 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
-                <button
-                  style={{
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                    border: "1px solid #262626",
-                    borderRadius: "8px",
-                    backgroundColor: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
-                  }}
-                >
-                  ↕ Sort By
-                </button>
+                {renderSortDropdown()}
               </div>
+
+              {renderSortIndicator()}
 
               {/* Orders List */}
               <div className="um-list-container">
-                {creditData?.pending_orders.length === 0 && (
+                {filteredOrders.length === 0 && (
                   <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
                 )}
-                {creditData?.pending_orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <div
                     key={order.order_id}
                     className="um-request-item"
@@ -282,7 +468,7 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
+              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -298,22 +484,10 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
-                <button
-                  style={{
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                    border: "1px solid #262626",
-                    borderRadius: "8px",
-                    backgroundColor: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
-                  }}
-                >
-                  ↕ Sort By
-                </button>
+                {renderSortDropdown()}
               </div>
+
+              {renderSortIndicator()}
 
               {/* Table View */}
               <div style={{ 
@@ -333,12 +507,12 @@ export default function CreditManagerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {creditData?.pending_orders.map((order, idx) => (
+                    {filteredOrders.map((order, idx) => (
                       <tr 
                         key={order.order_id}
                         onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
                         style={{ 
-                          borderBottom: idx < creditData.pending_orders.length - 1 ? "1px solid #e0e0e0" : "none",
+                          borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
                           cursor: "pointer"
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
@@ -367,7 +541,7 @@ export default function CreditManagerDashboard() {
             </>
           )}
 
-          {/* PAYMENT REVIEW LIST */}
+          {/* PAYMENT REVIEW LIST - PENDING */}
           {activeTab === "payment" && (
             <>
               {/* Tabs */}
@@ -405,7 +579,7 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
+              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -421,29 +595,17 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
-                <button
-                  style={{
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                    border: "1px solid #262626",
-                    borderRadius: "8px",
-                    backgroundColor: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
-                  }}
-                >
-                  ↕ Sort By
-                </button>
+                {renderSortDropdown()}
               </div>
+
+              {renderSortIndicator()}
 
               {/* Payments List */}
               <div className="um-list-container">
-                {payments.length === 0 && (
+                {filteredPayments.length === 0 && (
                   <p style={{ color: "#888", padding: "1rem" }}>No pending payments.</p>
                 )}
-                {payments.map((p) => (
+                {filteredPayments.map((p) => (
                   <div
                     key={p.payment_id}
                     className="um-request-item"
@@ -499,7 +661,7 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
+              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -515,22 +677,10 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
-                <button
-                  style={{
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                    border: "1px solid #262626",
-                    borderRadius: "8px",
-                    backgroundColor: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
-                  }}
-                >
-                  ↕ Sort By
-                </button>
+                {renderSortDropdown()}
               </div>
+
+              {renderSortIndicator()}
 
               {/* Table View */}
               <div style={{ 
@@ -549,12 +699,12 @@ export default function CreditManagerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {payments.map((p, idx) => (
+                    {filteredPayments.map((p, idx) => (
                       <tr 
                         key={p.payment_id}
                         onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
                         style={{ 
-                          borderBottom: idx < payments.length - 1 ? "1px solid #e0e0e0" : "none",
+                          borderBottom: idx < filteredPayments.length - 1 ? "1px solid #e0e0e0" : "none",
                           cursor: "pointer"
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
@@ -580,7 +730,7 @@ export default function CreditManagerDashboard() {
               </p>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
+              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -598,22 +748,10 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
-                <button
-                  style={{
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                    border: "1px solid #262626",
-                    borderRadius: "8px",
-                    backgroundColor: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
-                  }}
-                >
-                  ↕ Sort By
-                </button>
+                {renderSortDropdown()}
               </div>
+
+              {renderSortIndicator()}
 
               {/* Customer Cards */}
               <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
