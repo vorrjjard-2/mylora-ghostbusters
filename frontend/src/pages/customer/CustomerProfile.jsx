@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import logo from "../../assets/mylora-logo.png";
+import "./CustomerProfile.css";
+
 
 export default function CustomerProfile() {
   const navigate = useNavigate();
@@ -49,7 +52,7 @@ export default function CustomerProfile() {
         console.error(err);
         alert("Failed to load profile data");
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false)); 
   }, []);
 
   const handlePasswordChange = (e) => {
@@ -127,59 +130,63 @@ export default function CustomerProfile() {
   };
 
   if (loading) {
-    return <div style={styles.container}>Loading...</div>;
+    return <div className="profile-container">Loading...</div>;
   }
 
   if (!customerData) {
-    return <div style={styles.container}>Unable to load profile</div>;
+    return <div className="profile-container">Unable to load profile</div>;
   }
 
-  return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
+return (
+    <div className="profile-container">
+      {/* HEADER */}
+      <header className="profile-header-section">
+        <div className="profile-brand-group">
+          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <span className="profile-system-title">Web Credit System</span>
         </div>
-        <button style={styles.backBtn} onClick={() => navigate("/customer/dashboard")}>
-          Back
-        </button>
-      </div>
+        <div className="profile-header-actions">
+          <button className="profile-back-btn" onClick={() => navigate("/customer/dashboard")}>
+            Back
+          </button> 
+        </div>
+      </header>
 
-      <h1 style={styles.title}>Your profile</h1>
+      <main className="profile-content">
+
+      <h1 className="profile-title">Your profile</h1>
 
       {/* Password Section */}
-      <div style={styles.section}>
-        <h2 style={styles.sectionTitle}>Password</h2>
+      <div className="profile-section">
+        <h2 className="profile-section-title">Password</h2>
         
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Current Password</label>
+        <div className="profile-form-group">
+          <label className="profile-label">Current Password</label>
           <input
             type="password"
             name="current_password"
             value={passwordForm.current_password}
             onChange={handlePasswordChange}
-            style={styles.input}
+            className="profile-input"
             placeholder="••••••••"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>New Password</label>
+        <div className="profile-form-group">
+          <label className="profile-label">New Password</label>
           <input
             type="password"
             name="new_password"
             value={passwordForm.new_password}
             onChange={handlePasswordChange}
-            style={styles.input}
+            className="profile-input"
             placeholder="Enter new password"
           />
         </div>
 
-        <div style={styles.buttonRow}>
+        <div className="profile-button-row">
           <button
-            style={styles.saveBtn}
+            className="profile-save-password-btn"
             onClick={handleSavePassword}
             disabled={saving}
           >
@@ -189,108 +196,108 @@ export default function CustomerProfile() {
       </div>
 
       {/* Customer Information Section - Read Only */}
-      <div style={styles.section}>
-        <h2 style={styles.sectionTitle}>Customer Information</h2>
+      <div className="profile-section">
+        <h2 className="profile-section-title">Customer Information</h2>
         
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Name</label>
+        <div className="profile-form-group">
+          <label className="profile-label">Name</label>
           <input
             type="text"
             value={customerData.name}
             readOnly
-            style={styles.inputReadOnly}
+            className="profile-input-readonly"
           />
         </div>
 
-        <div style={styles.formRow}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Phone Number</label>
+        <div className="profile-form-row">
+          <div className="profile-form-group">
+            <label className="profile-label">Phone Number</label>
             <input
               type="text"
               value={customerData.phone}
               readOnly
-              style={styles.inputReadOnly}
+              className="profile-input-readonly"
             />
           </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Email</label>
+          <div className="profile-form-group">
+            <label className="profile-label">Email</label>
             <input
               type="email"
               value={customerData.email}
               readOnly
-              style={styles.inputReadOnly}
+              className="profile-input-readonly"
             />
           </div>
         </div>
       </div>
 
       {/* Address Details Section - Editable */}
-      <div style={styles.section}>
-        <h2 style={styles.sectionTitle}>Address Details</h2>
+      <div className="profile-section">
+        <h2 className="profile-section-title">Address Details</h2>
         
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Address 1*</label>
+        <div className="profile-form-group">
+          <label className="profile-label">Address 1*</label>
           <input
             type="text"
             name="address1"
             value={addressForm.address1}
             onChange={handleAddressChange}
-            style={styles.input}
+            className="profile-input"
             placeholder="UNIT 123, ABC STREET"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Address 2</label>
+        <div className="profile-form-group">
+          <label className="profile-label">Address 2</label>
           <input
             type="text"
             name="address2"
             value={addressForm.address2}
             onChange={handleAddressChange}
-            style={styles.input}
+            className="profile-input"
             placeholder="LANDMARK STATUE"
           />
         </div>
 
-        <div style={styles.formRow}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Barangay*</label>
+        <div className="profile-form-row">
+          <div className="profile-form-group">
+            <label className="profile-label">Barangay*</label>
             <input
               type="text"
               name="barangay"
               value={addressForm.barangay}
               onChange={handleAddressChange}
-              style={styles.input}
+              className="profile-input"
               placeholder="BRGY SAN JOSE"
             />
           </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>City*</label>
+          <div className="profile-form-group">
+            <label className="profile-label">City*</label>
             <input
               type="text"
               name="city"
               value={addressForm.city}
               onChange={handleAddressChange}
-              style={styles.input}
+              className="profile-input"
               placeholder="CEBU CITY"
             />
           </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Zip Code*</label>
+          <div className="profile-form-group">
+            <label className="profile-label">Zip Code*</label>
             <input
               type="text"
               name="zipcode"
               value={addressForm.zipcode}
               onChange={handleAddressChange}
-              style={styles.input}
+              className="profile-input"
               placeholder="9876"
             />
           </div>
         </div>
 
-        <div style={styles.buttonRow}>
+        <div className="profile-button-row">
           <button
-            style={styles.saveBtn}
+            className="profile-save-btn"
             onClick={handleSaveAddress}
             disabled={saving}
           >
@@ -298,106 +305,7 @@ export default function CustomerProfile() {
           </button>
         </div>
       </div>
+      </main>
     </div>
   );
-}
-
-const styles = {
-  container: {
-    padding: "2rem",
-    maxWidth: "900px",
-    margin: "0 auto",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "2rem",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  logoIcon: {
-    fontSize: "1.5rem",
-  },
-  logoText: {
-    fontSize: "1.25rem",
-    fontWeight: 500,
-  },
-  backBtn: {
-    padding: "0.5rem 1.5rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-    fontWeight: 600,
-  },
-  title: {
-    fontSize: "2.5rem",
-    fontWeight: 700,
-    marginBottom: "2rem",
-  },
-  section: {
-    marginBottom: "2.5rem",
-    paddingBottom: "2rem",
-    borderBottom: "1px solid #e0e0e0",
-  },
-  sectionTitle: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    marginBottom: "1.5rem",
-  },
-  formGroup: {
-    marginBottom: "1.5rem",
-    flex: 1,
-  },
-  formRow: {
-    display: "flex",
-    gap: "1rem",
-    alignItems: "flex-start",
-  },
-  label: {
-    display: "block",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-    fontSize: "0.9rem",
-  },
-  input: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-  },
-  inputReadOnly: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #e0e0e0",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    background: "#f5f5f5",
-    color: "#666",
-  },
-  buttonRow: {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: "1.5rem",
-  },
-  saveBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
 };

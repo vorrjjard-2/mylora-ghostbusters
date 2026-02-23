@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
 import logo from "../../assets/mylora-logo.png";
+import fileIcon from "../../assets/file.png";
 import "./PaymentRequest.css";
 
 export default function PaymentRequest() {

@@ -1,0 +1,142 @@
+.profile-container {
+    background-color: #FCFCFC;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    font-family: 'Arimo', sans-serif;
+}
+
+.profile-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    margin-bottom: 2rem;
+}
+
+.profile-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-logo-img {
+    height: 50px;
+    width: auto;
+}
+
+.profile-system-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.64px;
+    color: #395A31;
+}
+
+.profile-back-btn {
+    background: #183112;
+    border: 1.3px solid #183112; 
+    color: white;
+    padding: 6px 30px; 
+    height: 41px;
+    width: 186px;
+    border-radius: 10px; 
+    font-weight: 600;
+    font-size: 20px;
+    cursor: pointer;   
+}
+
+.profile-content {
+    display: block;
+    max-width: 90%;
+    margin: -20px auto;
+    padding: 0px 40px;
+}
+
+.profile-title {
+    font-size: 64px;
+    font-weight: 700;
+    padding-bottom: 40px;
+    color: #000000;
+}
+
+.profile-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+}
+
+.profile-section-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  margin-top: -40px;
+}
+
+.profile-form-group {
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.profile-form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.profile-label {
+  display: block;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 20px;
+  color: #183112;
+  margin-top: -10px;
+  margin-bottom: 5px;
+}
+
+.profile-input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.profile-input-readonly {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background: #f5f5f5;
+  color: #666;
+}
+
+.profile-button-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.profile-save-password-btn {
+  padding: 12px 120px;
+  background: #D1D5D0;
+  color: #262626;
+  border: 1px solid #183112;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.profile-save-btn {
+  padding: 12px 80px;
+  background: #183112;
+  color: #f2f2f2;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+
