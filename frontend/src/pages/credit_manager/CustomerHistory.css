@@ -1,0 +1,169 @@
+.ch-container {
+    background-color: #FCFCFC;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    font-family: 'Arimo', sans-serif;
+}
+
+.ch-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    margin-bottom: 2rem;
+}
+
+.ch-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ch-logo-img {
+    height: 50px;
+    width: auto;
+}
+
+.ch-system-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.64px;
+    color: #395A31;
+}
+
+.ch-back-btn {
+  padding: 8px 70px;
+  background: #1f3d1a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ch-content {
+    display: block;
+    max-width: 90%;
+    margin: -20px auto;
+    padding: 0px 40px;
+}
+
+.ch-title {
+    font-size: 64px;
+    font-weight: 700;
+    margin-top: 0px;
+    color: #000000;
+}
+
+.ch-customer-name {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.ch-summary-card {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 40px;
+}
+
+.ch-summary-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+}
+
+.ch-summary-item {
+    text-align: center;
+}
+
+.ch-summary-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.ch-summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f3d1a;
+}
+
+.ch-summary-value-red {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #b03a2e;
+}
+
+.ch-section {
+    margin-bottom: 2rem;
+}
+
+.ch-section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.ch-empty {
+    text-align: center;
+    color: #888;
+    padding: 3rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.ch-table-wrapper {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ch-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ch-th {
+  background: #f5f5f5;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+  font-weight: 600;
+  font-size: 18px;
+  color: #555;
+}
+
+.ch-td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #262626;
+}
+
+.ch-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.ch-status-verified {
+    background: #d4edda;
+    color: #155724;
+}
+
+.ch-status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.ch-status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
