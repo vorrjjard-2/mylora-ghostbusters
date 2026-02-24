@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import logo from "../../assets/mylora-logo.png";
+import fileIcon from "../../assets/file.png";
+import "./UpdateBalance.css";
 
 export default function UpdateBalance() {
   const navigate = useNavigate();
@@ -10,7 +13,7 @@ export default function UpdateBalance() {
   const [processing, setProcessing] = useState(false);
 
   // Modal states
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(true); 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -41,7 +44,7 @@ export default function UpdateBalance() {
         alert("Failed to load customer details");
         navigate("/credit-manager/adjustment");
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false)); 
   }, [customerId, navigate]);
 
   const handleFormChange = (e) => {
@@ -110,150 +113,173 @@ export default function UpdateBalance() {
   };
 
   if (loading) {
-    return <div style={styles.container}>Loading...</div>;
+    return <div className="ub-container">Loading...</div>;
   }
 
   if (!customer) {
-    return <div style={styles.container}>Customer not found</div>;
+    return <div className="ub-container">Customer not found</div>;
   }
 
-  return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
+return (
+    <div className="ub-container">
+      {/* HEADER */}
+      <header className="ub-header-section">
+        <div className="ub-brand-group">
+          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <span className="ub-system-title">Web Credit System</span>
         </div>
-        <button style={styles.logoutBtn} onClick={() => navigate("/credit-manager/dashboard")}>
+        <button className="ub-logout-btn" onClick={() => navigate("/login")}>
           Logout
         </button>
-      </div>
+      </header>
 
-      <h1 style={styles.customerTitle}>{customer.name}</h1>
+      <main className="ub-content">
+
+      <h1 className="ub-customer-title">{customer.name}</h1>
 
       {/* Credit Balance Section */}
-      <div style={styles.section}>
-        <h3 style={styles.sectionTitle}>Credit Balance</h3>
-        <div style={styles.balanceRow}>
+      <section className="ub-section">
+        <h3 className="ub-section-title">Credit Balance</h3>
+        <div className="ub-balance-row">
           <span>Available Credit:</span>
-          <span style={styles.balanceValue}>
+          <span className="ub-balance-value">
             ₱ {parseFloat(customer.available_credit).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
           </span>
         </div>
-        <div style={styles.balanceRow}>
+        <div className="ub-balance-row">
           <span>Credit Limit:</span>
           <span>
             ₱ {parseFloat(customer.credit_limit).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
           </span>
         </div>
-      </div>
+      </section>
 
       {/* Outstanding Balance */}
-      <div style={styles.outstandingSection}>
-        <div style={styles.outstandingRow}>
-          <span style={styles.outstandingLabel}>Outstanding Balance</span>
-          <span style={styles.outstandingAmount}>
+      <div className="ub-outstanding-section">
+        <div className="ub-outstanding-row">
+          <span className="ub-outstanding-label">Outstanding Balance</span>
+          <span className="ub-outstanding-amount">
             ₱ {parseFloat(customer.outstanding_balance).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
           </span>
         </div>
       </div>
 
+
       {/* Payment Form */}
-      <div style={styles.section}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Invoice Number</label>
+      <form className="ub-section" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <div className="ub-form-row">
+        <div className="ub-form-group">
+          <label className="ub-label">Invoice Number</label>
           <input
             type="text"
             name="invoice_number"
             value={paymentForm.invoice_number}
             onChange={handleFormChange}
-            style={styles.input}
+            className="ub-input"
             placeholder="Enter invoice number"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Balance Paid</label>
+        <div className="ub-form-group">
+          <label className="ub-label">Balance Paid</label>
           <input
             type="number"
             name="balance_paid"
             value={paymentForm.balance_paid}
             onChange={handleFormChange}
-            style={styles.input}
+            className="ub-input"
             placeholder="₱ 0.00"
             step="0.01"
           />
         </div>
+        </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Date of Payment</label>
+        <div className="ub-form-group">
+          <label className="ub-label">Date of Payment</label>
           <input
             type="date"
             name="date_of_payment"
             value={paymentForm.date_of_payment}
             onChange={handleFormChange}
-            style={styles.input}
+            className="ub-input"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Proof of Payment</label>
+      {/*}  <div className="ub-form-group">
+          <label className="ub-label">Proof of Payment</label>
           <input
             type="file"
             onChange={handleFileChange}
-            style={styles.fileInput}
+            className="ub-file-input"
             accept="image/*,.pdf"
           />
           {paymentForm.proof_of_payment && (
-            <div style={styles.fileName}>{paymentForm.proof_of_payment.name}</div>
+            <div className="ub-file-name">{paymentForm.proof_of_payment.name}</div>
+          )}
+        </div> */}
+
+        <div className="ub-form-group full-width">
+          <label className="ub-label">Proof of Payment</label>
+          <p className="ub-id-hint-text">Please make sure that uploaded image is clear.</p>
+          
+          {paymentForm.proof_of_payment ? (
+            <div className="ub-file-list-container">
+              <div className="ub-file-display-badge">
+                <img src={fileIcon} alt="File Icon" className="ub-custom-file-icon" />                  
+                <span className="ub-file-name">{paymentForm.proof_of_payment.name}</span>
+                <button 
+                  type="button" 
+                  className="ub-remove-file" 
+                  onClick={() => setPaymentForm(prev => ({ ...prev, proof_of_payment: null }))}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label className="ub-upload-zone">
+              <div className="ub-upload-content">
+                <p className="ub-upload-text">↑ Upload file here.</p>
+                <small className="ub-upload-hint">Supported formats are .jpg, .jpeg, and .png. Max file size is 10mb</small>
+              </div>
+              <input
+                type="file"
+                accept=".jpg, .jpeg, .png"
+                onChange={handleFileChange}
+                className="ub-hidden-file-input"
+              />
+            </label>
           )}
         </div>
 
-        <div style={styles.buttonRow}>
-          <button 
-            style={styles.cancelBtn} 
-            onClick={() => navigate("/credit-manager/dashboard")}
-          >
+
+
+        <div className="ub-button-row">
+          <button type="button" className="ub-cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
             Cancel
           </button>
-          <button style={styles.submitBtn} onClick={handleSubmit}>
-            Save
+          <button type="submit" className="ub-submit-btn">
+            Update Balance
           </button>
         </div>
-      </div>
+      </form>
 
       {/* Password Modal */}
       {showPasswordModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.modalTitle}>Please enter user password to proceed.</h3>
+        <div className="ub-modal-overlay">
+          <div className="ub-modal">
+            <h3 className="ub-modal-title">Please enter user password to proceed.</h3>
             <input
               type="password"
+              className="ub-password-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
-              style={styles.passwordInput}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleConfirmUpdate();
-              }}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirmUpdate()}
             />
-            <div style={styles.modalButtonRow}>
-              <button
-                style={styles.modalCancelBtn}
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setPassword("");
-                }}
-                disabled={processing}
-              >
-                Cancel
-              </button>
-              <button
-                style={styles.modalConfirmBtn}
-                onClick={handleConfirmUpdate}
-                disabled={processing}
-              >
+            <div className="ub-modal-button-row">
+              <button className="ub-modal-cancel-btn" onClick={() => setShowPasswordModal(false)}>Cancel</button>
+              <button className="ub-modal-confirm-btn" onClick={handleConfirmUpdate} disabled={processing}>
                 {processing ? "Processing..." : "Update Balance"}
               </button>
             </div>
@@ -263,224 +289,16 @@ export default function UpdateBalance() {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.successTitle}>Balance payment successfully updated!</h3>
-            <button
-              style={styles.returnBtn}
-              onClick={() => navigate("/credit-manager/dashboard")}
-            >
+        <div className="ub-modal-overlay">
+          <div className="ub-modal">
+            <h3 className="ub-success-title">Balance payment successfully updated!</h3>
+            <button className="ub-return-btn" onClick={() => navigate("/credit-manager/dashboard")}>
               Return to Credit Adjustment
             </button>
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    padding: "2rem",
-    maxWidth: "800px",
-    margin: "0 auto",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "2rem",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  logoIcon: {
-    fontSize: "1.5rem",
-  },
-  logoText: {
-    fontSize: "1.25rem",
-    fontWeight: 500,
-  },
-  logoutBtn: {
-    padding: "0.5rem 1.25rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-  },
-  customerTitle: {
-    fontSize: "2.5rem",
-    fontWeight: 700,
-    marginBottom: "2rem",
-  },
-  section: {
-    marginBottom: "2rem",
-  },
-  sectionTitle: {
-    fontSize: "1.1rem",
-    fontWeight: 600,
-    marginBottom: "1rem",
-  },
-  balanceRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "0.5rem 0",
-    fontSize: "0.95rem",
-  },
-  balanceValue: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-  },
-  outstandingSection: {
-    borderTop: "2px solid #000",
-    borderBottom: "2px solid #000",
-    padding: "1rem 0",
-    marginBottom: "2rem",
-  },
-  outstandingRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  outstandingLabel: {
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  outstandingAmount: {
-    fontSize: "1.75rem",
-    fontWeight: 700,
-    color: "#b03a2e",
-  },
-  formGroup: {
-    marginBottom: "1.5rem",
-  },
-  label: {
-    display: "block",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-    fontSize: "0.9rem",
-  },
-  input: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-  },
-  fileInput: {
-    width: "100%",
-    padding: "0.5rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "0.95rem",
-  },
-  fileName: {
-    marginTop: "0.5rem",
-    fontSize: "0.85rem",
-    color: "#666",
-  },
-  buttonRow: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "flex-end",
-    marginTop: "2rem",
-  },
-  cancelBtn: {
-    padding: "0.75rem 2rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-  },
-  submitBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  modal: {
-    background: "#fff",
-    borderRadius: "8px",
-    maxWidth: "500px",
-    width: "90%",
-    padding: "2rem",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  },
-  modalTitle: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-    marginBottom: "1.5rem",
-    textAlign: "center",
-  },
-  passwordInput: {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    marginBottom: "1.5rem",
-  },
-  modalButtonRow: {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "flex-end",
-  },
-  modalCancelBtn: {
-    padding: "0.75rem 2rem",
-    background: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-  },
-  modalConfirmBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-  },
-  successTitle: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    marginBottom: "2rem",
-    textAlign: "center",
-  },
-  returnBtn: {
-    padding: "0.75rem 2rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: 600,
-    width: "100%",
-  },
-};
