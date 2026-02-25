@@ -146,18 +146,18 @@ export default function ApplyStep2() {
            </div>
            <div className="input-group">
                <label>Last Name<span className="required">*</span></label>
-                <input 
-                      type="text" 
-                      value={lastName}
-                      onChange={e => {
-                        const value = e.target.value.toUpperCase();
-                        // allows letters (a-z) and spaces, but blocks numbers/symbols
-                        if (value === '' || /^[a-zA-Z\s]+$/.test(value)) {
-                          setLastName(value);
-                        }
-                      }} 
-                      required 
-                    />
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={e => {
+                    const value = e.target.value.toUpperCase();
+                    if (value === '' || /^[A-Z\s]+$/.test(value)) {
+                      setLastName(value);
+                    }
+                  }}
+                  style={{ textTransform: "uppercase" }}
+                  required
+                />
            </div>
            <div className="input-group full-width">
                <label>Phone Number<span className="required">*</span></label>
