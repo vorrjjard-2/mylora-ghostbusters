@@ -21,6 +21,7 @@ export default function CreditManagerDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(null);
+  const [dashTab, setDashTab] = useState("credit");
   
   // Sorting states
   const [sortBy, setSortBy] = useState("date");
@@ -298,13 +299,45 @@ export default function CreditManagerDashboard() {
                 </div>
               </div>
 
-              {/* Two-column layout for dashboard */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px", marginTop: "30px" }}>
-                {/* Left Column - Credit Approval */}
-                <div>
-                  <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "20px", borderBottom: "2px solid #262626", paddingBottom: "10px" }}>
+              {/* Tabbed full-width layout for dashboard */}
+              <div style={{ marginTop: "30px" }}>
+                <div style={{ display: "flex", gap: "30px", borderBottom: "2px solid #e0e0e0", marginBottom: "20px" }}>
+                  <button
+                    onClick={() => setDashTab("credit")}
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: dashTab === "credit" ? "#1f3d1a" : "#888",
+                      borderBottom: dashTab === "credit" ? "3px solid #1f3d1a" : "none",
+                      marginBottom: "-2px",
+                      paddingBottom: "10px",
+                      background: "none",
+                      border: "none",
+                      borderBottom: dashTab === "credit" ? "3px solid #1f3d1a" : "none",
+                      cursor: "pointer"
+                    }}
+                  >
                     Pending Credit Approval
-                  </h2>
+                  </button>
+                  <button
+                    onClick={() => setDashTab("payment")}
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: dashTab === "payment" ? "#1f3d1a" : "#888",
+                      borderBottom: dashTab === "payment" ? "3px solid #1f3d1a" : "none",
+                      marginBottom: "-2px",
+                      paddingBottom: "10px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Pending Payment Review
+                  </button>
+                </div>
+
+                {dashTab === "credit" && (
                   <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                     {creditData?.pending_orders.length === 0 && (
                       <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
@@ -324,13 +357,9 @@ export default function CreditManagerDashboard() {
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
 
-                {/* Right Column - Payment Review */}
-                <div>
-                  <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "20px", borderBottom: "2px solid #262626", paddingBottom: "10px" }}>
-                    Pending Payment Review
-                  </h2>
+                {dashTab === "payment" && (
                   <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                     {payments.length === 0 && (
                       <p style={{ color: "#888", padding: "1rem" }}>No pending payments.</p>
@@ -350,7 +379,7 @@ export default function CreditManagerDashboard() {
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
               </div>
             </>
           )}
