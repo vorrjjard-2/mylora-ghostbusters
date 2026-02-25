@@ -218,7 +218,7 @@ return (
       </div>
 
       {error && (
-        <p style={{ color: "#b03a2e", fontSize: "14px", marginTop: "-8px", marginBottom: "8px" }}>{error}</p>
+        <p className="error-message">{error}</p>
       )}
 
       <button type="submit" className="btn-submit" disabled={submitting}>

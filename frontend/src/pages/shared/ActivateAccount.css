@@ -133,8 +133,12 @@
 }
 
 .activate-page-wrapper .error-message {
- color: red;
- font-weight: bold;
+  color: #b03a2e;
+  font-size: 14px;
+  font-family: 'Arimo', sans-serif;
+  margin-left: -100px;
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 
 
