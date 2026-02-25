@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ApplicationSubmittedModal from "../../../components/ApplicationSubmittedModal";
 import logo from "../../../assets/mylora-logo.png";
 import fileIcon from "../../../assets/file.png";
@@ -11,10 +11,50 @@ export default function ApplyStep2() {
 
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
-  const [barangay, setBarangay] = useState("");
+  const [province, setProvince] = useState("");
+  const [cityCode, setCityCode] = useState("");
   const [city, setCity] = useState("");
+  const [barangay, setBarangay] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [branch, setBranch] = useState("");
+
+  const [provinces, setProvinces] = useState([]);
+  const [citiesMunicipalities, setCitiesMunicipalities] = useState([]);
+  const [barangays, setBarangays] = useState([]);
+
+  useEffect(() => {
+    fetch("https://psgc.gitlab.io/api/provinces/")
+      .then(r => r.json())
+      .then(data => setProvinces(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (!province) {
+      setCitiesMunicipalities([]);
+      setCityCode("");
+      setCity("");
+      setBarangays([]);
+      setBarangay("");
+      return;
+    }
+    fetch(`https://psgc.gitlab.io/api/provinces/${province}/cities-municipalities/`)
+      .then(r => r.json())
+      .then(data => setCitiesMunicipalities(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, [province]);
+
+  useEffect(() => {
+    if (!cityCode) {
+      setBarangays([]);
+      setBarangay("");
+      return;
+    }
+    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${cityCode}/barangays/`)
+      .then(r => r.json())
+      .then(data => setBarangays(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, [cityCode]);
 
   const [creditAmount, setCreditAmount] = useState("");
   const [creditTerm, setCreditTerm] = useState("");
@@ -216,41 +256,63 @@ export default function ApplyStep2() {
               </div>
            <div className="input-grid three-col">
              <div className="input-group">
-               <label>Barangay<span className="required">*</span></label>
-                <input 
-                    type="text" 
-                    value={barangay}
-                    onChange={e => setBarangay(e.target.value.toUpperCase())} 
-                    required
-                  />                
+               <label>Province<span className="required">*</span></label>
+               <select
+                 value={province}
+                 onChange={e => setProvince(e.target.value)}
+                 required
+               >
+                 <option value="">Select province</option>
+                 {provinces.map(p => (
+                   <option key={p.code} value={p.code}>{p.name}</option>
+                 ))}
+               </select>
              </div>
              <div className="input-group">
-               <label>City<span className="required">*</span></label>
-                <input 
-                    type="text" 
-                    value={city}
-                    onChange={e => setCity(e.target.value.toUpperCase())} 
-                    required
-                  />                 
-                </div>
+               <label>City / Municipality<span className="required">*</span></label>
+               <select
+                 value={cityCode}
+                 onChange={e => {
+                   const selected = citiesMunicipalities.find(c => c.code === e.target.value);
+                   setCityCode(e.target.value);
+                   setCity(selected ? selected.name : "");
+                 }}
+                 disabled={!province}
+                 required
+               >
+                 <option value="">Select city / municipality</option>
+                 {citiesMunicipalities.map(c => (
+                   <option key={c.code} value={c.code}>{c.name}</option>
+                 ))}
+               </select>
+             </div>
              <div className="input-group">
-               <label>Zip Code<span className="required">*</span></label>
-                <input 
-                      type="text" 
-                      placeholder="XXXX"
-                      value={zipCode} 
-                      onChange={e => {
-                        // Remove anything that isn't a number
-                        const value = e.target.value.replace(/\D/g, "");
-                        
-                        // Only update state if it's 4 digits or less
-                        if (value.length <= 4) {
-                          setZipCode(value);
-                        }
-                      }} 
-                      required 
-                    />             
-                </div>
+               <label>Barangay<span className="required">*</span></label>
+               <select
+                 value={barangay}
+                 onChange={e => setBarangay(e.target.value)}
+                 disabled={!cityCode}
+                 required
+               >
+                 <option value="">Select barangay</option>
+                 {barangays.map(b => (
+                   <option key={b.code} value={b.name}>{b.name}</option>
+                 ))}
+               </select>
+             </div>
+           </div>
+           <div className="input-group">
+             <label>Zip Code<span className="required">*</span></label>
+             <input
+               type="text"
+               placeholder="XXXX"
+               value={zipCode}
+               onChange={e => {
+                 const value = e.target.value.replace(/\D/g, "");
+                 if (value.length <= 4) setZipCode(value);
+               }}
+               required
+             />
            </div>
            <div className="input-group">
              <label>Default Store Branch<span className="required">*</span></label>
