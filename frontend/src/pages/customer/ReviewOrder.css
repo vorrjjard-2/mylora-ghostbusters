@@ -247,6 +247,55 @@
     margin-bottom: 80px; 
 }
 
+/* Credit Warning Modal */
+.review-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.review-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px 48px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.review-modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #911818;
+    margin-bottom: 16px;
+}
+
+.review-modal-body {
+    font-size: 16px;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 32px;
+}
+
+.review-modal-accept-btn {
+    background: #183112;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
 .review-back-link {
     background: none;
     border: none;

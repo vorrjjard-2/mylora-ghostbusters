@@ -9,6 +9,7 @@ export default function ReviewOrder() {
   const [customerInfo, setCustomerInfo] = useState(null);
   const [deliveryDetails, setDeliveryDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
 
   useEffect(() => {
     // Load order items from localStorage
@@ -34,19 +35,16 @@ export default function ReviewOrder() {
       .then((res) => res.json())
       .then((data) => {
         setCustomerInfo(data);
+        const items = JSON.parse(localStorage.getItem("order_items") || "[]");
+        const total = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+        const available = parseFloat(data.credit.available_credit);
+        if (total > available) setShowCreditModal(true);
       })
-      .catch((err) => console.error(err)); 
+      .catch((err) => console.error(err));
   }, [navigate]);
 
   const calculateTotal = () => {
     return orderItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
-  };
-
-  const exceedsCredit = () => {
-    if (!customerInfo) return false;
-    const total = calculateTotal();
-    const available = parseFloat(customerInfo.credit.available_credit);
-    return total > available;
   };
 
   const handleSubmit = async () => {
@@ -137,11 +135,21 @@ return (
     </div>
 
     <div className="review-content">
-      {/* Credit Warning */}
-      {exceedsCredit() && (
-        <div className="review-warning-box">
-          <strong>⚠️ Notice:</strong> This order exceeds your available credit limit. 
-          Your order will be submitted for override approval by management.
+      {/* Credit Warning Modal */}
+      {showCreditModal && (
+        <div className="review-modal-overlay">
+          <div className="review-modal">
+            <h2 className="review-modal-title">Credit Limit Exceeded</h2>
+            <p className="review-modal-body">
+              This order exceeds your available credit limit. It will be submitted for override approval by management before processing.
+            </p>
+            <button
+              className="review-modal-accept-btn"
+              onClick={() => setShowCreditModal(false)}
+            >
+              I understand, continue
+            </button>
+          </div>
         </div>
       )}
 

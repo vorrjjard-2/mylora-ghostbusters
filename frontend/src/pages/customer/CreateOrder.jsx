@@ -64,7 +64,7 @@ export default function CreateOrder() {
     } else {
       setSelectedItems(
         selectedItems.map((item) =>
-          item.product_id === productId ? { ...item, quantity: parseFloat(newQuantity) } : item
+          item.product_id === productId ? { ...item, quantity: parseInt(newQuantity, 10) } : item
         )
       );
     }
@@ -183,7 +183,7 @@ export default function CreateOrder() {
                               handleQuantityChange(item.product_id, e.target.value)
                             }
                             min="0"
-                            step="0.01"
+                            step="1"
                             className="order-quantity-input"
                           />
                         </td>
