@@ -162,7 +162,7 @@ export default function Login() {
              </button>
              
              <Link to="/apply/step-1" className="enroll-link">
-               Enrol for a credit account
+               Enroll for a credit account
              </Link>
            </div>
          </form>

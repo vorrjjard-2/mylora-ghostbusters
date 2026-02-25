@@ -162,7 +162,7 @@ export default function ApplyStep2() {
        </div>
      </header>
      <div className="apply-container">
-       <h1 className="main-title">Enrol for a credit line.</h1>
+       <h1 className="main-title">Enroll for a credit line.</h1>
        <form onSubmit={handleSubmit} className="enroll-form">
 
          {/* Section 01 */}
