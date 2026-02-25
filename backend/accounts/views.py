@@ -101,12 +101,14 @@ def customer_dashboard(request):
                 'status': order.order_status
             })
         
+        available_credit = credit_account.credit_limit - credit_account.outstanding_bal
+
         return Response({
             'user': {
                 'name': request.user.get_full_name() or request.user.username,
             },
             'credit': {
-                'available_credit': str(credit_account.available_credit),
+                'available_credit': str(available_credit),
                 'credit_limit': str(credit_account.credit_limit),
                 'outstanding_balance': str(credit_account.outstanding_bal)
             },
