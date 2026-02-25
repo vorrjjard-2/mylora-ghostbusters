@@ -160,7 +160,7 @@ export default function Login() {
              <button type="submit" className="btn-submit" disabled={loading}>
                {loading ? "Logging in..." : "Login"}
              </button>
-             
+
              <Link to="/apply/step-1" className="enroll-link">
                Enroll for a credit account
              </Link>
