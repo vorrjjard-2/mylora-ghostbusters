@@ -64,7 +64,7 @@ export default function ProcessorOrderView() {
 
     <main className="view-content">
 
-      <h1 className="view-title">ORDER ID XX{order.order_id}</h1>
+      <h1 className="view-title">ORDER ID {order.order_id}</h1>
       <p className="view-date-submitted">
         <span className="meta-label">DATE SUBMITTED:</span> 
         <span className="meta-value">{formatDate(order.date_submitted)}</span>

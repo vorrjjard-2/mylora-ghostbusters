@@ -74,7 +74,7 @@ export default function UMCustomerHistory() {
               <tbody>
                 {orders.map((order) => (
                   <tr key={order.order_id}>
-                    <td style={styles.td}>XX{order.order_id}</td>
+                    <td style={styles.td}>{order.order_id}</td>
                     <td style={styles.td}>{order.date_ordered}</td>
                     <td style={styles.td}>
                       ₱{" "}

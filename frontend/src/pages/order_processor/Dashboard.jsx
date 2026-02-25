@@ -260,7 +260,7 @@ export default function OrderProcessorDashboard() {
                   onClick={() => navigate(`/order-processor/order/${order.order_id}`)}
                 >
                   <div className="op-dash-item-left">
-                    <div className="op-dash-order-id">ORDER ID XX{order.order_id}</div>
+                    <div className="op-dash-order-id">ORDER ID {order.order_id}</div>
                     <div className="op-dash-order-sub">Ordered by: {order.customer_name}</div>
                   </div>
                   <div className="op-dash-item-right">

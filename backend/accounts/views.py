@@ -94,7 +94,7 @@ def customer_dashboard(request):
         orders_data = []
         for order in recent_orders:
             orders_data.append({
-                'order_id': f"XX{order.order_id}",
+                'order_id': order.order_id,
                 'raw_id': order.order_id,
                 'amount': str(order.total_amount),
                 'date_ordered': order.date_ordered.strftime('%B %d, %Y'),

@@ -201,7 +201,7 @@
 .cd-th {
     background: #F9F9F9;
     padding: 15px 20px;
-    text-align: left;
+    text-align: center;
     font-size: 14px;
     font-weight: 700;
     color: #666;
@@ -211,6 +211,7 @@
     padding: 15px 20px;
     border-top: 1px solid #eee;
     font-size: 16px;
+    text-align: center;
 }
 
 .cd-table-row {

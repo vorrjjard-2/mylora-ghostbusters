@@ -154,7 +154,7 @@ export default function Dashboard() {
                       style={{ cursor: "pointer" }}
                     >
                       <div className="um-request-info">
-                        <div className="um-request-id">ORDER ID XX{override.order_id}</div>
+                        <div className="um-request-id">ORDER ID {override.order_id}</div>
                         <div className="um-request-sub">Customer: {override.customer_name}</div>
                       </div>
                       <div className="um-request-date">Date Submitted: {override.date_submitted}</div>
@@ -173,7 +173,7 @@ export default function Dashboard() {
                       style={{ cursor: "default" }}
                     >
                       <div className="um-request-info">
-                        <div className="um-request-id">ORDER ID XX{order.order_id}</div>
+                        <div className="um-request-id">ORDER ID {order.order_id}</div>
                         <div className="um-request-sub">Customer: {order.customer_name} | Amount: ₱{parseFloat(order.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
                       </div>
                       <div className="um-request-date">

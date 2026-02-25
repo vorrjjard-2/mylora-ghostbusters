@@ -110,7 +110,7 @@ export default function OverrideReview() {
       </div>
 
       {/* Title */}
-      <h1 style={styles.title}>ORDER ID XX{override.order_id}</h1>
+      <h1 style={styles.title}>ORDER ID {override.order_id}</h1>
       <p style={styles.dateSubmitted}>DATE SUBMITTED: {override.date_submitted}</p>
 
       {/* Customer Info */}

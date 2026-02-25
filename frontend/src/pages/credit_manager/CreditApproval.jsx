@@ -141,7 +141,7 @@ export default function CreditApproval() {
 
       <main className="approval-content">
 
-      <h1 className="approval-title">ORDER ID XX{order.order_id}</h1>
+      <h1 className="approval-title">ORDER ID {order.order_id}</h1>
 
       {/* Customer Information */}
       <h2 className="approval-subtitle">Customer Information</h2>
@@ -167,7 +167,7 @@ export default function CreditApproval() {
         <div className="credit-warning-box">
           <strong>WARNING!</strong>
           <br />
-          ORDER XX{order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
+          ORDER {order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
           credit limit. {order.customer_name} has insufficient credit balance.
         </div>
       )}
@@ -260,7 +260,7 @@ export default function CreditApproval() {
           <div className="modal-card">
             <h3 className="modal-title-warning">WARNING!</h3>
               <p className="modal-text-body">
-                <span className="text-bold">ORDER XX{order.order_id}</span> amounting to{" "}
+                <span className="text-bold">ORDER {order.order_id}</span> amounting to{" "}
                 <span className="text-bold">₱ {fmt(order.total_amount)}</span> is over the available 
                 credit limit. {order.customer_name} has{" "}
                 <span className="text-warning-bold">insufficient credit balance</span>.

@@ -55,7 +55,7 @@ return (
 
     {/* order ID + date */}
   <main className="order-content">
-    <h1 className="order-detail-title">ORDER ID XX{order.order_id}</h1>
+    <h1 className="order-detail-title">ORDER ID {order.order_id}</h1>
     <p className="order-detail-date">
       <span className="meta-label">DATE SUBMITTED:</span> 
       <span className="meta-value">{formatDate(order.date_submitted)}</span>

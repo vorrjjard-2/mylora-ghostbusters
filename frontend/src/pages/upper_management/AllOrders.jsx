@@ -318,7 +318,7 @@ export default function AllOrders() {
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
                   >
                     <td style={{ padding: "15px 20px", fontWeight: "700" }}>
-                      XX{order.order_id}
+                      {order.order_id}
                     </td>
                     <td style={{ padding: "15px 20px" }}>
                       ₱ {parseFloat(order.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

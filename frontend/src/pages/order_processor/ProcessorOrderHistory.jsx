@@ -293,7 +293,7 @@ export default function ProcessorOrderHistory() {
                   onClick={() => handleOrderClick(order)}
                 >
                   <div className="poh-item-left">
-                    <div className="poh-order-id">ORDER ID XX{order.order_id}</div>
+                    <div className="poh-order-id">ORDER ID {order.order_id}</div>
                     <div className="poh-order-sub">Ordered by: {order.customer_name}</div>
                   </div>
                   <div className="poh-item-right">

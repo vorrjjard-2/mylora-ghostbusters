@@ -317,7 +317,7 @@ export default function CreditManagerDashboard() {
                         style={{ cursor: "pointer" }}
                       >
                         <div className="um-request-info">
-                          <div className="um-request-id">ORDER ID XX{order.order_id}</div>
+                          <div className="um-request-id">ORDER ID {order.order_id}</div>
                           <div className="um-request-sub">Ordered by: {order.customer_name}</div>
                         </div>
                         <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
@@ -427,7 +427,7 @@ export default function CreditManagerDashboard() {
                     style={{ cursor: "pointer" }}
                   >
                     <div className="um-request-info">
-                      <div className="um-request-id">ORDER ID XX{order.order_id}</div>
+                      <div className="um-request-id">ORDER ID {order.order_id}</div>
                       <div className="um-request-sub">Ordered by: {order.customer_name}</div>
                     </div>
                     <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
@@ -525,7 +525,7 @@ export default function CreditManagerDashboard() {
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
                       >
-                        <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>XX{order.order_id}</td>
+                        <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{order.order_id}</td>
                         <td style={{ padding: "15px", fontSize: "14px" }}>₱ 50,000.00</td>
                         <td style={{ padding: "15px", fontSize: "14px" }}>{order.date_ordered}</td>
                         <td style={{ padding: "15px", fontSize: "14px" }}>{order.customer_name}</td>

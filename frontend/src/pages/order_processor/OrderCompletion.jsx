@@ -114,7 +114,7 @@ export default function OrderCompletion() {
 
       <main className="completion-content">
     <div className="title-action-row">
-      <h1 className="completion-title">ORDER ID XX{order.order_id}</h1>
+      <h1 className="completion-title">ORDER ID {order.order_id}</h1>
       <button className="completion-complete-btn" onClick={handleMarkComplete}>
         <img 
           src={completeIcon} 
