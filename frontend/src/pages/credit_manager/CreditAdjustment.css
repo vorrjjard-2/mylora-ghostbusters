@@ -1,0 +1,238 @@
+.ca-container {
+    background-color: #FCFCFC;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    font-family: 'Arimo', sans-serif;
+}
+
+.ca-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    margin-bottom: 2rem;
+}
+
+.ca-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ca-logo-img {
+    height: 50px;
+    width: auto;
+}
+
+.ca-system-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.64px;
+    color: #395A31;
+}
+
+.ca-logout-btn {
+  padding: 8px 70px;
+  background: #fff;
+  color: #183112;
+  border: 1px solid #183112;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ca-content{
+    display: block;
+    max-width: 90%;
+    margin: -20px auto;
+    padding: 0px 40px;
+}
+
+.ca-body {
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Sidebar */
+.ca-sidebar {
+    width: 160px;
+    min-width: 160px;
+    border-right: 1px solid #e0e0e0;
+    padding-right: 1rem;
+}
+
+.ca-side-item {
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.25rem;
+}
+
+.ca-side-item-active {
+    background: #f0f0f0;
+    font-weight: 600;
+    color: #1f3d1a;
+}
+
+/* Main Content */
+.ca-main {
+    flex: 1;
+    padding: 1px 20px; 
+    background-color: #F2F2F2; 
+    border-radius: 15px;
+    font-family: 'Arimo', sans-serif;}
+
+.ca-greeting {
+    font-size: 64px; 
+    font-weight: 700;
+    color: #262626;
+    margin-bottom: 40px;
+    margin-top: 20px;
+}
+
+.ca-subtitle {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Controls */
+.ca-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ca-search-box {
+    flex: 1;
+    position: relative;
+    max-width: 350px;
+    display: flex;
+    align-items: center;
+}
+
+.ca-search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+}
+
+.ca-search-icon-img {
+    position: absolute;
+    left: 0.75rem;
+    width: 25px;     
+    height: auto;
+    margin-right: 5px;
+    pointer-events: none; 
+    object-fit: contain;
+}
+
+.ca-search-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem 0.6rem 2.25rem;
+    border: 1px solid #183112;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.ca-sort-btn {
+    padding: 0.6rem 1.25rem;
+    background: #fff;
+    border: 1px solid #183112;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Customer Cards */
+.ca-customer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ca-customer-card {
+    border: 1px solid #183112;
+    border-radius: 8px;
+    padding: 1.25rem;
+    cursor: pointer;
+    background: #fff;
+}
+
+.ca-customer-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.ca-card-top {
+    margin-bottom: 1rem;
+}
+
+.ca-customer-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.ca-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.ca-info-row {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.ca-info-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.ca-card-balance {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1rem;
+}
+
+.ca-balance-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ca-balance-label {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.ca-balance-value {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.ca-balance-value-red {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #b03a2e;
+}
+
+.ca-empty {
+    color: #888;
+    padding: 1rem 0;
+}
+
+
+
+
