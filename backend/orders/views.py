@@ -272,7 +272,7 @@ def cm_order_detail(request, order_id):
         "email": app.email if app else customer.user.email,
         "items": items_data,
         "total_amount": str(order.total_amount),
-        "available_credit": str(credit.available_credit),
+        "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
     })
@@ -505,7 +505,7 @@ def um_override_detail(request, override_id):
         "order_date_submitted": order.date_ordered.strftime("%B %d, %Y"),
         "items": items_data,
         "total_amount": str(order.total_amount),
-        "available_credit": str(credit.available_credit),
+        "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
         "reason": override_req.reason,
