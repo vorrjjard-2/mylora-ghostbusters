@@ -19,6 +19,7 @@ export default function CustomerProfile() {
     new_password: "",
   });
 
+
   useEffect(() => {
     // Fetch customer profile data
     fetch("http://localhost:8000/api/customer/profile/", {
