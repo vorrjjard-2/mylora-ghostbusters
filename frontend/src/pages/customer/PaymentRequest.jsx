@@ -20,6 +20,7 @@ export default function PaymentRequest() {
   
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [displayAmount, setDisplayAmount] = useState("");
 
   useEffect(() => {
     // Fetch credit info and user info to display on the page
@@ -40,8 +41,17 @@ export default function PaymentRequest() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleAmountChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9.]/g, "");
+    const parts = raw.split(".");
+    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    const formatted = parts.length > 1 ? `${intPart}.${parts[1]}` : intPart;
+    setDisplayAmount(formatted);
+    setFormData((prev) => ({ ...prev, amount_paid: raw }));
+    setErrors((prev) => ({ ...prev, amount_paid: "" }));
   };
 
   const handleFileChange = (e) => {
@@ -221,13 +231,12 @@ return (
             <label className="pr-label">Balance Paid</label>
             <div className="pr-input-with-icon">
               <input
-                type="number"
+                type="text"
                 name="amount_paid"
-                value={formData.amount_paid}
-                onChange={handleChange}
+                value={`₱ ${displayAmount}`}
+                onChange={handleAmountChange}
                 className={`pr-input ${errors.amount_paid ? 'pr-input-error' : ''}`}
-                placeholder="₱"
-                step="0.01"
+                placeholder="₱ 0"
               />
             </div>
             {errors.amount_paid && <span className="pr-error">{errors.amount_paid}</span>}
