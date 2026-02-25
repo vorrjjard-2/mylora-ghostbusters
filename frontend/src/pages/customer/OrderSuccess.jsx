@@ -6,7 +6,7 @@ import "./OrderSuccess.css";
 export default function OrderSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
-  orderId = location.state?.orderId;
+  const orderId = location.state?.orderId;
   const exceedsCredit = location.state?.exceedsCredit || false;
 
 
