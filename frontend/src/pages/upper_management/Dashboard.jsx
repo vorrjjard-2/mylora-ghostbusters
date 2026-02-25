@@ -108,7 +108,7 @@ export default function Dashboard() {
                 className={`um-tab ${activeTab === "enrollments" ? "active-tab" : ""}`}
                 onClick={() => setActiveTab("enrollments")}
               >
-                Enrolment Requests
+                Enrollment Requests
               </button>
               <button 
                 className={`um-tab ${activeTab === "overrides" ? "active-tab" : ""}`}
