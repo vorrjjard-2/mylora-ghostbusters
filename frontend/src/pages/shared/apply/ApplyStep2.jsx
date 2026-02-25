@@ -131,17 +131,17 @@ export default function ApplyStep2() {
            <div className="input-grid">
              <div className="input-group">
                <label>First Name<span className="required">*</span></label>
-                <input 
-                  type="text" 
-                  value={firstName} 
+                <input
+                  type="text"
+                  value={firstName}
                   onChange={e => {
-                    const value = e.target.value.toUpperCase(); 
-                    // allows letters (a-z) and spaces, but blocks numbers/symbols
+                    const value = e.target.value.toUpperCase();
                     if (value === '' || /^[A-Z\s]+$/.test(value)) {
                       setFirstName(value);
                     }
-                  }} 
-                  required 
+                  }}
+                  style={{ textTransform: "uppercase" }}
+                  required
                 />
            </div>
            <div className="input-group">
