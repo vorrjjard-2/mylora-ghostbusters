@@ -18,6 +18,8 @@ export default function CustomerProfile() {
     current_password: "",
     new_password: "",
   });
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
 
   useEffect(() => {
@@ -45,8 +47,20 @@ export default function CustomerProfile() {
   };
 
   const handleSavePassword = async () => {
+    setPasswordError("");
+
     if (!passwordForm.current_password || !passwordForm.new_password) {
-      alert("Please fill in both password fields");
+      setPasswordError("Please fill in all password fields.");
+      return;
+    }
+
+    if (passwordForm.new_password.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+
+    if (passwordForm.new_password !== confirmPassword) {
+      setPasswordError("Passwords do not match.");
       return;
     }
 
@@ -71,9 +85,10 @@ export default function CustomerProfile() {
 
       alert("Password changed successfully");
       setPasswordForm({ current_password: "", new_password: "" });
+      setConfirmPassword("");
     } catch (err) {
       console.error(err);
-      alert(err.message || "Failed to change password");
+      setPasswordError(err.message || "Failed to change password");
     } finally {
       setSaving(false);
     }
@@ -133,6 +148,21 @@ return (
             placeholder="Enter new password"
           />
         </div>
+
+        <div className="profile-form-group">
+          <label className="profile-label">Confirm New Password</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="profile-input"
+            placeholder="Re-enter new password"
+          />
+        </div>
+
+        {passwordError && (
+          <p className="profile-error">{passwordError}</p>
+        )}
 
         <div className="profile-button-row">
           <button
