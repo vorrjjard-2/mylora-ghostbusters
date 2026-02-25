@@ -141,7 +141,7 @@ return (
           <div className="review-modal">
             <h2 className="review-modal-title">Credit Limit Exceeded</h2>
             <p className="review-modal-body">
-              This order exceeds your available credit limit. It will be submitted for override approval by management before processing.
+              This order exceeds your available credit limit. Your order will need to be reviewed by management for approval.
             </p>
             <button
               className="review-modal-accept-btn"

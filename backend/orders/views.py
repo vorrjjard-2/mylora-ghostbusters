@@ -64,9 +64,6 @@ def create_order(request):
                     unit_price=Decimal(str(item_data["unit_price"]))
                 )
             
-            # Reduce available credit (reserve it)
-            # If order exceeds limit, available_credit may go negative
-            credit_account.available_credit -= total_amount
             credit_account.save()
         
         return Response({
@@ -306,6 +303,7 @@ def cm_approve_order(request, order_id):
         order.save()
 
         credit = order.account
+        credit.available_credit -= order.total_amount
         credit.outstanding_bal += order.total_amount
         credit.save()
 
@@ -393,11 +391,6 @@ def cm_reject_order(request, order_id):
     with transaction.atomic():
         order.order_status = "REJECTED"
         order.save()
-
-        # Return the reserved credit to the customer
-        credit = order.account
-        credit.available_credit += order.total_amount
-        credit.save()
 
         OrderApproval.objects.create(
             user=request.user,
@@ -567,8 +560,9 @@ def um_approve_override(request, override_id):
         order.order_status = "APPROVED"
         order.save()
 
-        # Move amount from reserved to outstanding balance
+        # Deduct available credit and move to outstanding balance
         credit = order.account
+        credit.available_credit -= order.total_amount
         credit.outstanding_bal += order.total_amount
         credit.save()
 
@@ -629,15 +623,10 @@ def um_reject_override(request, override_id):
         override_req.override_date = timezone.now()
         override_req.save()
 
-        # Reject the order and return reserved credit
+        # Reject the order
         order = override_req.order
         order.order_status = "REJECTED"
         order.save()
-
-        # Return the reserved credit
-        credit = order.account
-        credit.available_credit += order.total_amount
-        credit.save()
 
     return Response({
         "success": True,
