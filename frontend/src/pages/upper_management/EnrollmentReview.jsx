@@ -239,7 +239,7 @@ export default function EnrollmentReview() {
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{ backgroundColor: "white", borderRadius: "15px", width: "80vw", maxWidth: "900px", height: "85vh", display: "flex", flexDirection: "column", overflow: "hidden" }}
+            style={{ backgroundColor: "white", borderRadius: "15px", width: "80vw", maxWidth: "900px", height: "85vh", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "'Arimo', sans-serif" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderBottom: "1px solid #e0e0e0" }}>
               <span style={{ fontWeight: "700", fontSize: "16px" }}>{filePreview.label}</span>
