@@ -281,40 +281,85 @@ export default function CreditApproval() {
 
       {/* Password Approval Modal */}
       {showPasswordModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3 className="modal-title-warning" style={{ color: "#1f3d1a" }}>Confirm Approval</h3>
-            <p className="modal-text-body">
-              Enter your password to approve <span className="text-bold">ORDER {order.order_id}</span>.
-            </p>
-            <div className="info-group">
-              <label className="info-label">Password</label>
-              <input
-                type="password"
-                className="info-input"
-                value={approvalPassword}
-                onChange={(e) => { setApprovalPassword(e.target.value); setPasswordError(""); }}
-                onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
-                autoFocus
-              />
-              {passwordError && (
-                <span style={{ color: "#911818", fontSize: "14px", marginTop: "4px" }}>{passwordError}</span>
-              )}
-            </div>
-            <div className="modal-button-row">
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: "8px",
+            maxWidth: "500px",
+            width: "90%",
+            padding: "2rem",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            fontFamily: "'Arimo', sans-serif",
+          }}>
+            <h3 style={{
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              marginBottom: "1.5rem",
+              textAlign: "center",
+              color: "#1E2D1A",
+            }}>
+              Please enter your password to approve ORDER {order.order_id}.
+            </h3>
+            <input
+              type="password"
+              value={approvalPassword}
+              onChange={(e) => { setApprovalPassword(e.target.value); setPasswordError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
+              placeholder="••••••••••"
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+                marginBottom: passwordError ? "0.5rem" : "1.5rem",
+              }}
+            />
+            {passwordError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{passwordError}</p>
+            )}
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
               <button
-                className="reject-btn"
                 onClick={() => setShowPasswordModal(false)}
                 disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  fontFamily: "'Arimo', sans-serif",
+                }}
               >
                 Cancel
               </button>
               <button
-                className="modal-submit-btn"
                 onClick={handlePasswordSubmit}
                 disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#1f3d1a",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: acting ? "not-allowed" : "pointer",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  fontFamily: "'Arimo', sans-serif",
+                }}
               >
-                {acting ? "Approving..." : "Confirm"}
+                {acting ? "Approving..." : "Approve"}
               </button>
             </div>
           </div>

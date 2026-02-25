@@ -40,7 +40,8 @@ def create_order(request):
             total_amount += quantity * unit_price
         
         # Allow orders that exceed credit limit - they will require override approval
-        exceeds_credit = total_amount > credit_account.available_credit
+        available = credit_account.credit_limit - credit_account.outstanding_bal
+        exceeds_credit = total_amount > available
         
         # Create order and items in transaction
         with transaction.atomic():
@@ -325,7 +326,7 @@ def cm_approve_order(request, order_id):
         "success": True,
         "order_id": order.order_id,
         "order_status": order.order_status,
-        "available_credit": str(credit.available_credit),
+        "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
     })
