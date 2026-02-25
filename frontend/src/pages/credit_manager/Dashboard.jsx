@@ -6,7 +6,14 @@ import "../upper_management/Dashboard.css";
 
 export default function CreditManagerDashboard() {
   const navigate = useNavigate();
-  const user = { username: "CM1234" };
+  const [user, setUser] = useState({ username: "" });
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/me/", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => { if (data.username) setUser({ username: data.username }); })
+      .catch(console.error);
+  }, []);
 
   const [creditData, setCreditData] = useState(null);
   const [payments, setPayments] = useState([]);
