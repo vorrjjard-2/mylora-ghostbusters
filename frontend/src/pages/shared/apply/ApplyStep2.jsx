@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ApplicationSubmittedModal from "../../../components/ApplicationSubmittedModal";
 import logo from "../../../assets/mylora-logo.png";
 import fileIcon from "../../../assets/file.png";
 import "./ApplyStep2.css";
 
 export default function ApplyStep2() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -444,7 +446,7 @@ export default function ApplyStep2() {
   {showModal && (
     <ApplicationSubmittedModal
       applicationId={applicationId}
-      onClose={() => setShowModal(false)}
+      onClose={() => navigate("/login")}
     />
   )}
 </>
