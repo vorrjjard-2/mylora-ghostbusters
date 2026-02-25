@@ -6,7 +6,14 @@ import "./Dashboard.css";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const user = { username: "UM1234" };
+  const [user, setUser] = useState({ username: "" });
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/me/", { credentials: "include" })
+      .then(r => r.json())
+      .then(data => { if (data.username) setUser({ username: data.username }); })
+      .catch(console.error);
+  }, []);
 
   const [enrollments, setEnrollments] = useState([]);
   const [overrideRequests, setOverrideRequests] = useState([]);
