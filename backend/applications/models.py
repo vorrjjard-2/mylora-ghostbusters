@@ -26,6 +26,7 @@ class CreditEnrollment(models.Model):
     # Address
     address1 = models.CharField(max_length=255)
     address2 = models.CharField(max_length=255, blank=True)
+    province = models.CharField(max_length=100, blank=True)
     barangay = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)

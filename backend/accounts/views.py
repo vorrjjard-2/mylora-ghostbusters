@@ -150,6 +150,7 @@ def customer_profile(request):
             'email': app.email if app else request.user.email,
             'address1': app.address1 if app else "",
             'address2': app.address2 if app else "",
+            'province': app.province if app else "",
             'barangay': app.barangay if app else "",
             'city': app.city if app else "",
             'zipcode': app.zipcode if app else "",

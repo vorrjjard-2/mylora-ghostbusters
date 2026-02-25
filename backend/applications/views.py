@@ -78,6 +78,7 @@ def create_application(request):
 
         address1=step2["address1"],
         address2=step2.get("address2", ""),
+        province=step2.get("province", ""),
         barangay=step2["barangay"],
         city=step2["city"],
         zipcode=step2["zipCode"],
@@ -159,6 +160,7 @@ def enrollment_detail(request, application_id):
         "phone_number": app.phone_number,
         "address1": app.address1,
         "address2": app.address2,
+        "province": app.province,
         "barangay": app.barangay,
         "city": app.city,
         "zipcode": app.zipcode,

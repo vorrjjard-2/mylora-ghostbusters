@@ -14,6 +14,7 @@ export default function ApplyStep2() {
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [province, setProvince] = useState("");
+  const [provinceName, setProvinceName] = useState("");
   const [cityCode, setCityCode] = useState("");
   const [city, setCity] = useState("");
   const [barangay, setBarangay] = useState("");
@@ -36,6 +37,7 @@ export default function ApplyStep2() {
       setCitiesMunicipalities([]);
       setCityCode("");
       setCity("");
+      setProvinceName("");
       setBarangays([]);
       setBarangay("");
       return;
@@ -112,6 +114,7 @@ export default function ApplyStep2() {
           phone,
           address1,
           address2,
+          province: provinceName,
           barangay,
           city,
           zipCode,
@@ -261,7 +264,11 @@ export default function ApplyStep2() {
                <label>Province<span className="required">*</span></label>
                <select
                  value={province}
-                 onChange={e => setProvince(e.target.value)}
+                 onChange={e => {
+                   const selected = provinces.find(p => p.code === e.target.value);
+                   setProvince(e.target.value);
+                   setProvinceName(selected ? selected.name : "");
+                 }}
                  required
                >
                  <option value="">Select province</option>

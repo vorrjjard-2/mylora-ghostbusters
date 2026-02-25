@@ -9,23 +9,14 @@ export default function CustomerProfile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   // Customer data
   const [customerData, setCustomerData] = useState(null);
-  
+
   // Password form
   const [passwordForm, setPasswordForm] = useState({
     current_password: "",
     new_password: "",
-  });
-  
-  // Address form
-  const [addressForm, setAddressForm] = useState({
-    address1: "",
-    address2: "",
-    barangay: "",
-    city: "",
-    zipcode: "",
   });
 
   useEffect(() => {
@@ -39,30 +30,17 @@ export default function CustomerProfile() {
       })
       .then((data) => {
         setCustomerData(data);
-        // Pre-fill address form
-        setAddressForm({
-          address1: data.address1 || "",
-          address2: data.address2 || "",
-          barangay: data.barangay || "",
-          city: data.city || "",
-          zipcode: data.zipcode || "",
-        });
       })
       .catch((err) => {
         console.error(err);
         alert("Failed to load profile data");
       })
-      .finally(() => setLoading(false)); 
+      .finally(() => setLoading(false));
   }, []);
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddressChange = (e) => {
-    const { name, value } = e.target;
-    setAddressForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSavePassword = async () => {
@@ -100,35 +78,6 @@ export default function CustomerProfile() {
     }
   };
 
-  const handleSaveAddress = async () => {
-    setSaving(true);
-    const csrfToken = getCookie("csrftoken");
-
-    try {
-      const response = await fetch("http://localhost:8000/api/customer/update-address/", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        body: JSON.stringify(addressForm),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update address");
-      }
-
-      alert("Address updated successfully");
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Failed to update address");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (loading) {
     return <div className="profile-container">Loading...</div>;
   }
@@ -148,7 +97,7 @@ return (
         <div className="profile-header-actions">
           <button className="profile-back-btn" onClick={() => navigate("/customer/dashboard")}>
             Back
-          </button> 
+          </button>
         </div>
       </header>
 
@@ -159,7 +108,7 @@ return (
       {/* Password Section */}
       <div className="profile-section">
         <h2 className="profile-section-title">Password</h2>
-        
+
         <div className="profile-form-group">
           <label className="profile-label">Current Password</label>
           <input
@@ -198,7 +147,7 @@ return (
       {/* Customer Information Section - Read Only */}
       <div className="profile-section">
         <h2 className="profile-section-title">Customer Information</h2>
-        
+
         <div className="profile-form-group">
           <label className="profile-label">Name</label>
           <input
@@ -231,19 +180,17 @@ return (
         </div>
       </div>
 
-      {/* Address Details Section - Editable */}
+      {/* Address Details Section - Read Only */}
       <div className="profile-section">
         <h2 className="profile-section-title">Address Details</h2>
-        
+
         <div className="profile-form-group">
-          <label className="profile-label">Address 1*</label>
+          <label className="profile-label">Address 1</label>
           <input
             type="text"
-            name="address1"
-            value={addressForm.address1}
-            onChange={handleAddressChange}
-            className="profile-input"
-            placeholder="UNIT 123, ABC STREET"
+            value={customerData.address1 || ""}
+            readOnly
+            className="profile-input-readonly"
           />
         </div>
 
@@ -251,58 +198,49 @@ return (
           <label className="profile-label">Address 2</label>
           <input
             type="text"
-            name="address2"
-            value={addressForm.address2}
-            onChange={handleAddressChange}
-            className="profile-input"
-            placeholder="LANDMARK STATUE"
+            value={customerData.address2 || ""}
+            readOnly
+            className="profile-input-readonly"
           />
         </div>
 
         <div className="profile-form-row">
           <div className="profile-form-group">
-            <label className="profile-label">Barangay*</label>
+            <label className="profile-label">Province</label>
             <input
               type="text"
-              name="barangay"
-              value={addressForm.barangay}
-              onChange={handleAddressChange}
-              className="profile-input"
-              placeholder="BRGY SAN JOSE"
+              value={customerData.province || ""}
+              readOnly
+              className="profile-input-readonly"
             />
           </div>
           <div className="profile-form-group">
-            <label className="profile-label">City*</label>
+            <label className="profile-label">City / Municipality</label>
             <input
               type="text"
-              name="city"
-              value={addressForm.city}
-              onChange={handleAddressChange}
-              className="profile-input"
-              placeholder="CEBU CITY"
+              value={customerData.city || ""}
+              readOnly
+              className="profile-input-readonly"
             />
           </div>
           <div className="profile-form-group">
-            <label className="profile-label">Zip Code*</label>
+            <label className="profile-label">Barangay</label>
             <input
               type="text"
-              name="zipcode"
-              value={addressForm.zipcode}
-              onChange={handleAddressChange}
-              className="profile-input"
-              placeholder="9876"
+              value={customerData.barangay || ""}
+              readOnly
+              className="profile-input-readonly"
             />
           </div>
         </div>
-
-        <div className="profile-button-row">
-          <button
-            className="profile-save-btn"
-            onClick={handleSaveAddress}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
+        <div className="profile-form-group">
+          <label className="profile-label">Zip Code</label>
+          <input
+            type="text"
+            value={customerData.zipcode || ""}
+            readOnly
+            className="profile-input-readonly"
+          />
         </div>
       </div>
       </main>

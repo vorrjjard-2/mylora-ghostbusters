@@ -60,7 +60,7 @@ export default function ConfirmPasswordModal({
           </button>
           <button
             onClick={() => onConfirm(password)}
-            disabled={loading || !password}
+            disabled={loading || password.length < 8}
             style={{
               padding: "10px 24px",
               fontSize: "15px",
@@ -68,9 +68,9 @@ export default function ConfirmPasswordModal({
               fontFamily: "'Arimo', sans-serif",
               border: "none",
               borderRadius: "8px",
-              backgroundColor: loading || !password ? "#888" : "#1E2D1A",
+              backgroundColor: loading || password.length < 8 ? "#888" : "#1E2D1A",
               color: "white",
-              cursor: loading || !password ? "not-allowed" : "pointer",
+              cursor: loading || password.length < 8 ? "not-allowed" : "pointer",
             }}
           >
             {loading ? "Verifying..." : "Confirm"}
