@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import logo from "../../assets/mylora-logo.png";
+import "./CustomerHistory.css";
 
 export default function CustomerHistory() {
   const navigate = useNavigate();
@@ -9,7 +11,7 @@ export default function CustomerHistory() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch customer details and payment history
+  /*  // Fetch customer details and payment history
     Promise.all([
       fetch("http://localhost:8000/api/cm/customers/", {
         credentials: "include",
@@ -29,112 +31,129 @@ export default function CustomerHistory() {
         alert("Failed to load customer history");
         navigate("/credit-manager/adjustment");
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false)); */
+
+      const mockCustomer = { // REMOVE
+      customer_id: parseInt(customerId) || 1,
+      name: "Juan Dela Cruz",
+      available_credit: 75000.00,
+      credit_limit: 100000.00,
+      outstanding_balance: 25000.00,
+    };
+
+    const mockHistory = [
+      {
+        payment_id: 101,
+        date_paid: "2024-02-15",
+        inv_number: "INV-2024-001",
+        amount_paid: 5000.00,
+        payment_status: "VERIFIED",
+        approved_by: "Admin Maria"
+      },
+      {
+        payment_id: 102,
+        date_paid: "2024-02-20",
+        inv_number: "INV-2024-005",
+        amount_paid: 15000.00,
+        payment_status: "PENDING",
+        approved_by: null
+      },
+      {
+        payment_id: 103,
+        date_paid: "2024-01-10",
+        inv_number: "INV-2023-999",
+        amount_paid: 2000.00,
+        payment_status: "REJECTED",
+        approved_by: "Admin Jose"
+      }
+    ];
+
+    setCustomer(mockCustomer);
+    setHistory(mockHistory);
+    setLoading(false); // REMOVE
   }, [customerId, navigate]);
 
   if (loading) {
-    return <div style={styles.container}>Loading...</div>;
+    return <div className="ch-container">Loading...</div>;
   }
 
   if (!customer) {
-    return <div style={styles.container}>Customer not found</div>;
+    return <div className="ch-container">Customer not found</div>;
   }
 
-  return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.logo}>
-          <span style={styles.logoIcon}>🌾</span>
-          <span style={styles.logoText}>Web Credit System</span>
+return (
+    <div className="ch-container">
+      {/* HEADER */}
+      <header className="ch-header-section">
+        <div className="ch-brand-group">
+          <img src={logo} alt="Mylora Logo" className="mylora-logo" />
+          <span className="ch-system-title">Web Credit System</span>
         </div>
-        <button
-          style={styles.backBtn}
-          onClick={() => navigate("/credit-manager/dashboard")}
-        >
+        <button className="ch-back-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}`)}>
           Back
         </button>
-      </div>
+      </header>
 
-      <h1 style={styles.title}>Credit History</h1>
-      <h2 style={styles.customerName}>{customer.name}</h2>
+      <main className="ch-content">
+
+      <h1 className="ch-title">Credit History</h1>
+      <h2 className="ch-customer-name">{customer.name}</h2>
 
       {/* Current Balance Summary */}
-      <div style={styles.summaryCard}>
-        <div style={styles.summaryRow}>
-          <div style={styles.summaryItem}>
-            <div style={styles.summaryLabel}>Available Credit</div>
-            <div style={styles.summaryValue}>
-              ₱{" "}
-              {parseFloat(customer.available_credit).toLocaleString("en-PH", {
-                minimumFractionDigits: 2,
-              })}
+      <div className="ch-summary-card">
+        <div className="ch-summary-row">
+          <div className="ch-summary-item">
+            <div className="ch-summary-label">Available Credit</div>
+            <div className="ch-summary-value">
+              ₱ {parseFloat(customer.available_credit).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
             </div>
           </div>
-          <div style={styles.summaryItem}>
-            <div style={styles.summaryLabel}>Credit Limit</div>
-            <div style={styles.summaryValue}>
-              ₱{" "}
-              {parseFloat(customer.credit_limit).toLocaleString("en-PH", {
-                minimumFractionDigits: 2,
-              })}
+          <div className="ch-summary-item">
+            <div className="ch-summary-label">Credit Limit</div>
+            <div className="ch-summary-value">
+              ₱ {parseFloat(customer.credit_limit).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
             </div>
           </div>
-          <div style={styles.summaryItem}>
-            <div style={styles.summaryLabel}>Outstanding Balance</div>
-            <div style={styles.summaryValueRed}>
-              ₱{" "}
-              {parseFloat(customer.outstanding_balance).toLocaleString("en-PH", {
-                minimumFractionDigits: 2,
-              })}
+          <div className="ch-summary-item">
+            <div className="ch-summary-label">Outstanding Balance</div>
+            <div className="ch-summary-value-red">
+              ₱ {parseFloat(customer.outstanding_balance).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
             </div>
           </div>
         </div>
       </div>
 
       {/* Payment History Table */}
-      <div style={styles.section}>
-        <h3 style={styles.sectionTitle}>Payment History</h3>
+      <div className="ch-section">
+        <h3 className="ch-section-title">Payment History</h3>
         {history.length === 0 ? (
-          <div style={styles.empty}>No payment history found</div>
+          <div className="ch-empty">No payment history found</div>
         ) : (
-          <div style={styles.tableWrapper}>
-            <table style={styles.table}>
+          <div className="ch-table-wrapper">
+            <table className="ch-table">
               <thead>
                 <tr>
-                  <th style={styles.th}>Date</th>
-                  <th style={styles.th}>Invoice Number</th>
-                  <th style={styles.th}>Amount Paid</th>
-                  <th style={styles.th}>Status</th>
-                  <th style={styles.th}>Approved By</th>
+                  <th className="ch-th">Date</th>
+                  <th className="ch-th">Invoice Number</th>
+                  <th className="ch-th">Amount Paid</th>
+                  <th className="ch-th">Status</th>
+                  <th className="ch-th">Approved By</th>
                 </tr>
               </thead>
               <tbody>
                 {history.map((payment) => (
                   <tr key={payment.payment_id}>
-                    <td style={styles.td}>{payment.date_paid}</td>
-                    <td style={styles.td}>{payment.inv_number || "—"}</td>
-                    <td style={styles.td}>
-                      ₱{" "}
-                      {parseFloat(payment.amount_paid).toLocaleString("en-PH", {
-                        minimumFractionDigits: 2,
-                      })}
+                    <td className="ch-td">{payment.date_paid}</td>
+                    <td className="ch-td">{payment.inv_number || "—"}</td>
+                    <td className="ch-td">
+                      ₱ {parseFloat(payment.amount_paid).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                     </td>
-                    <td style={styles.td}>
-                      <span
-                        style={{
-                          ...styles.statusBadge,
-                          ...(payment.payment_status === "VERIFIED"
-                            ? styles.statusVerified
-                            : payment.payment_status === "PENDING"
-                            ? styles.statusPending
-                            : styles.statusRejected),
-                        }}
-                      >
+                    <td className="ch-td">
+                      <span className={`ch-status-badge ch-status-${payment.payment_status.toLowerCase()}`}>
                         {payment.payment_status}
                       </span>
                     </td>
-                    <td style={styles.td}>{payment.approved_by || "—"}</td>
+                    <td className="ch-td">{payment.approved_by || "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -142,140 +161,7 @@ export default function CustomerHistory() {
           </div>
         )}
       </div>
+      </main>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    padding: "2rem",
-    maxWidth: "1200px",
-    margin: "0 auto",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "2rem",
-  },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  logoIcon: {
-    fontSize: "1.5rem",
-  },
-  logoText: {
-    fontSize: "1.25rem",
-    fontWeight: 500,
-  },
-  backBtn: {
-    padding: "0.5rem 1.5rem",
-    background: "#1f3d1a",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-    fontWeight: 600,
-  },
-  title: {
-    fontSize: "2rem",
-    fontWeight: 700,
-    marginBottom: "0.5rem",
-  },
-  customerName: {
-    fontSize: "1.5rem",
-    fontWeight: 600,
-    marginBottom: "2rem",
-    color: "#555",
-  },
-  summaryCard: {
-    background: "#f9f9f9",
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    padding: "1.5rem",
-    marginBottom: "2rem",
-  },
-  summaryRow: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
-    gap: "2rem",
-  },
-  summaryItem: {
-    textAlign: "center",
-  },
-  summaryLabel: {
-    fontSize: "0.9rem",
-    color: "#666",
-    marginBottom: "0.5rem",
-  },
-  summaryValue: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    color: "#1f3d1a",
-  },
-  summaryValueRed: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    color: "#b03a2e",
-  },
-  section: {
-    marginBottom: "2rem",
-  },
-  sectionTitle: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-    marginBottom: "1rem",
-  },
-  empty: {
-    textAlign: "center",
-    color: "#888",
-    padding: "3rem",
-    background: "#f9f9f9",
-    borderRadius: "8px",
-  },
-  tableWrapper: {
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    overflow: "hidden",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-  th: {
-    background: "#f5f5f5",
-    padding: "1rem",
-    textAlign: "left",
-    borderBottom: "2px solid #e0e0e0",
-    fontWeight: 600,
-    fontSize: "0.9rem",
-    color: "#555",
-  },
-  td: {
-    padding: "1rem",
-    borderBottom: "1px solid #f0f0f0",
-    fontSize: "0.95rem",
-  },
-  statusBadge: {
-    padding: "0.25rem 0.75rem",
-    borderRadius: "4px",
-    fontSize: "0.85rem",
-    fontWeight: 600,
-  },
-  statusVerified: {
-    background: "#d4edda",
-    color: "#155724",
-  },
-  statusPending: {
-    background: "#fff3cd",
-    color: "#856404",
-  },
-  statusRejected: {
-    background: "#f8d7da",
-    color: "#721c24",
-  },
-};
