@@ -22,6 +22,11 @@ export default function CreditApproval() {
   const [overrideReason, setOverrideReason] = useState("");
   const [showOverrideSuccess, setShowOverrideSuccess] = useState(false);
 
+  // Password modal state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [approvalPassword, setApprovalPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   useEffect(() => {
     fetch(`http://localhost:8000/api/cm/order/${orderId}/`, { credentials: "include" })
       .then((r) => {
@@ -41,16 +46,21 @@ export default function CreditApproval() {
     return totalAmount > availableCredit;
   };
 
-  const postAction = async (action) => {
+  const postAction = async (action, password = null) => {
     // action = "approve" | "reject"
     setActing(true);
     try {
+      const body = password ? JSON.stringify({ password }) : undefined;
       const res = await fetch(
         `http://localhost:8000/api/cm/order/${orderId}/${action}/`,
         {
           method: "POST",
           credentials: "include",
-          headers: { "X-CSRFToken": getCookie("csrftoken") },
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            ...(password ? { "Content-Type": "application/json" } : {}),
+          },
+          body,
         }
       );
       if (!res.ok) {
@@ -72,6 +82,21 @@ export default function CreditApproval() {
     } finally {
       setActing(false);
     }
+  };
+
+  const handleApproveClick = () => {
+    setApprovalPassword("");
+    setPasswordError("");
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!approvalPassword.trim()) {
+      setPasswordError("Password is required.");
+      return;
+    }
+    setShowPasswordModal(false);
+    await postAction("approve", approvalPassword);
   };
 
   const handleRequestOverride = () => {
@@ -247,12 +272,54 @@ export default function CreditApproval() {
           <button
             className="approve-btn"
             disabled={acting}
-            onClick={() => postAction("approve")}
+            onClick={handleApproveClick}
           >
             Approve Order
           </button>
         )}
       </div>
+
+      {/* Password Approval Modal */}
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3 className="modal-title-warning" style={{ color: "#1f3d1a" }}>Confirm Approval</h3>
+            <p className="modal-text-body">
+              Enter your password to approve <span className="text-bold">ORDER {order.order_id}</span>.
+            </p>
+            <div className="info-group">
+              <label className="info-label">Password</label>
+              <input
+                type="password"
+                className="info-input"
+                value={approvalPassword}
+                onChange={(e) => { setApprovalPassword(e.target.value); setPasswordError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
+                autoFocus
+              />
+              {passwordError && (
+                <span style={{ color: "#911818", fontSize: "14px", marginTop: "4px" }}>{passwordError}</span>
+              )}
+            </div>
+            <div className="modal-button-row">
+              <button
+                className="reject-btn"
+                onClick={() => setShowPasswordModal(false)}
+                disabled={acting}
+              >
+                Cancel
+              </button>
+              <button
+                className="modal-submit-btn"
+                onClick={handlePasswordSubmit}
+                disabled={acting}
+              >
+                {acting ? "Approving..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Override Request Modal */}
       {showOverrideModal && (

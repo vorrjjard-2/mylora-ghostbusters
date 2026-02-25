@@ -285,6 +285,12 @@ def cm_approve_order(request, order_id):
     if not _require_role(request, "credit_manager"):
         return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
+    password = request.data.get("password")
+    if not password:
+        return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.check_password(password):
+        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+
     try:
         order = Order.objects.select_related("account").get(order_id=order_id)
     except Order.DoesNotExist:
