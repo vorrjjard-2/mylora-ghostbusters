@@ -89,7 +89,7 @@ export default function Dashboard() {
             {/* SECTION 3: STAT CARDS */}
             <div className="um-stats-container">
               <div className="um-stat-card">
-                <span className="um-stat-label">Enrolment Requests</span>
+                <span className="um-stat-label">Enrollment Requests</span>
                 <span className="um-stat-number">{enrollments.length}</span>
               </div>
               <div className="um-stat-card">
