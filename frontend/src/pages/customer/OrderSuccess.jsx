@@ -19,18 +19,20 @@ export default function OrderSuccess() {
 return (
     <div className="success-container">
           {/* Header Section */}
-          <header className="success-main-header">
+          <header className="success-main-header"> 
             <div className="success-brand-group">
               <img src={logo} alt="Mylora Logo" className="success-logo-img" />
               <span className="success-system-title">Web Credit System</span>
             </div>
           </header>
+
+      <main className="success-content">
       <div className="success-card">
 
         <h1 className="success-title">Your purchase request has been sent!</h1>
 
         <p className="success-message">
-          <strong>ORDER ID: XX{orderId}</strong>
+          <strong>ORDER ID: {orderId}</strong>
         </p>
 
         {exceedsCredit ? (
@@ -68,6 +70,7 @@ return (
           </button>
         </div>
       </div>
+      </main>
     </div>
   );
 }

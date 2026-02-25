@@ -1,11 +1,9 @@
 .success-container {
-    display: flex;
-    flex-direction: column;
+    background-color: #FCFCFC;
     min-height: 100vh;
     width: 100%;
-    background-color: #FCFCFC;
-    margin: 0;
-    padding: 0;
+    margin: 0px;
+    padding: 0px;
     font-family: 'Arimo', sans-serif;
 }
 
@@ -20,7 +18,7 @@
 .success-brand-group {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 15px; 
 }
 
 .success-logo-img {
@@ -29,10 +27,17 @@
 }
 
 .success-system-title {
-    font-size: 32px;
+    font-size: 64px;
     font-weight: 700;
     letter-spacing: -0.64px;
     color: #395A31;
+}
+
+.success-content{
+    display: block;
+    max-width: 90%;
+    margin: -20px auto;
+    padding: 0px 40px;
 }
 
 .success-card {
@@ -78,9 +83,9 @@
 }
 
 .success-dashboard-btn {
-    padding: 12px 32px;
+    padding: 8px 32px;
     background: #fff;
-    border: 2px solid #1f3d1a;
+    border: 1px solid #1f3d1a;
     color: #1f3d1a;
     border-radius: 10px;
     cursor: pointer;
@@ -90,7 +95,7 @@
 }
 
 .success-orders-btn {
-    padding: 12px 32px;
+    padding: 8px 32px;
     background: #1f3d1a;
     color: white;
     border: none;
