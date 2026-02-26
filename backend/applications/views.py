@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CreditEnrollment
+from accounts.models import log_audit
 
 
 @api_view(["POST"])
@@ -238,6 +239,7 @@ Mylora Web Credit System
         # Log the error but don't fail the approval
         print(f"Email sending failed: {e}")
     
+    log_audit(user=request.user, action="APPROVE_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email}, request=request)
     return Response({"status": "approved", "email_sent": True})
 
 
@@ -269,6 +271,7 @@ def reject_enrollment(request, application_id):
     app.enrollment_status = "REJECTED"
     app.approved_by = request.user
     app.save()
+    log_audit(user=request.user, action="REJECT_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email}, request=request)
     return Response({"status": "rejected"})
 
 

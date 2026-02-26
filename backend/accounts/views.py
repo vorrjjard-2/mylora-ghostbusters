@@ -11,7 +11,7 @@ from django.contrib.auth import logout
 from rest_framework.response import Response
 
 from django.contrib.auth.models import User
-from .models import Customer, CreditAccount
+from .models import Customer, CreditAccount, AuditLog, log_audit
 from orders.models import Order
 
 @api_view(['POST'])
@@ -27,6 +27,7 @@ def login_view(request):
         )
 
     login(request, user)
+    log_audit(user=user, action="LOGIN", details={"username": username}, request=request)
     return Response({'message': 'Logged in'})
 
 @ensure_csrf_cookie
@@ -48,6 +49,8 @@ def me_view(request):
 
 @api_view(["POST"])
 def logout_view(request):
+    user = request.user
+    log_audit(user=user if user.is_authenticated else None, action="LOGOUT", details={"username": user.username if user.is_authenticated else "anonymous"}, request=request)
     logout(request)
     return Response({"success": True})
 
@@ -354,6 +357,7 @@ def um_create_employee(request):
         group, _ = Group.objects.get_or_create(name=role)
         user.groups.add(group)
         
+        log_audit(user=request.user, action="CREATE_EMPLOYEE", details={"employee_id": user.id, "username": username, "role": role}, request=request)
         return Response({
             "success": True,
             "message": "Employee created successfully",
@@ -409,7 +413,8 @@ def um_update_employee(request, user_id):
         emp.groups.add(group)
     
     emp.save()
-    
+
+    log_audit(user=request.user, action="UPDATE_EMPLOYEE", details={"employee_id": user_id, "username": emp.username}, request=request)
     return Response({
         "success": True,
         "message": "Employee updated successfully"
@@ -441,7 +446,9 @@ def um_delete_employee(request, user_id):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        username = emp.username
         emp.delete()
+        log_audit(user=request.user, action="DELETE_EMPLOYEE", details={"employee_id": user_id, "username": username}, request=request)
         return Response({"success": True, "message": "Employee deleted successfully"})
     except User.DoesNotExist:
         return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -452,4 +459,27 @@ def branches_list(request):
     from .models import Branch
     branches = Branch.objects.all().order_by("name")
     data = [{"branch_id": b.branch_id, "name": b.name} for b in branches]
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_audit_logs(request):
+    """Get all audit logs for upper management"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    logs = AuditLog.objects.select_related('user').order_by('-timestamp')
+
+    data = []
+    for log in logs:
+        data.append({
+            "log_id": log.log_id,
+            "actor": log.user.get_full_name() or log.user.username if log.user else "System",
+            "action": log.action,
+            "timestamp": log.timestamp.isoformat(),
+            "details": log.details,
+            "ip_address": log.ip_address,
+        })
+
     return Response(data)

@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 from datetime import datetime
 
 from .models import Order, OrderItem, OrderApproval
-from accounts.models import Customer, CreditAccount
+from accounts.models import Customer, CreditAccount, log_audit
 from products.models import Product
 from payments.models import PaymentRequest
 
@@ -348,6 +348,7 @@ def cm_approve_order(request, order_id):
         )
 
     credit.refresh_from_db()
+    log_audit(user=request.user, action="APPROVE_ORDER", details={"order_id": order_id}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -394,6 +395,7 @@ def cm_request_override(request, order_id):
         override_status="PENDING",
     )
 
+    log_audit(user=request.user, action="REQUEST_OVERRIDE", details={"order_id": order_id, "reason": reason}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -432,6 +434,7 @@ def cm_reject_order(request, order_id):
             approval_date=timezone.now(),
         )
 
+    log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -607,6 +610,7 @@ def um_approve_override(request, override_id):
             approval_date=timezone.now(),
         )
 
+    log_audit(user=request.user, action="APPROVE_OVERRIDE", details={"override_id": override_id, "order_id": order.order_id}, request=request)
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -661,6 +665,7 @@ def um_reject_override(request, override_id):
         order.order_status = "REJECTED"
         order.save()
 
+    log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id}, request=request)
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -857,6 +862,7 @@ def cm_adjust_customer_balance(request, customer_id):
         credit.available_credit = new_available
         credit.save()
 
+    log_audit(user=request.user, action="ADJUST_BALANCE", details={"customer_id": customer_id, "amount": str(amount_decimal)}, request=request)
     # Return updated customer data
     app = customer.application
     return Response({
@@ -1027,6 +1033,7 @@ def op_complete_order(request, order_id):
         order.order_status = "COMPLETED"
         order.save()
 
+    log_audit(user=request.user, action="COMPLETE_ORDER", details={"order_id": order_id}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -1333,6 +1340,7 @@ def um_update_customer_balance(request, customer_id):
         credit.available_credit += amount
         credit.save()
 
+    log_audit(user=request.user, action="UPDATE_BALANCE", details={"customer_id": customer_id, "amount": str(amount)}, request=request)
     # Return updated customer data
     app = customer.application
     return Response({
@@ -1388,6 +1396,7 @@ def um_delete_customer(request, customer_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    customer_name = customer.user.get_full_name() or customer.user.username
     with transaction.atomic():
         user = customer.user
         # Delete customer (cascade will handle related records)
@@ -1395,6 +1404,7 @@ def um_delete_customer(request, customer_id):
         # Delete user account
         user.delete()
 
+    log_audit(user=request.user, action="DELETE_CUSTOMER", details={"customer_id": customer_id, "customer_name": customer_name}, request=request)
     return Response({"success": True, "message": "Customer deleted successfully"})
 
 

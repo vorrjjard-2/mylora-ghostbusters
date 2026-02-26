@@ -45,6 +45,7 @@ import EmployeeDatabase from "./pages/upper_management/EmployeeDatabase";
 import EmployeeProfile from "./pages/upper_management/EmployeeProfile";
 import EmployeeEdit from "./pages/upper_management/EmployeeEdit";
 import EmployeeCreate from "./pages/upper_management/EmployeeCreate";
+import AuditLog from "./pages/upper_management/AuditLog";
 
 // Credit Manager pages
 import CreditDashboard from "./pages/credit_manager/Dashboard";
@@ -186,7 +187,15 @@ function Layout() {
               </ProtectedRoute>
             }
           />
-          
+          <Route
+            path="/upper-management/audit-log"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <AuditLog />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Credit Manager routes */}
           <Route
             path="/credit-manager/dashboard"

@@ -7,7 +7,7 @@ from datetime import datetime
 from django.db import transaction
 
 from .models import PaymentRequest
-from accounts.models import Customer
+from accounts.models import Customer, log_audit
 
 
 def _require_role(request, role_name):
@@ -268,6 +268,7 @@ def cm_approve_payment(request, payment_id):
         credit.available_credit = new_available
         credit.save()
 
+    log_audit(user=request.user, action="APPROVE_PAYMENT", details={"payment_id": payment_id, "amount": str(payment.amount_paid)}, request=request)
     return Response({
         "success": True,
         "payment_id": payment.payment_id,
@@ -299,6 +300,7 @@ def cm_reject_payment(request, payment_id):
     payment.approved_by = request.user
     payment.save()
 
+    log_audit(user=request.user, action="REJECT_PAYMENT", details={"payment_id": payment_id}, request=request)
     return Response({
         "success": True,
         "payment_id": payment.payment_id,

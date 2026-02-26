@@ -14,6 +14,7 @@ from .views import (
     um_update_employee,
     um_delete_employee,
     branches_list,
+    um_audit_logs,
 )
 
 urlpatterns = [
@@ -33,4 +34,5 @@ urlpatterns = [
     path("api/um/employee/<int:user_id>/update/", um_update_employee),
     path("api/um/employee/<int:user_id>/delete/", um_delete_employee),
     path("api/branches/", branches_list),
+    path("api/um/audit-logs/", um_audit_logs),
 ]
