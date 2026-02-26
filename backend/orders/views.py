@@ -928,7 +928,8 @@ def op_order_detail(request, order_id):
     try:
         order = Order.objects.select_related(
             "account__customer__user",
-            "account__customer__application"
+            "account__customer__application",
+            "branch"
         ).get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -963,7 +964,9 @@ def op_order_detail(request, order_id):
         "total_amount": str(order.total_amount),
         "shipping_address": order.shipping_address,
         "delivery_mode": order.delivery_mode,
-        "approval_date": approval.approval_date.strftime("%B %d, %Y") if approval else "",
+        "branch_name": order.branch.name if order.branch else "",
+        "branch_address": order.branch.address if order.branch else "",
+        "approval_date": approval.approval_date.strftime("%B %d, %Y at %I:%M %p") if approval else "",
         "approved_by": approval.user.username if approval else "",
     })
 
@@ -1013,7 +1016,7 @@ def op_complete_order(request, order_id):
 
     with transaction.atomic():
         # Create completion record
-        OrderCompletion.objects.create(
+        completion = OrderCompletion.objects.create(
             order=order,
             user=request.user,
             completion_status="COMPLETED",
@@ -1028,6 +1031,8 @@ def op_complete_order(request, order_id):
         "success": True,
         "order_id": order.order_id,
         "message": "Order marked as completed successfully",
+        "processed_by": request.user.username,
+        "completion_date": completion.completion_date.strftime("%B %d, %Y at %I:%M %p") if completion.completion_date else "",
     })
 
 
@@ -1078,7 +1083,8 @@ def op_order_view(request, order_id):
     try:
         order = Order.objects.select_related(
             "account__customer__user",
-            "account__customer__application"
+            "account__customer__application",
+            "branch"
         ).get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -1116,9 +1122,11 @@ def op_order_view(request, order_id):
         "total_amount": str(order.total_amount),
         "shipping_address": order.shipping_address,
         "delivery_mode": order.delivery_mode,
-        "approval_date": approval.approval_date.strftime("%B %d, %Y") if approval else "",
+        "branch_name": order.branch.name if order.branch else "",
+        "branch_address": order.branch.address if order.branch else "",
+        "approval_date": approval.approval_date.strftime("%B %d, %Y at %I:%M %p") if approval else "",
         "approved_by": approval.user.username if approval else "",
-        "completion_date": completion.completion_date.strftime("%B %d, %Y"),
+        "completion_date": completion.completion_date.strftime("%B %d, %Y at %I:%M %p"),
         "processed_by": completion.user.username,
     })
 

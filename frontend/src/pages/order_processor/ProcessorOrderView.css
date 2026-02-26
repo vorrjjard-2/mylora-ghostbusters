@@ -174,10 +174,22 @@
 .view-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 1rem;
 }
 
 .view-back-btn {
-  padding: 10px 140px;
+  padding: 10px 60px;
+  background: white;
+  color: #183112;
+  border: 1px solid #183112;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.view-generate-btn {
+  padding: 10px 40px;
   background: #183112;
   color: white;
   border: none;
