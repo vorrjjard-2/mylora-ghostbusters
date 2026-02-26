@@ -82,7 +82,7 @@ def create_application(request):
         barangay=step2["barangay"],
         city=step2["city"],
         zipcode=step2["zipCode"],
-        default_branch=step2["branch"],
+        branch_id=step2["branch"],
 
         credit_amt_request=step2["creditAmount"],
         credit_term_request=step2["creditTerm"],
@@ -313,7 +313,7 @@ def activate_account(request, token):
     from django.contrib.auth.models import User, Group
     from django.utils import timezone
     from datetime import timedelta
-    from accounts.models import Customer, Branch, CreditAccount
+    from accounts.models import Customer, CreditAccount
     from django.db import transaction
     
     password = request.data.get("password")
@@ -360,11 +360,8 @@ def activate_account(request, token):
                 application=app
             )
             
-            # 4. Get or create Branch
-            branch, created = Branch.objects.get_or_create(
-                name=app.default_branch,
-                defaults={'address': 'To be updated'}
-            )
+            # 4. Get Branch from FK
+            branch = app.branch
             
             # 5. Create CreditAccount with approved credit info
             credit_account = CreditAccount.objects.create(

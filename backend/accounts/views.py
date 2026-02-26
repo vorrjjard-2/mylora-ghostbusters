@@ -110,7 +110,11 @@ def customer_dashboard(request):
             'credit': {
                 'available_credit': str(available_credit),
                 'credit_limit': str(credit_account.credit_limit),
-                'outstanding_balance': str(credit_account.outstanding_bal)
+                'outstanding_balance': str(credit_account.outstanding_bal),
+                'branch': {
+                    'name': credit_account.branch.name,
+                    'address': credit_account.branch.address,
+                },
             },
             'recent_orders': orders_data
         })
@@ -423,3 +427,11 @@ def um_delete_employee(request, user_id):
         return Response({"success": True, "message": "Employee deleted successfully"})
     except User.DoesNotExist:
         return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["GET"])
+def branches_list(request):
+    from .models import Branch
+    branches = Branch.objects.all().order_by("name")
+    data = [{"branch_id": b.branch_id, "name": b.name} for b in branches]
+    return Response(data)

@@ -16,6 +16,7 @@ export default function CreditManagerDashboard() {
   }, []);
 
   const [creditData, setCreditData] = useState(null);
+  const [allOrders, setAllOrders] = useState([]);
   const [payments, setPayments] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,11 +37,13 @@ export default function CreditManagerDashboard() {
   useEffect(() => {
     Promise.all([
       fetch("http://localhost:8000/api/cm/pending-orders/", { credentials: "include" }).then((r) => r.json()),
+      fetch("http://localhost:8000/api/cm/all-orders/", { credentials: "include" }).then((r) => r.json()),
       fetch("http://localhost:8000/api/cm/pending-payments/", { credentials: "include" }).then((r) => r.json()),
       fetch("http://localhost:8000/api/cm/customers/", { credentials: "include" }).then((r) => r.json()),
     ])
-      .then(([cd, pm, cust]) => {
+      .then(([cd, ao, pm, cust]) => {
         setCreditData(cd);
+        setAllOrders(ao);
         setPayments(pm);
         setCustomers(cust);
       })
@@ -50,18 +53,36 @@ export default function CreditManagerDashboard() {
 
   // Update filtered and sorted data whenever dependencies change
   useEffect(() => {
-    // Credit Approval sorting
-    if (creditData?.pending_orders && (activeTab === "credit" || activeTab === "credit-all")) {
+    // Credit Approval - Pending tab
+    if (creditData?.pending_orders && activeTab === "credit") {
       const sorted = [...creditData.pending_orders].sort((a, b) => {
         let comparison = 0;
         if (sortBy === "order_id") {
           comparison = a.order_id - b.order_id;
-        } else if (sortBy === "status") {
-          comparison = (a.order_status || "").localeCompare(b.order_status || "");
         } else if (sortBy === "date") {
-          const dateA = new Date(a.date_ordered);
-          const dateB = new Date(b.date_ordered);
-          comparison = dateA - dateB;
+          comparison = new Date(a.date_ordered) - new Date(b.date_ordered);
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setFilteredOrders(sorted);
+    }
+
+    // Credit Approval - View All tab
+    if (activeTab === "credit-all") {
+      const term = searchTerm.toLowerCase();
+      const filtered = allOrders.filter((o) =>
+        !term ||
+        String(o.order_id).includes(term) ||
+        o.customer_name.toLowerCase().includes(term)
+      );
+      const sorted = filtered.sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "order_id") {
+          comparison = a.order_id - b.order_id;
+        } else if (sortBy === "status") {
+          comparison = (a.status || "").localeCompare(b.status || "");
+        } else if (sortBy === "date") {
+          comparison = new Date(a.date_ordered) - new Date(b.date_ordered);
         }
         return sortDirection === "asc" ? comparison : -comparison;
       });
@@ -105,7 +126,7 @@ export default function CreditManagerDashboard() {
       });
       setFilteredCustomers(sorted);
     }
-  }, [activeTab, creditData, payments, customers, sortBy, sortDirection, searchTerm]);
+  }, [activeTab, creditData, allOrders, payments, customers, sortBy, sortDirection, searchTerm]);
 
   const handleSortChange = (newSortBy) => {
     if (newSortBy === sortBy) {
@@ -509,7 +530,9 @@ export default function CreditManagerDashboard() {
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
                     type="text"
-                    placeholder="Search"
+                    placeholder="Search by order ID or customer"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "10px 10px 10px 45px",
@@ -526,10 +549,10 @@ export default function CreditManagerDashboard() {
               {renderSortIndicator()}
 
               {/* Table View */}
-              <div style={{ 
-                backgroundColor: "white", 
-                border: "1px solid #262626", 
-                borderRadius: "15px", 
+              <div style={{
+                backgroundColor: "white",
+                border: "1px solid #262626",
+                borderRadius: "15px",
                 overflow: "hidden"
               }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -543,34 +566,48 @@ export default function CreditManagerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredOrders.map((order, idx) => (
-                      <tr 
-                        key={order.order_id}
-                        onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
-                        style={{ 
-                          borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
-                          cursor: "pointer"
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
-                      >
-                        <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{order.order_id}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>₱ 50,000.00</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>{order.date_ordered}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>{order.customer_name}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>
-                          <span style={{ 
-                            padding: "4px 12px", 
-                            borderRadius: "12px", 
-                            backgroundColor: "#D1E7DD",
-                            fontSize: "12px",
-                            fontWeight: "600"
-                          }}>
-                            Credit Approved
-                          </span>
-                        </td>
+                    {filteredOrders.length === 0 && (
+                      <tr>
+                        <td colSpan="5" style={{ padding: "20px", textAlign: "center", color: "#888" }}>No orders found.</td>
                       </tr>
-                    ))}
+                    )}
+                    {filteredOrders.map((order, idx) => {
+                      const statusStyles = {
+                        PENDING:   { backgroundColor: "#FFF3CD", color: "#856404" },
+                        APPROVED:  { backgroundColor: "#D1E7DD", color: "#0F5132" },
+                        REJECTED:  { backgroundColor: "#F8D7DA", color: "#842029" },
+                        COMPLETED: { backgroundColor: "#CCE5FF", color: "#004085" },
+                      };
+                      const badge = statusStyles[order.status] || { backgroundColor: "#e0e0e0", color: "#333" };
+                      return (
+                        <tr
+                          key={order.order_id}
+                          onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
+                          style={{
+                            borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
+                            cursor: "pointer"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
+                        >
+                          <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{order.order_id}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>₱ {fmt(order.amount)}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>{order.date_ordered}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>{order.customer_name}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>
+                            <span style={{
+                              padding: "4px 12px",
+                              borderRadius: "12px",
+                              fontSize: "12px",
+                              fontWeight: "600",
+                              ...badge
+                            }}>
+                              {order.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

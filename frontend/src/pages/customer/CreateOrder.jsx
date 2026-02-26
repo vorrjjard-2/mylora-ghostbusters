@@ -9,7 +9,10 @@ export default function CreateOrder() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(() => {
+    const saved = localStorage.getItem("order_items");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
     // Fetch available products

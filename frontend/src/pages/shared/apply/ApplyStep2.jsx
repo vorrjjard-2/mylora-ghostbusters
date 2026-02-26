@@ -24,6 +24,14 @@ export default function ApplyStep2() {
   const [provinces, setProvinces] = useState([]);
   const [citiesMunicipalities, setCitiesMunicipalities] = useState([]);
   const [barangays, setBarangays] = useState([]);
+  const [branches, setBranches] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/branches/")
+      .then(r => r.json())
+      .then(data => setBranches(data))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetch("https://psgc.gitlab.io/api/provinces/")
@@ -325,9 +333,11 @@ export default function ApplyStep2() {
            </div>
            <div className="input-group">
              <label>Default Store Branch<span className="required">*</span></label>
-             <select onChange={e => setBranch(e.target.value)} required>
+             <select value={branch} onChange={e => setBranch(e.target.value)} required>
                <option value="">Select your preferred branch</option>
-               <option value="branch-a">Branch A</option>
+               {branches.map(b => (
+                 <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+               ))}
              </select>
            </div>
          </section>

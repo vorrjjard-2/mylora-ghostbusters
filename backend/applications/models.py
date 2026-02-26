@@ -30,7 +30,12 @@ class CreditEnrollment(models.Model):
     barangay = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
-    default_branch = models.CharField(max_length=100)
+    branch = models.ForeignKey(
+        'accounts.Branch',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
 
     # Credit request
     credit_amt_request = models.DecimalField(

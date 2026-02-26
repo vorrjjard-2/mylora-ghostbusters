@@ -196,6 +196,32 @@ def _require_role(request, role_name):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def cm_all_orders(request):
+    """All orders (any status) for the credit manager View All tab."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    orders = Order.objects.select_related(
+        "account__customer__user",
+        "account__customer__application",
+    ).order_by("-date_ordered")
+
+    data = []
+    for order in orders:
+        customer = order.account.customer
+        data.append({
+            "order_id": order.order_id,
+            "amount": str(order.total_amount),
+            "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "status": order.order_status,
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def cm_pending_orders(request):
     """Dashboard summary + list of PENDING orders for credit approval."""
     if not _require_role(request, "credit_manager"):

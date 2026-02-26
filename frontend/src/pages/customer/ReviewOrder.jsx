@@ -232,6 +232,16 @@ return (
           </div>
         </div>
 
+        {deliveryDetails.deliveryMode === "PICKUP" && customerInfo?.credit?.branch && (
+          <div className="review-field-group">
+            <label className="review-field-label">Branch Address</label>
+            <div className="review-readonly-box review-address-multi-line">
+              <p><strong>{customerInfo.credit.branch.name}</strong></p>
+              <p>{customerInfo.credit.branch.address}</p>
+            </div>
+          </div>
+        )}
+
         {deliveryDetails.deliveryMode === "DELIVERY" && (
           <div className="review-field-group">
             <label className="review-field-label">Shipping Address</label>
