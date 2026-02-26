@@ -100,6 +100,35 @@ def submit_payment(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def cm_all_payments(request):
+    """All payment requests (any status) for the Payment Review View All tab."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    payments = (
+        PaymentRequest.objects.select_related(
+            "account__customer__user",
+            "approved_by",
+        ).order_by("-date_paid")
+    )
+
+    data = []
+    for p in payments:
+        customer = p.account.customer
+        data.append({
+            "payment_id": p.payment_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "amount_paid": str(p.amount_paid),
+            "date_paid": p.date_paid.strftime("%B %d, %Y"),
+            "status": p.payment_status,
+            "confirmed_by": p.approved_by.get_full_name() or p.approved_by.username if p.approved_by else None,
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def cm_pending_payments(request):
     """List of PENDING payment requests for the Payment Review tab."""
     if not _require_role(request, "credit_manager"):

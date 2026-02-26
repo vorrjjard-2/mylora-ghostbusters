@@ -18,6 +18,7 @@ export default function CreditManagerDashboard() {
   const [creditData, setCreditData] = useState(null);
   const [allOrders, setAllOrders] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [allPayments, setAllPayments] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -39,12 +40,14 @@ export default function CreditManagerDashboard() {
       fetch("http://localhost:8000/api/cm/pending-orders/", { credentials: "include" }).then((r) => r.json()),
       fetch("http://localhost:8000/api/cm/all-orders/", { credentials: "include" }).then((r) => r.json()),
       fetch("http://localhost:8000/api/cm/pending-payments/", { credentials: "include" }).then((r) => r.json()),
+      fetch("http://localhost:8000/api/cm/all-payments/", { credentials: "include" }).then((r) => r.json()),
       fetch("http://localhost:8000/api/cm/customers/", { credentials: "include" }).then((r) => r.json()),
     ])
-      .then(([cd, ao, pm, cust]) => {
+      .then(([cd, ao, pm, ap, cust]) => {
         setCreditData(cd);
         setAllOrders(ao);
         setPayments(pm);
+        setAllPayments(ap);
         setCustomers(cust);
       })
       .catch(console.error)
@@ -89,8 +92,8 @@ export default function CreditManagerDashboard() {
       setFilteredOrders(sorted);
     }
 
-    // Payment Review sorting
-    if (payments && (activeTab === "payment" || activeTab === "payment-all")) {
+    // Payment Review - Pending tab
+    if (payments && activeTab === "payment") {
       const sorted = [...payments].sort((a, b) => {
         let comparison = 0;
         if (sortBy === "customer") {
@@ -98,9 +101,23 @@ export default function CreditManagerDashboard() {
         } else if (sortBy === "amount") {
           comparison = parseFloat(a.amount_paid) - parseFloat(b.amount_paid);
         } else if (sortBy === "date") {
-          const dateA = new Date(a.date_paid);
-          const dateB = new Date(b.date_paid);
-          comparison = dateA - dateB;
+          comparison = new Date(a.date_paid) - new Date(b.date_paid);
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setFilteredPayments(sorted);
+    }
+
+    // Payment Review - View All tab
+    if (activeTab === "payment-all") {
+      const sorted = [...allPayments].sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "customer") {
+          comparison = (a.customer_name || "").localeCompare(b.customer_name || "");
+        } else if (sortBy === "amount") {
+          comparison = parseFloat(a.amount_paid) - parseFloat(b.amount_paid);
+        } else if (sortBy === "date") {
+          comparison = new Date(a.date_paid) - new Date(b.date_paid);
         }
         return sortDirection === "asc" ? comparison : -comparison;
       });
@@ -126,7 +143,7 @@ export default function CreditManagerDashboard() {
       });
       setFilteredCustomers(sorted);
     }
-  }, [activeTab, creditData, allOrders, payments, customers, sortBy, sortDirection, searchTerm]);
+  }, [activeTab, creditData, allOrders, payments, allPayments, customers, sortBy, sortDirection, searchTerm]);
 
   const handleSortChange = (newSortBy) => {
     if (newSortBy === sortBy) {
@@ -768,27 +785,48 @@ export default function CreditManagerDashboard() {
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>CUSTOMER</th>
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>AMOUNT PAID</th>
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>DATE PAID</th>
+                      <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>STATUS</th>
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>CONFIRMED BY</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredPayments.map((p, idx) => (
-                      <tr 
-                        key={p.payment_id}
-                        onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
-                        style={{ 
-                          borderBottom: idx < filteredPayments.length - 1 ? "1px solid #e0e0e0" : "none",
-                          cursor: "pointer"
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
-                      >
-                        <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{p.customer_name}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>₱ {fmt(p.amount_paid)}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>{p.date_paid}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>CM1234</td>
+                    {filteredPayments.length === 0 && (
+                      <tr>
+                        <td colSpan="5" style={{ padding: "20px", textAlign: "center", color: "#888" }}>No payments found.</td>
                       </tr>
-                    ))}
+                    )}
+                    {filteredPayments.map((p, idx) => {
+                      const statusStyles = {
+                        PENDING:  { backgroundColor: "#FFF3CD", color: "#856404" },
+                        VERIFIED: { backgroundColor: "#D1E7DD", color: "#0F5132" },
+                        REJECTED: { backgroundColor: "#F8D7DA", color: "#842029" },
+                      };
+                      const badge = statusStyles[p.status] || { backgroundColor: "#e0e0e0", color: "#333" };
+                      return (
+                        <tr
+                          key={p.payment_id}
+                          onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
+                          style={{
+                            borderBottom: idx < filteredPayments.length - 1 ? "1px solid #e0e0e0" : "none",
+                            cursor: "pointer"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
+                        >
+                          <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{p.customer_name}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>₱ {fmt(p.amount_paid)}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>{p.date_paid}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>
+                            <span style={{ padding: "4px 12px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", ...badge }}>
+                              {p.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: "15px", fontSize: "14px", color: p.confirmed_by ? "inherit" : "#aaa" }}>
+                            {p.confirmed_by ?? "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
