@@ -13,7 +13,7 @@ export default function UpdateBalance() {
   const [processing, setProcessing] = useState(false);
 
   // Modal states
-  const [showPasswordModal, setShowPasswordModal] = useState(true); 
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -24,6 +24,12 @@ export default function UpdateBalance() {
     date_of_payment: "",
     proof_of_payment: null,
   });
+  const formatAsCurrency = (value) => {
+    if (!value) return "";
+    const number = value.toString().replace(/\D/g, "");
+    if (!number) return "";
+    return "₱" + Number(number).toLocaleString("en-PH");
+  };
 
   useEffect(() => {
     // Fetch customer details
@@ -183,13 +189,15 @@ return (
         <div className="ub-form-group">
           <label className="ub-label">Balance Paid</label>
           <input
-            type="number"
+            type="text"
             name="balance_paid"
-            value={paymentForm.balance_paid}
-            onChange={handleFormChange}
+            value={formatAsCurrency(paymentForm.balance_paid)}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              setPaymentForm((prev) => ({ ...prev, balance_paid: raw }));
+            }}
             className="ub-input"
-            placeholder="₱ 0.00"
-            step="0.01"
+            placeholder="₱0"
           />
         </div>
         </div>
@@ -255,7 +263,7 @@ return (
 
 
         <div className="ub-button-row">
-          <button type="button" className="ub-cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
+          <button type="button" className="ub-cancel-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}/details`)}>
             Cancel
           </button>
           <button type="submit" className="ub-submit-btn">

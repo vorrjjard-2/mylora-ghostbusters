@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
 import { getCookie } from "../../utils/csrf";
-import "./Dashboard.css";
+import "../upper_management/Dashboard.css";
+import "../../components/internal/Sidebar.css";
 
 export default function OrderProcessorDashboard() {
   const navigate = useNavigate();
@@ -10,8 +11,8 @@ export default function OrderProcessorDashboard() {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState("date"); // "date", "status", "order_id"
-  const [sortDirection, setSortDirection] = useState("desc"); // "asc" or "desc"
+  const [sortBy, setSortBy] = useState("date");
+  const [sortDirection, setSortDirection] = useState("desc");
   const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
@@ -39,24 +40,18 @@ export default function OrderProcessorDashboard() {
     fetchData();
   }, []);
 
-  // Sort orders whenever sortBy or sortDirection changes
   useEffect(() => {
     if (orders.length === 0) return;
 
     const sorted = [...orders].sort((a, b) => {
       let comparison = 0;
-
       if (sortBy === "order_id") {
         comparison = a.order_id - b.order_id;
       } else if (sortBy === "status") {
         comparison = a.order_status.localeCompare(b.order_status);
       } else if (sortBy === "date") {
-        // Parse dates for comparison
-        const dateA = new Date(a.date_ordered);
-        const dateB = new Date(b.date_ordered);
-        comparison = dateA - dateB;
+        comparison = new Date(a.date_ordered) - new Date(b.date_ordered);
       }
-
       return sortDirection === "asc" ? comparison : -comparison;
     });
 
@@ -65,10 +60,8 @@ export default function OrderProcessorDashboard() {
 
   const handleSortChange = (newSortBy) => {
     if (newSortBy === sortBy) {
-      // Toggle direction if same field
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      // New field, default to ascending
       setSortBy(newSortBy);
       setSortDirection(newSortBy === "date" ? "desc" : "asc");
     }
@@ -90,50 +83,60 @@ export default function OrderProcessorDashboard() {
     navigate("/login");
   };
 
+  const sortOptions = [
+    { value: "date", label: "Date Ordered" },
+    { value: "status", label: "Status" },
+    { value: "order_id", label: "Order ID" },
+  ];
+
   return (
-    <div className="op-dash-root">
+    <div className="um-dashboard-wrapper">
       {/* HEADER */}
-      <header className="op-dash-header">
-        <div className="op-dash-brand">
-          <img src={logo} alt="Logo" className="op-dash-logo" />
-          <span className="op-dash-brand-name">Web Credit System</span>
+      <header className="um-header-section">
+        <div className="um-brand-group">
+          <img src={logo} alt="Logo" className="mylora-logo" />
+          <span className="um-system-title">Web Credit System</span>
         </div>
-        <button className="op-dash-logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <div className="um-header-actions">
+          <button className="um-logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </header>
 
-      <div className="op-dash-body">
+      <div className="um-dashboard-body" style={{ display: "flex", flex: 1 }}>
         {/* SIDEBAR */}
-        <aside className="op-dash-sidebar">
-          <div className="op-dash-side-item op-dash-side-active">Dashboard</div>
-          <div
-            className="op-dash-side-item"
-            onClick={() => navigate("/order-processor/history")}
-          >
-            Order History
-          </div>
+        <aside className="um-sidebar">
+          <nav className="um-sidebar-nav">
+            <div className="um-sidebar-item active">Dashboard</div>
+            <div
+              className="um-sidebar-item"
+              onClick={() => navigate("/order-processor/history")}
+            >
+              Order History
+            </div>
+          </nav>
         </aside>
 
         {/* MAIN */}
-        <main className="op-dash-main">
-          <h1 className="op-dash-greeting">
+        <main className="um-dashboard-content">
+          <h1 className="um-welcome-text">
             Hello, {userName || "Order Processor"}
           </h1>
 
-          {/* Summary Card */}
-          <div className="op-dash-card-row">
-            <div className="op-dash-card">
-              <div className="op-dash-card-label">For Processing</div>
-              <div className="op-dash-card-count">
+          {/* Stat Card */}
+          <div className="um-stats-container">
+            <div className="um-stat-card">
+              <span className="um-stat-label">For Processing</span>
+              <span className="um-stat-number">
                 {loading ? "..." : orders.length}
-              </div>
+              </span>
             </div>
           </div>
 
           {/* Section Header with Sort */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <h2 className="op-dash-section-title">Pending Orders:</h2>
+            <h2 style={{ fontSize: "20px", fontWeight: "600", margin: 0 }}>Pending Orders:</h2>
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => setShowSortMenu(!showSortMenu)}
@@ -147,7 +150,7 @@ export default function OrderProcessorDashboard() {
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  fontWeight: "600"
+                  fontWeight: "600",
                 }}
               >
                 <span>↕</span>
@@ -156,7 +159,7 @@ export default function OrderProcessorDashboard() {
                   {sortDirection === "asc" ? "↑" : "↓"}
                 </span>
               </button>
-              
+
               {showSortMenu && (
                 <div style={{
                   position: "absolute",
@@ -167,68 +170,36 @@ export default function OrderProcessorDashboard() {
                   borderRadius: "8px",
                   boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                   minWidth: "200px",
-                  zIndex: 1000
+                  zIndex: 1000,
                 }}>
-                  <div
-                    onClick={() => handleSortChange("date")}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid #e0e0e0",
-                      backgroundColor: sortBy === "date" ? "#f5f5f5" : "white",
-                      fontWeight: sortBy === "date" ? "600" : "400",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === "date" ? "#f5f5f5" : "white"}
-                  >
-                    <span>Date Ordered</span>
-                    {sortBy === "date" && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
-                  </div>
-                  <div
-                    onClick={() => handleSortChange("status")}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid #e0e0e0",
-                      backgroundColor: sortBy === "status" ? "#f5f5f5" : "white",
-                      fontWeight: sortBy === "status" ? "600" : "400",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === "status" ? "#f5f5f5" : "white"}
-                  >
-                    <span>Status</span>
-                    {sortBy === "status" && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
-                  </div>
-                  <div
-                    onClick={() => handleSortChange("order_id")}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      backgroundColor: sortBy === "order_id" ? "#f5f5f5" : "white",
-                      fontWeight: sortBy === "order_id" ? "600" : "400",
-                      borderRadius: "0 0 8px 8px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === "order_id" ? "#f5f5f5" : "white"}
-                  >
-                    <span>Order ID</span>
-                    {sortBy === "order_id" && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
-                  </div>
+                  {sortOptions.map((option, index) => (
+                    <div
+                      key={option.value}
+                      onClick={() => handleSortChange(option.value)}
+                      style={{
+                        padding: "12px 16px",
+                        cursor: "pointer",
+                        borderBottom: index < sortOptions.length - 1 ? "1px solid #e0e0e0" : "none",
+                        backgroundColor: sortBy === option.value ? "#f5f5f5" : "white",
+                        fontWeight: sortBy === option.value ? "600" : "400",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderRadius: index === sortOptions.length - 1 ? "0 0 8px 8px" : "0",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === option.value ? "#f5f5f5" : "white"}
+                    >
+                      <span>{option.label}</span>
+                      {sortBy === option.value && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Sorting indicator chip */}
+          {/* Sort indicator */}
           <div style={{ marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
             <span style={{
@@ -240,35 +211,32 @@ export default function OrderProcessorDashboard() {
               fontWeight: "600",
               display: "inline-flex",
               alignItems: "center",
-              gap: "6px"
+              gap: "6px",
             }}>
               {getSortLabel()}
               <span style={{ fontSize: "12px" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
             </span>
           </div>
 
+          {/* Orders List */}
           {loading ? (
-            <div className="op-dash-empty">Loading...</div>
+            <p style={{ color: "#888", padding: "1rem" }}>Loading...</p>
           ) : filteredOrders.length === 0 ? (
-            <div className="op-dash-empty">No pending orders.</div>
+            <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
           ) : (
-            <div className="op-dash-list">
+            <div className="um-list-container">
               {filteredOrders.map((order) => (
                 <div
                   key={order.order_id}
-                  className="op-dash-list-item"
+                  className="um-request-item"
                   onClick={() => navigate(`/order-processor/order/${order.order_id}`)}
+                  style={{ cursor: "pointer" }}
                 >
-                  <div className="op-dash-item-left">
-                    <div className="op-dash-order-id">ORDER ID {order.order_id}</div>
-                    <div className="op-dash-order-sub">Ordered by: {order.customer_name}</div>
+                  <div className="um-request-info">
+                    <div className="um-request-id">ORDER ID {order.order_id}</div>
+                    <div className="um-request-sub">Ordered by: {order.customer_name}</div>
                   </div>
-                  <div className="op-dash-item-right">
-                    <span className="op-dash-badge">{order.order_status}</span>
-                    <div className="op-dash-order-date">
-                      Date Ordered: {order.date_ordered}
-                    </div>
-                  </div>
+                  <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
                 </div>
               ))}
             </div>

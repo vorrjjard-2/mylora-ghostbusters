@@ -912,6 +912,7 @@ def op_pending_orders(request):
             "customer_name": customer.user.get_full_name() or customer.user.username,
             "order_status": order.order_status,
             "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
+            "total_amount": str(order.total_amount),
         })
 
     return Response(data)
@@ -1056,7 +1057,10 @@ def op_completed_orders(request):
         data.append({
             "order_id": order.order_id,
             "customer_name": customer.user.get_full_name() or customer.user.username,
+            "order_status": "COMPLETED",
+            "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
             "completion_date": completion.completion_date.strftime("%B %d, %Y"),
+            "total_amount": str(order.total_amount),
         })
 
     return Response(data)
