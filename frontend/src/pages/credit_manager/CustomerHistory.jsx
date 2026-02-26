@@ -11,7 +11,6 @@ export default function CustomerHistory() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  /*  // Fetch customer details and payment history
     Promise.all([
       fetch("http://localhost:8000/api/cm/customers/", {
         credentials: "include",
@@ -29,48 +28,9 @@ export default function CustomerHistory() {
       .catch((err) => {
         console.error(err);
         alert("Failed to load customer history");
-        navigate("/credit-manager/adjustment");
+        navigate("/credit-manager/dashboard");
       })
-      .finally(() => setLoading(false)); */
-
-      const mockCustomer = { // REMOVE
-      customer_id: parseInt(customerId) || 1,
-      name: "Juan Dela Cruz",
-      available_credit: 75000.00,
-      credit_limit: 100000.00,
-      outstanding_balance: 25000.00,
-    };
-
-    const mockHistory = [
-      {
-        payment_id: 101,
-        date_paid: "2024-02-15",
-        inv_number: "INV-2024-001",
-        amount_paid: 5000.00,
-        payment_status: "VERIFIED",
-        approved_by: "Admin Maria"
-      },
-      {
-        payment_id: 102,
-        date_paid: "2024-02-20",
-        inv_number: "INV-2024-005",
-        amount_paid: 15000.00,
-        payment_status: "PENDING",
-        approved_by: null
-      },
-      {
-        payment_id: 103,
-        date_paid: "2024-01-10",
-        inv_number: "INV-2023-999",
-        amount_paid: 2000.00,
-        payment_status: "REJECTED",
-        approved_by: "Admin Jose"
-      }
-    ];
-
-    setCustomer(mockCustomer);
-    setHistory(mockHistory);
-    setLoading(false); // REMOVE
+      .finally(() => setLoading(false));
   }, [customerId, navigate]);
 
   if (loading) {
@@ -89,7 +49,7 @@ return (
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
           <span className="ch-system-title">Web Credit System</span>
         </div>
-        <button className="ch-back-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}`)}>
+        <button className="ch-back-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}/details`)}>
           Back
         </button>
       </header>
