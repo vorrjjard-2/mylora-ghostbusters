@@ -35,6 +35,7 @@ export default function CreditManagerDashboard() {
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
 
+
   useEffect(() => {
     Promise.all([
       fetch("http://localhost:8000/api/cm/pending-orders/", { credentials: "include" }).then((r) => r.json()),
@@ -53,6 +54,7 @@ export default function CreditManagerDashboard() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
 
   // Update filtered and sorted data whenever dependencies change
   useEffect(() => {

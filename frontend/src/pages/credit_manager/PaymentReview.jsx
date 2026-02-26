@@ -13,6 +13,7 @@ export default function PaymentReview() {
   const [processing, setProcessing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [password, setPassword] = useState("");
   const [pendingAction, setPendingAction] = useState(null); // 'approve' or 'reject'
 
@@ -71,7 +72,6 @@ export default function PaymentReview() {
       if (pendingAction === "approve") {
         setShowSuccessModal(true);
       } else {
-        alert("Payment rejected");
         navigate("/credit-manager/dashboard");
       }
     } catch (err) {
@@ -193,9 +193,9 @@ export default function PaymentReview() {
         <label className="payment-label">Proof of Payment</label>
         <div className="file-display">
           {payment.proof_payment_url ? (
-            <a href={payment.proof_payment_url} target="_blank" className="file-link">
+            <span className="file-link" onClick={() => setShowImageModal(true)} style={{ cursor: "pointer" }}>
               View Proof of Payment
-            </a>
+            </span>
           ) : "No file uploaded"}
         </div>
       </div>
@@ -205,9 +205,16 @@ export default function PaymentReview() {
         <button className="payment-cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
           Cancel
         </button>
-        <button className="payment-confirm-btn" onClick={() => initiateAction("approve")}>
-          Confirm Payment
-        </button>
+        {payment.payment_status === "PENDING" && (
+          <>
+            <button className="payment-cancel-btn" onClick={() => initiateAction("reject")}>
+              Reject Payment
+            </button>
+            <button className="payment-confirm-btn" onClick={() => initiateAction("approve")}>
+              Confirm Payment
+            </button>
+          </>
+        )}
       </div>
 
       {/* Modals remain structurally similar but use CSS classes */}
@@ -224,8 +231,28 @@ export default function PaymentReview() {
             />
             <div className="payment-button-row">
               <button className="payment-cancel-btn" onClick={handleCancelPasswordModal}>Cancel</button>
-              <button className="payment-confirm-btn" onClick={handleConfirmAction}>Confirm Payment</button>
+              <button className="payment-confirm-btn" onClick={handleConfirmAction}>
+                {pendingAction === "reject" ? "Reject Payment" : "Confirm Payment"}
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showImageModal && (
+        <div className="modal-overlay" onClick={() => setShowImageModal(false)}>
+          <div style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowImageModal(false)}
+              style={{ position: "absolute", top: "-12px", right: "-12px", background: "#1f3d1a", color: "#fff", border: "none", borderRadius: "50%", width: "28px", height: "28px", fontSize: "16px", cursor: "pointer", lineHeight: 1 }}
+            >
+              ×
+            </button>
+            <img
+              src={payment.proof_payment_url}
+              alt="Proof of Payment"
+              style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: "8px", display: "block" }}
+            />
           </div>
         </div>
       )}
