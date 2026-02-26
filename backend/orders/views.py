@@ -1131,6 +1131,65 @@ def op_order_view(request, order_id):
     })
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_order_view(request, order_id):
+    """View order details for upper management (any status)"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import OrderCompletion
+
+    try:
+        order = Order.objects.select_related(
+            "account__customer__user",
+            "account__customer__application",
+            "branch"
+        ).get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    customer = order.account.customer
+    app = customer.application
+
+    items_data = [
+        {
+            "name": item.product.name,
+            "quantity": f'{item.quantity:.10g}',
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("product").all()
+    ]
+
+    approval = OrderApproval.objects.filter(order=order, approval_status="APPROVED").first()
+
+    try:
+        completion = OrderCompletion.objects.select_related("user").get(order=order)
+        processed_by = completion.user.username
+        completion_date = completion.completion_date.strftime("%B %d, %Y at %I:%M %p") if completion.completion_date else ""
+    except OrderCompletion.DoesNotExist:
+        processed_by = ""
+        completion_date = ""
+
+    return Response({
+        "order_id": order.order_id,
+        "customer_name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+        "items": items_data,
+        "total_amount": str(order.total_amount),
+        "shipping_address": order.shipping_address,
+        "delivery_mode": order.delivery_mode,
+        "branch_name": order.branch.name if order.branch else "",
+        "branch_address": order.branch.address if order.branch else "",
+        "approval_date": approval.approval_date.strftime("%B %d, %Y at %I:%M %p") if approval else "",
+        "approved_by": approval.user.username if approval else "",
+        "completion_date": completion_date,
+        "processed_by": processed_by,
+        "order_status": order.order_status,
+    })
+
+
 # ─── Upper Management Customer Endpoints ───────────────────────────────────────
 
 @api_view(["GET"])

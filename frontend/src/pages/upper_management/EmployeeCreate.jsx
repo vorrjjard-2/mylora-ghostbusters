@@ -17,12 +17,14 @@ export default function EmployeeCreate() {
     password: ""
   });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    setErrorMsg("");
     if (!formData.username || !formData.password) {
-      alert("Username and password are required");
+      setErrorMsg("Username and password are required");
       return;
     }
 
@@ -53,7 +55,7 @@ export default function EmployeeCreate() {
         setShowSuccess(true);
       })
       .catch((err) => {
-        alert(err.message);
+        setErrorMsg(err.message);
       });
   };
 
@@ -302,6 +304,9 @@ export default function EmployeeCreate() {
                 Save
               </button>
             </div>
+            {errorMsg && (
+              <p style={{ color: "#dc3545", fontSize: "14px", marginTop: "12px" }}>{errorMsg}</p>
+            )}
           </form>
         </main>
       </div>

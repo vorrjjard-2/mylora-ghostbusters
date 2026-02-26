@@ -349,12 +349,14 @@ export default function OrderCompletion() {
             <p className="success-message">
               Order has been marked as completed.
             </p>
-            <button
-              className="modal-cancel-btn"
-              onClick={() => setShowSuccessModal(false)}
-            >
-              Close
-            </button>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <button
+                className="modal-cancel-btn"
+                onClick={() => setShowSuccessModal(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -326,12 +326,20 @@ def um_create_employee(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    if User.objects.filter(username=username).exists():
+    employee_users = User.objects.filter(groups__name__in=["credit_manager", "order_processor"])
+
+    if employee_users.filter(username=username).exists():
         return Response(
             {"error": "Username already exists"},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+    if email and employee_users.filter(email=email).exists():
+        return Response(
+            {"error": "Email already exists"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     try:
         # Create user
         user = User.objects.create_user(
@@ -372,14 +380,24 @@ def um_update_employee(request, user_id):
     except User.DoesNotExist:
         return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    # Update basic info
-    if "email" in request.data:
+    # Validate uniqueness before updating
+    employee_users = User.objects.filter(groups__name__in=["credit_manager", "order_processor"]).exclude(id=user_id)
+
+    if "username" in request.data and request.data["username"] != emp.username:
+        if employee_users.filter(username=request.data["username"]).exists():
+            return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        emp.username = request.data["username"]
+
+    if "email" in request.data and request.data["email"]:
+        if employee_users.filter(email=request.data["email"]).exists():
+            return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
         emp.email = request.data["email"]
+
     if "first_name" in request.data:
         emp.first_name = request.data["first_name"]
     if "last_name" in request.data:
         emp.last_name = request.data["last_name"]
-    
+
     # Update password if provided
     if "password" in request.data and request.data["password"]:
         emp.set_password(request.data["password"])

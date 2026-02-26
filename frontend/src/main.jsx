@@ -38,6 +38,8 @@ import OverrideReview from "./pages/upper_management/OverrideReview";
 import CustomerDatabase from "./pages/upper_management/CustomerDatabase";
 import UMCustomerDetail from "./pages/upper_management/UMCustomerDetail";
 import UMCustomerHistory from "./pages/upper_management/UMCustomerHistory";
+import UMUpdateBalance from "./pages/upper_management/UMUpdateBalance";
+import UMOrderView from "./pages/upper_management/UMOrderView";
 import AllOrders from "./pages/upper_management/AllOrders";
 import EmployeeDatabase from "./pages/upper_management/EmployeeDatabase";
 import EmployeeProfile from "./pages/upper_management/EmployeeProfile";
@@ -165,6 +167,22 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="upper_management">
                 <UMCustomerHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/customer/:customerId/update-balance"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <UMUpdateBalance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/customer/:customerId/order/:orderId"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <UMOrderView />
               </ProtectedRoute>
             }
           />
