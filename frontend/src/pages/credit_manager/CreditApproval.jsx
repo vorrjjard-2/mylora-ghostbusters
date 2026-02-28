@@ -27,6 +27,11 @@ export default function CreditApproval() {
   const [approvalPassword, setApprovalPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  // Reject password modal state
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectPassword, setRejectPassword] = useState("");
+  const [rejectPasswordError, setRejectPasswordError] = useState("");
+
   useEffect(() => {
     fetch(`http://localhost:8000/api/cm/order/${orderId}/`, { credentials: "include" })
       .then((r) => {
@@ -97,6 +102,21 @@ export default function CreditApproval() {
     }
     setShowPasswordModal(false);
     await postAction("approve", approvalPassword);
+  };
+
+  const handleRejectClick = () => {
+    setRejectPassword("");
+    setRejectPasswordError("");
+    setShowRejectModal(true);
+  };
+
+  const handleRejectPasswordSubmit = async () => {
+    if (!rejectPassword.trim()) {
+      setRejectPasswordError("Password is required.");
+      return;
+    }
+    setShowRejectModal(false);
+    await postAction("reject", rejectPassword);
   };
 
   const handleRequestOverride = () => {
@@ -172,7 +192,7 @@ export default function CreditApproval() {
       <h2 className="approval-subtitle">Customer Information</h2>
       <div className="info-grid">
         <div className="info-group">
-          <label className="info-label-">Name</label>
+          <label className="info-label">Name</label>
           <input className="info-input-name" readOnly value={order.customer_name} />
         </div>
         <div className="info-row">
@@ -256,7 +276,7 @@ export default function CreditApproval() {
         <button
           className="reject-btn"
           disabled={acting}
-          onClick={() => postAction("reject")}
+          onClick={handleRejectClick}
         >
           Reject Order
         </button>
@@ -360,6 +380,93 @@ export default function CreditApproval() {
                 }}
               >
                 {acting ? "Approving..." : "Approve"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Reject Modal */}
+      {showRejectModal && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: "8px",
+            maxWidth: "500px",
+            width: "90%",
+            padding: "2rem",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            fontFamily: "'Arimo', sans-serif",
+          }}>
+            <h3 style={{
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              marginBottom: "1.5rem",
+              textAlign: "center",
+              color: "#1E2D1A",
+            }}>
+              Please enter your password to reject ORDER {order.order_id}.
+            </h3>
+            <input
+              type="password"
+              value={rejectPassword}
+              onChange={(e) => { setRejectPassword(e.target.value); setRejectPasswordError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleRejectPasswordSubmit()}
+              placeholder="••••••••••"
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+                marginBottom: rejectPasswordError ? "0.5rem" : "1.5rem",
+              }}
+            />
+            {rejectPasswordError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectPasswordError}</p>
+            )}
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setShowRejectModal(false)}
+                disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  fontFamily: "'Arimo', sans-serif",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectPasswordSubmit}
+                disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#b03a2e",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: acting ? "not-allowed" : "pointer",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  fontFamily: "'Arimo', sans-serif",
+                }}
+              >
+                {acting ? "Rejecting..." : "Reject"}
               </button>
             </div>
           </div>

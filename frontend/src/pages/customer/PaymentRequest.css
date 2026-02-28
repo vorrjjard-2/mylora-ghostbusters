@@ -267,3 +267,10 @@
     opacity: 0.7;
     cursor: not-allowed;
 }
+
+.pr-error {
+    color: #b03a2e;
+    font-size: 13px;
+    margin-top: 4px;
+    display: block;
+}

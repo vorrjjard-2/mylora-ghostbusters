@@ -243,14 +243,26 @@ return (
         )}
 
         {deliveryDetails.deliveryMode === "DELIVERY" && (
-          <div className="review-field-group">
-            <label className="review-field-label">Shipping Address</label>
-            <div className="review-readonly-box review-address-multi-line">
-              <p>{deliveryDetails.address1}</p>
-              {deliveryDetails.address2 && <p>{deliveryDetails.address2}</p>}
-              <p>{deliveryDetails.barangay}, {deliveryDetails.city} {deliveryDetails.zipCode}</p>
+          <>
+            <div className="review-field-group">
+              <label className="review-field-label">Shipping Address</label>
+              <div className="review-readonly-box review-address-multi-line">
+                <p>{deliveryDetails.address1}</p>
+                {deliveryDetails.address2 && <p>{deliveryDetails.address2}</p>}
+                <p>{deliveryDetails.barangay}, {deliveryDetails.city} {deliveryDetails.zipCode}</p>
+              </div>
             </div>
-          </div>
+
+            {customerInfo?.credit?.branch && (
+              <div className="review-field-group">
+                <label className="review-field-label">Branch Address</label>
+                <div className="review-readonly-box review-address-multi-line">
+                  <p><strong>{customerInfo.credit.branch.name}</strong></p>
+                  <p>{customerInfo.credit.branch.address}</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
