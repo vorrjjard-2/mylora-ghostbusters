@@ -67,6 +67,8 @@ class CreditEnrollment(models.Model):
         related_name="approved_enrollments",
     )
     
+    rejection_reason = models.TextField(blank=True)
+
     # Activation token for password setup
     activation_token = models.CharField(max_length=64, blank=True, null=True)
     activation_token_created = models.DateTimeField(blank=True, null=True)

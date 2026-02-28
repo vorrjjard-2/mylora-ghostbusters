@@ -20,6 +20,13 @@ export default function EnrollmentReview() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Reject modal state
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReasonError, setRejectReasonError] = useState("");
+  const [rejectPassword, setRejectPassword] = useState("");
+  const [rejectPasswordError, setRejectPasswordError] = useState("");
+
   // File preview modal
   const [filePreview, setFilePreview] = useState(null); // { url, label, type }
 
@@ -57,6 +64,14 @@ export default function EnrollmentReview() {
   }, [applicationId]);
 
   function handleActionClick(action) {
+    if (action === "reject") {
+      setRejectReason("");
+      setRejectReasonError("");
+      setRejectPassword("");
+      setRejectPasswordError("");
+      setShowRejectModal(true);
+      return;
+    }
     setPendingAction(action);
     setShowModal(true);
     setError("");
@@ -65,7 +80,7 @@ export default function EnrollmentReview() {
   function handleConfirm(password) {
     setLoading(true);
     setError("");
-    
+
     fetch(`http://localhost:8000/api/enrollments/${applicationId}/${pendingAction}/`, {
       method: "POST",
       credentials: "include",
@@ -96,8 +111,52 @@ export default function EnrollmentReview() {
       });
   }
 
+  function handleRejectSubmit() {
+    let hasError = false;
+    if (rejectReason.trim().split(/\s+/).length < 5) {
+      setRejectReasonError("Please provide at least 5 words for the rejection reason.");
+      hasError = true;
+    }
+    if (!rejectPassword.trim()) {
+      setRejectPasswordError("Password is required.");
+      hasError = true;
+    }
+    if (hasError) return;
+
+    setLoading(true);
+    setRejectPasswordError("");
+
+    fetch(`http://localhost:8000/api/enrollments/${applicationId}/reject/`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify({ password: rejectPassword, rejection_reason: rejectReason.trim() }),
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(d => { throw new Error(d.error || "Action failed"); });
+        }
+        return res.json();
+      })
+      .then(() => {
+        setActionResult("reject");
+        setShowRejectModal(false);
+        setShowSuccessModal(true);
+      })
+      .catch(err => {
+        setRejectPasswordError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
   function handleCancel() {
     setShowModal(false);
+    setShowRejectModal(false);
     setPendingAction(null);
     setError("");
   }
@@ -268,6 +327,95 @@ export default function EnrollmentReview() {
           loading={loading}
           error={error}
         />
+      )}
+
+      {showRejectModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0, 0, 0, 0.5)",
+          display: "flex", justifyContent: "center", alignItems: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#fff", borderRadius: "15px", border: "1px solid #262626",
+            maxWidth: "500px", width: "90%", padding: "2rem",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)", fontFamily: "'Arimo', sans-serif",
+          }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px", color: "#1E2D1A" }}>
+              Reject Enrollment
+            </h3>
+            <p style={{ fontSize: "14px", color: "#666", marginBottom: "20px" }}>
+              Please provide a reason and enter your password to proceed.
+            </p>
+
+            <label style={{ fontSize: "14px", fontWeight: 600, color: "#333", marginBottom: "4px", display: "block" }}>
+              Reason for Rejection
+            </label>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
+              placeholder="Enter reason for rejection..."
+              autoFocus
+              rows={3}
+              style={{
+                width: "100%", padding: "10px 14px", fontSize: "15px",
+                border: "1px solid #262626", borderRadius: "8px",
+                fontFamily: "'Arimo', sans-serif", boxSizing: "border-box",
+                resize: "vertical", marginBottom: rejectReasonError ? "0.5rem" : "1rem",
+                outline: "none",
+              }}
+            />
+            {rejectReasonError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectReasonError}</p>
+            )}
+
+            <label style={{ fontSize: "14px", fontWeight: 600, color: "#333", marginBottom: "4px", display: "block" }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={rejectPassword}
+              onChange={(e) => { setRejectPassword(e.target.value); setRejectPasswordError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleRejectSubmit()}
+              placeholder="••••••••••"
+              style={{
+                width: "100%", padding: "10px 14px", fontSize: "15px",
+                border: "1px solid #262626", borderRadius: "8px",
+                fontFamily: "'Arimo', sans-serif", boxSizing: "border-box",
+                outline: "none", marginBottom: rejectPasswordError ? "0.5rem" : "1.5rem",
+              }}
+            />
+            {rejectPasswordError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectPasswordError}</p>
+            )}
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                onClick={handleCancel}
+                disabled={loading}
+                style={{
+                  padding: "10px 24px", fontSize: "15px", fontWeight: 600,
+                  fontFamily: "'Arimo', sans-serif", border: "1.5px solid #262626",
+                  borderRadius: "8px", backgroundColor: "white", color: "#262626", cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectSubmit}
+                disabled={loading}
+                style={{
+                  padding: "10px 24px", fontSize: "15px", fontWeight: 600,
+                  fontFamily: "'Arimo', sans-serif", border: "none", borderRadius: "8px",
+                  backgroundColor: loading ? "#888" : "#b03a2e", color: "white",
+                  cursor: loading ? "not-allowed" : "pointer",
+                }}
+              >
+                {loading ? "Rejecting..." : "Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showSuccessModal && (

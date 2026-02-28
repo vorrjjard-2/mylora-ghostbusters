@@ -266,12 +266,21 @@ def reject_enrollment(request, application_id):
             status=status.HTTP_403_FORBIDDEN
         )
     
+    # Validate rejection reason
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     # Proceed with rejection
     app = CreditEnrollment.objects.get(application_id=application_id)
     app.enrollment_status = "REJECTED"
     app.approved_by = request.user
+    app.rejection_reason = rejection_reason
     app.save()
-    log_audit(user=request.user, action="REJECT_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email}, request=request)
+    log_audit(user=request.user, action="REJECT_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email, "rejection_reason": rejection_reason}, request=request)
     return Response({"status": "rejected"})
 
 

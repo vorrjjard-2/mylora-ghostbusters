@@ -319,7 +319,7 @@ def cm_approve_order(request, order_id):
         return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
 
     try:
-        order = Order.objects.select_related("account").get(order_id=order_id)
+        order = Order.objects.select_related("account__customer__user").get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -330,6 +330,7 @@ def cm_approve_order(request, order_id):
         )
 
     from django.utils import timezone
+    from django.core.mail import send_mail
 
     with transaction.atomic():
         order.order_status = "APPROVED"
@@ -348,6 +349,34 @@ def cm_approve_order(request, order_id):
         )
 
     credit.refresh_from_db()
+
+    # Send order approval email to customer
+    customer_user = order.account.customer.user
+    try:
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Approved!",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been approved.
+
+Your updated credit details:
+- Available Credit: ₱{credit.available_credit:,.2f}
+- Credit Limit: ₱{credit.credit_limit:,.2f}
+- Outstanding Balance: ₱{credit.outstanding_bal:,.2f}
+
+Thank you for your purchase!
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
     log_audit(user=request.user, action="APPROVE_ORDER", details={"order_id": order_id}, request=request)
     return Response({
         "success": True,
@@ -416,8 +445,15 @@ def cm_reject_order(request, order_id):
     if not request.user.check_password(password):
         return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     try:
-        order = Order.objects.select_related("account").get(order_id=order_id)
+        order = Order.objects.select_related("account__customer__user").get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -428,6 +464,7 @@ def cm_reject_order(request, order_id):
         )
 
     from django.utils import timezone
+    from django.core.mail import send_mail
 
     with transaction.atomic():
         order.order_status = "REJECTED"
@@ -438,9 +475,35 @@ def cm_reject_order(request, order_id):
             order=order,
             approval_status="REJECTED",
             approval_date=timezone.now(),
+            notes=rejection_reason,
         )
 
-    log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id}, request=request)
+    # Send rejection email to customer
+    customer_user = order.account.customer.user
+    try:
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Rejected",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+We regret to inform you that your order (Order ID: {order.order_id}) amounting to \u20B1{order.total_amount:,.2f} has been rejected.
+
+Reason for rejection:
+{rejection_reason}
+
+If you have any questions, please contact your branch for further assistance.
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
+    log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id, "rejection_reason": rejection_reason}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,

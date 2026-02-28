@@ -31,6 +31,8 @@ export default function CreditApproval() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectPassword, setRejectPassword] = useState("");
   const [rejectPasswordError, setRejectPasswordError] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReasonError, setRejectReasonError] = useState("");
 
   useEffect(() => {
     fetch(`http://localhost:8000/api/cm/order/${orderId}/`, { credentials: "include" })
@@ -51,11 +53,14 @@ export default function CreditApproval() {
     return totalAmount > availableCredit;
   };
 
-  const postAction = async (action, password = null) => {
+  const postAction = async (action, password = null, rejectionReason = null) => {
     // action = "approve" | "reject"
     setActing(true);
     try {
-      const body = password ? JSON.stringify({ password }) : undefined;
+      const payload = {};
+      if (password) payload.password = password;
+      if (rejectionReason) payload.rejection_reason = rejectionReason;
+      const body = Object.keys(payload).length > 0 ? JSON.stringify(payload) : undefined;
       const res = await fetch(
         `http://localhost:8000/api/cm/order/${orderId}/${action}/`,
         {
@@ -63,7 +68,7 @@ export default function CreditApproval() {
           credentials: "include",
           headers: {
             "X-CSRFToken": getCookie("csrftoken"),
-            ...(password ? { "Content-Type": "application/json" } : {}),
+            ...(body ? { "Content-Type": "application/json" } : {}),
           },
           body,
         }
@@ -107,16 +112,24 @@ export default function CreditApproval() {
   const handleRejectClick = () => {
     setRejectPassword("");
     setRejectPasswordError("");
+    setRejectReason("");
+    setRejectReasonError("");
     setShowRejectModal(true);
   };
 
   const handleRejectPasswordSubmit = async () => {
+    let hasError = false;
+    if (rejectReason.trim().split(/\s+/).length < 5) {
+      setRejectReasonError("Please provide at least 5 words for the rejection reason.");
+      hasError = true;
+    }
     if (!rejectPassword.trim()) {
       setRejectPasswordError("Password is required.");
-      return;
+      hasError = true;
     }
+    if (hasError) return;
     setShowRejectModal(false);
-    await postAction("reject", rejectPassword);
+    await postAction("reject", rejectPassword, rejectReason.trim());
   };
 
   const handleRequestOverride = () => {
@@ -415,13 +428,39 @@ export default function CreditApproval() {
             }}>
               Please enter your password to reject ORDER {order.order_id}.
             </h3>
+            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
+              Reason for Rejection
+            </label>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
+              placeholder="Enter reason for rejection..."
+              autoFocus
+              rows={3}
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+                fontFamily: "'Arimo', sans-serif",
+                resize: "vertical",
+                marginBottom: rejectReasonError ? "0.5rem" : "1rem",
+              }}
+            />
+            {rejectReasonError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectReasonError}</p>
+            )}
+            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
+              Password
+            </label>
             <input
               type="password"
               value={rejectPassword}
               onChange={(e) => { setRejectPassword(e.target.value); setRejectPasswordError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handleRejectPasswordSubmit()}
               placeholder="••••••••••"
-              autoFocus
               style={{
                 width: "100%",
                 padding: "0.75rem",

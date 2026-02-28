@@ -62,15 +62,13 @@ export default function CreateOrder() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity <= 0) {
-      setSelectedItems(selectedItems.filter((item) => item.product_id !== productId));
-    } else {
-      setSelectedItems(
-        selectedItems.map((item) =>
-          item.product_id === productId ? { ...item, quantity: parseInt(newQuantity, 10) } : item
-        )
-      );
-    }
+    const parsed = parseInt(newQuantity, 10);
+    const quantity = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+    setSelectedItems(
+      selectedItems.map((item) =>
+        item.product_id === productId ? { ...item, quantity } : item
+      )
+    );
   };
 
   const handleRemoveItem = (productId) => {
@@ -185,7 +183,7 @@ export default function CreateOrder() {
                             onChange={(e) =>
                               handleQuantityChange(item.product_id, e.target.value)
                             }
-                            min="0"
+                            min="1"
                             step="1"
                             className="order-quantity-input"
                           />
