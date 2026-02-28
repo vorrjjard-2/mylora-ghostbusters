@@ -284,6 +284,21 @@ export default function CreditApproval() {
         </table>
       </div>
 
+      {/* Rejection Reason (for already-rejected orders) */}
+      {order.order_status === "REJECTED" && order.rejection_reason && (
+        <>
+          <h2 className="approval-subtitle">Reason for Rejection</h2>
+          <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029", marginBottom: "1.5rem" }}>
+            {order.rejection_reason}
+          </div>
+          {order.rejected_by && (
+            <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "1.5rem" }}>
+              Rejected by: {order.rejected_by} {order.rejection_date ? `on ${order.rejection_date}` : ""}
+            </p>
+          )}
+        </>
+      )}
+
       {/* Action Buttons */}
       <div className="approval-actions">
         <button

@@ -35,6 +35,7 @@ class PaymentRequest(models.Model):
         ],
         default='PENDING'
     )
+    rejection_reason = models.TextField(blank=True)
     
     def __str__(self):
         return f"Payment {self.payment_id} - ₱{self.amount_paid}"

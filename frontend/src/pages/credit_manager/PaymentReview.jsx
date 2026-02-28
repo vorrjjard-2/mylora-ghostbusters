@@ -16,6 +16,8 @@ export default function PaymentReview() {
   const [showImageModal, setShowImageModal] = useState(false);
   const [password, setPassword] = useState("");
   const [pendingAction, setPendingAction] = useState(null); // 'approve' or 'reject'
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReasonError, setRejectReasonError] = useState("");
 
   useEffect(() => {
     fetch(`http://localhost:8000/api/cm/payment/${paymentId}/`, { 
@@ -38,6 +40,8 @@ export default function PaymentReview() {
     setPendingAction(action);
     setShowPasswordModal(true);
     setPassword("");
+    setRejectReason("");
+    setRejectReasonError("");
   };
 
   const handleConfirmAction = async () => {
@@ -46,8 +50,21 @@ export default function PaymentReview() {
       return;
     }
 
+    if (pendingAction === "reject") {
+      if (rejectReason.trim().split(/\s+/).length < 5) {
+        setRejectReasonError("Please provide at least 5 words for the rejection reason.");
+        return;
+      }
+      setRejectReasonError("");
+    }
+
     setProcessing(true);
     const csrfToken = getCookie("csrftoken");
+
+    const bodyData = { password };
+    if (pendingAction === "reject") {
+      bodyData.rejection_reason = rejectReason;
+    }
 
     try {
       const response = await fetch(
@@ -59,7 +76,7 @@ export default function PaymentReview() {
             "Content-Type": "application/json",
             "X-CSRFToken": csrfToken,
           },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify(bodyData),
         }
       );
 
@@ -221,6 +238,22 @@ export default function PaymentReview() {
       {showPasswordModal && (
         <div className="modal-overlay">
           <div className="payment-modal">
+            {pendingAction === "reject" && (
+              <>
+                <h3 className="section-title">Reason for Rejection</h3>
+                <textarea
+                  className="password-input"
+                  rows={4}
+                  value={rejectReason}
+                  onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
+                  placeholder="Enter reason for rejection..."
+                  style={{ resize: "vertical", fontFamily: "inherit" }}
+                />
+                {rejectReasonError && (
+                  <p style={{ color: "#b03a2e", fontSize: "0.85rem", marginTop: "4px" }}>{rejectReasonError}</p>
+                )}
+              </>
+            )}
             <h3 className="section-title">Please enter user password to proceed.</h3>
             <input
               type="password"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
 import "../order_processor/ProcessorOrderView.css";
 import "./Dashboard.css";
@@ -7,6 +7,8 @@ import "./Dashboard.css";
 export default function UMOrderView() {
   const { customerId, orderId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const backTo = location.state?.from || `/upper-management/customer/${customerId}/history`;
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -114,6 +116,14 @@ export default function UMOrderView() {
   <p class="section-label">Processed and Closed by Order Processor</p>
   <p><strong>Username:</strong> ${order.processed_by || "—"}</p>
   <p><strong>Date &amp; Time:</strong> ${order.completion_date || "—"}</p>
+  ${order.order_status === "REJECTED" && order.rejection_reason ? `
+  <hr/>
+  <p class="section-label">Reason for Rejection</p>
+  <div style="padding:12px 16px;border:1px solid #e0e0e0;border-radius:6px;background:#fdf2f2;color:#842029;line-height:1.6;font-size:14px;">
+    ${order.rejection_reason}
+  </div>
+  <p style="font-size:12px;color:#666;margin-top:6px;">Rejected by: ${order.rejected_by || "—"} ${order.rejection_date ? "on " + order.rejection_date : ""}</p>
+  ` : ""}
 </body>
 </html>`;
     iframe.srcdoc = content;
@@ -209,10 +219,24 @@ export default function UMOrderView() {
           </p>
         )}
 
+        {order.order_status === "REJECTED" && order.rejection_reason && (
+          <>
+            <h3 className="view-section-title">Reason for Rejection</h3>
+            <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029" }}>
+              {order.rejection_reason}
+            </div>
+            {order.rejected_by && (
+              <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
+                Rejected by: {order.rejected_by} {order.rejection_date ? `on ${order.rejection_date}` : ""}
+              </p>
+            )}
+          </>
+        )}
+
         <div className="view-actions">
           <button
             className="view-back-btn"
-            onClick={() => navigate(`/upper-management/customer/${customerId}/history`)}
+            onClick={() => navigate(backTo)}
           >
             Back
           </button>

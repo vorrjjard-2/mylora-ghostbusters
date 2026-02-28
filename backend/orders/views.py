@@ -123,6 +123,16 @@ def order_detail(request, order_id):
                 'subtotal': str(item.subtotal),
             })
 
+        # Check for rejection info
+        rejection_reason = ""
+        rejected_by = ""
+        rejection_date = ""
+        rejection = OrderApproval.objects.filter(order=order, approval_status="REJECTED").first()
+        if rejection:
+            rejection_reason = rejection.notes or ""
+            rejected_by = rejection.user.username if rejection.user else ""
+            rejection_date = rejection.approval_date.strftime('%B %d, %Y at %I:%M %p') if rejection.approval_date else ""
+
         return Response({
             'order_id': order.order_id,
             'date_submitted': order.date_ordered.strftime('%B %d, %Y'),
@@ -133,6 +143,9 @@ def order_detail(request, order_id):
             'order_status': order.order_status,
             'total_amount': str(order.total_amount),
             'items': items_data,
+            'rejection_reason': rejection_reason,
+            'rejected_by': rejected_by,
+            'rejection_date': rejection_date,
         })
 
     except Order.DoesNotExist:
@@ -290,6 +303,16 @@ def cm_order_detail(request, order_id):
         for item in order.items.select_related("product").all()
     ]
 
+    # Check for rejection info
+    rejection_reason = ""
+    rejected_by = ""
+    rejection_date = ""
+    rejection = OrderApproval.objects.filter(order=order, approval_status="REJECTED").first()
+    if rejection:
+        rejection_reason = rejection.notes or ""
+        rejected_by = rejection.user.username if rejection.user else ""
+        rejection_date = rejection.approval_date.strftime("%B %d, %Y at %I:%M %p") if rejection.approval_date else ""
+
     return Response({
         "order_id": order.order_id,
         "order_status": order.order_status,
@@ -302,6 +325,9 @@ def cm_order_detail(request, order_id):
         "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
+        "rejection_reason": rejection_reason,
+        "rejected_by": rejected_by,
+        "rejection_date": rejection_date,
     })
 
 
@@ -560,6 +586,7 @@ def um_pending_orders(request):
         customer = order.account.customer
         data.append({
             "order_id": order.order_id,
+            "customer_id": customer.id,
             "customer_name": customer.user.get_full_name() or customer.user.username,
             "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
             "status": order.order_status,
@@ -1238,6 +1265,7 @@ def um_order_view(request, order_id):
     ]
 
     approval = OrderApproval.objects.filter(order=order, approval_status="APPROVED").first()
+    rejection = OrderApproval.objects.filter(order=order, approval_status="REJECTED").first()
 
     try:
         completion = OrderCompletion.objects.select_related("user").get(order=order)
@@ -1263,6 +1291,9 @@ def um_order_view(request, order_id):
         "completion_date": completion_date,
         "processed_by": processed_by,
         "order_status": order.order_status,
+        "rejection_reason": rejection.notes if rejection else "",
+        "rejected_by": rejection.user.username if rejection and rejection.user else "",
+        "rejection_date": rejection.approval_date.strftime("%B %d, %Y at %I:%M %p") if rejection and rejection.approval_date else "",
     })
 
 
@@ -1526,6 +1557,7 @@ def um_all_orders(request):
         customer = order.account.customer
         data.append({
             "order_id": order.order_id,
+            "customer_id": customer.id,
             "amount": str(order.total_amount),
             "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
             "ordered_by": customer.user.get_full_name() or customer.user.username,

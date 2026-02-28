@@ -308,9 +308,10 @@ export default function AllOrders() {
                   </tr>
                 )}
                 {filteredOrders.map((order) => (
-                  <tr 
-                    key={order.order_id} 
-                    style={{ 
+                  <tr
+                    key={order.order_id}
+                    onClick={() => navigate(`/upper-management/customer/${order.customer_id}/order/${order.order_id}`, { state: { from: "/upper-management/all-orders" } })}
+                    style={{
                       borderBottom: "1px solid #E9ECEF",
                       cursor: "pointer"
                     }}

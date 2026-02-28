@@ -296,11 +296,41 @@ def cm_reject_payment(request, payment_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if not rejection_reason or len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     payment.payment_status = "REJECTED"
     payment.approved_by = request.user
+    payment.rejection_reason = rejection_reason
     payment.save()
 
-    log_audit(user=request.user, action="REJECT_PAYMENT", details={"payment_id": payment_id}, request=request)
+    # Send rejection email to the customer
+    from django.core.mail import send_mail
+    customer = payment.account.customer
+    customer_name = customer.user.get_full_name() or customer.user.username
+    customer_email = customer.user.email
+    if customer_email:
+        send_mail(
+            subject="Your Payment Request Has Been Rejected",
+            message=(
+                f"Dear {customer_name},\n\n"
+                f"We regret to inform you that your payment request "
+                f"(Payment ID: {payment.payment_id}) for ₱{payment.amount_paid} "
+                f"has been rejected.\n\n"
+                f"Reason for rejection:\n{rejection_reason}\n\n"
+                f"If you have any questions, please contact our support team.\n\n"
+                f"Regards,\nMylora Web Credit System"
+            ),
+            from_email="noreply@mylora.ph",
+            recipient_list=[customer_email],
+            fail_silently=True,
+        )
+
+    log_audit(user=request.user, action="REJECT_PAYMENT", details={"payment_id": payment_id, "rejection_reason": rejection_reason}, request=request)
     return Response({
         "success": True,
         "payment_id": payment.payment_id,

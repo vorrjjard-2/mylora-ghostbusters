@@ -280,6 +280,24 @@ def reject_enrollment(request, application_id):
     app.approved_by = request.user
     app.rejection_reason = rejection_reason
     app.save()
+
+    # Send rejection email
+    from django.core.mail import send_mail
+    applicant_name = f"{app.first_name} {app.last_name}".strip() or "Applicant"
+    send_mail(
+        subject="Your Credit Account Application Has Been Rejected",
+        message=(
+            f"Dear {applicant_name},\n\n"
+            f"We regret to inform you that your credit account application has been rejected.\n\n"
+            f"Reason for rejection:\n{rejection_reason}\n\n"
+            f"If you have any questions, please contact our support team.\n\n"
+            f"Regards,\nMylora Web Credit System"
+        ),
+        from_email="noreply@mylora.com",
+        recipient_list=[app.email],
+        fail_silently=True,
+    )
+
     log_audit(user=request.user, action="REJECT_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email, "rejection_reason": rejection_reason}, request=request)
     return Response({"status": "rejected"})
 
