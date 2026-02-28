@@ -15,6 +15,7 @@ export default function UMCustomerDetail() {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeletePasswordModal, setShowDeletePasswordModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
   const [processing, setProcessing] = useState(false);
 
@@ -60,8 +61,8 @@ export default function UMCustomerDetail() {
         throw new Error(errorData.error || "Failed to delete account");
       }
 
-      alert("Customer account deleted successfully");
-      navigate("/upper-management/customers");
+      setShowDeletePasswordModal(false);
+      setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
       alert(err.message || "Operation failed");
@@ -279,6 +280,23 @@ export default function UMCustomerDetail() {
                 {processing ? "Deleting..." : "Delete Account"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccessModal && (
+        <div style={modal.overlay}>
+          <div style={{ ...modal.box, textAlign: "center" }}>
+            <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem" }}>Account Deleted</h3>
+            <p style={{ fontSize: "1rem", color: "#666", marginBottom: "2rem" }}>
+              {customer.name}'s account has been successfully deleted.
+            </p>
+            <button
+              onClick={() => navigate("/upper-management/customers")}
+              style={{ padding: "0.75rem 2rem", background: "#1E2D1A", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "1rem", fontWeight: 600 }}
+            >
+              Back to Customers
+            </button>
           </div>
         </div>
       )}

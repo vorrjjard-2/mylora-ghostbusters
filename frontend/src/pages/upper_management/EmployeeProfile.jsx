@@ -12,6 +12,7 @@ export default function EmployeeProfile() {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:8000/api/um/employee/${userId}/`, {
@@ -46,8 +47,8 @@ export default function EmployeeProfile() {
         return res.json();
       })
       .then(() => {
-        alert("Employee account deleted successfully");
-        navigate("/upper-management/employees");
+        setShowDeleteModal(false);
+        setShowSuccessModal(true);
       })
       .catch((err) => {
         alert(err.message);
@@ -270,6 +271,23 @@ export default function EmployeeProfile() {
           onConfirm={handleDeleteConfirm}
           onCancel={() => setShowDeleteModal(false)}
         />
+      )}
+
+      {showSuccessModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ backgroundColor: "white", border: "1px solid #262626", borderRadius: "15px", padding: "40px", maxWidth: "500px", width: "90%", textAlign: "center", fontFamily: "'Arimo', sans-serif" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "15px" }}>Account Deleted</h2>
+            <p style={{ fontSize: "16px", marginBottom: "30px", color: "#666" }}>
+              {employee.name}'s account has been successfully deleted.
+            </p>
+            <button
+              onClick={() => navigate("/upper-management/employees")}
+              style={{ padding: "12px 40px", fontSize: "16px", fontWeight: "600", border: "none", borderRadius: "8px", backgroundColor: "#1E2D1A", color: "white", cursor: "pointer", fontFamily: "'Arimo', sans-serif" }}
+            >
+              Back to Employees
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

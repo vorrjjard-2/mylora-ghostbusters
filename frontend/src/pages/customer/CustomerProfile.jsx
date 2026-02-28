@@ -20,6 +20,7 @@ export default function CustomerProfile() {
   });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
 
   useEffect(() => {
@@ -83,9 +84,9 @@ export default function CustomerProfile() {
         throw new Error(errorData.error || "Failed to change password");
       }
 
-      alert("Password changed successfully");
       setPasswordForm({ current_password: "", new_password: "" });
       setConfirmPassword("");
+      setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
       setPasswordError(err.message || "Failed to change password");
@@ -275,6 +276,23 @@ return (
         </div>
       </div>
       </main>
+
+      {showSuccessModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ backgroundColor: "white", border: "1px solid #262626", borderRadius: "15px", padding: "40px", maxWidth: "500px", width: "90%", textAlign: "center", fontFamily: "'Arimo', sans-serif" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "15px" }}>Password Updated</h2>
+            <p style={{ fontSize: "16px", marginBottom: "30px", color: "#666" }}>
+              Your password has been changed successfully.
+            </p>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              style={{ padding: "12px 40px", fontSize: "16px", fontWeight: "600", border: "none", borderRadius: "8px", backgroundColor: "#1E2D1A", color: "white", cursor: "pointer", fontFamily: "'Arimo', sans-serif" }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

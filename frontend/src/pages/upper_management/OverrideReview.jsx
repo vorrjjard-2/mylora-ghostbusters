@@ -65,12 +65,7 @@ export default function OverrideReview() {
       }
 
       setShowPasswordModal(false);
-      if (pendingAction === "approve") {
-        setShowSuccessModal(true);
-      } else {
-        alert("Override request rejected");
-        navigate("/upper-management/dashboard");
-      }
+      setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
       alert(err.message || `Failed to ${pendingAction} override request`);
@@ -245,9 +240,13 @@ export default function OverrideReview() {
       {showSuccessModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
-            <h3 style={styles.successTitle}>Override approved!</h3>
+            <h3 style={styles.successTitle}>
+              {pendingAction === "approve" ? "Override approved!" : "Override rejected"}
+            </h3>
             <p style={styles.successMessage}>
-              Credit override request has been approved and order has been approved.
+              {pendingAction === "approve"
+                ? "Credit override request has been approved and order has been approved."
+                : "Credit override request has been rejected."}
             </p>
             <button
               style={styles.returnBtn}
