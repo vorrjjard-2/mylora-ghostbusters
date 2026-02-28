@@ -214,33 +214,38 @@ export default function ApplyStep2() {
            </div>
            <div className="input-group full-width">
                <label>Phone Number<span className="required">*</span></label>
-                <input 
-                      type="text" 
-                      placeholder="09XX XXX XXXX" 
-                      value={phone} 
+                <input
+                      type="text"
+                      placeholder="+63 9XX XXX XXXX"
+                      value={phone}
                       onChange={e => {
-                        // 1. Remove all non-numeric characters
-                        let rawValue = e.target.value.replace(/\D/g, "");
-                        
-                        // 2. Limit to 11 digits
-                        if (rawValue.length > 11) rawValue = rawValue.substring(0, 11);
-                        
-                        // 3. Apply the mask (09XX XXX XXXX)
-                        let formattedValue = "";
-                        if (rawValue.length > 0) {
-                          formattedValue += rawValue.substring(0, 4);
-                          if (rawValue.length > 4) {
-                            formattedValue += " " + rawValue.substring(4, 7);
-                          }
-                          if (rawValue.length > 7) {
-                            formattedValue += " " + rawValue.substring(7, 11);
-                          }
+                        // Strip everything except digits
+                        let raw = e.target.value.replace(/\D/g, "");
+
+                        // If user typed leading 63, strip it (we add the prefix)
+                        if (raw.startsWith("63")) raw = raw.substring(2);
+                        // If user typed leading 0 (e.g. 09...), strip the 0
+                        if (raw.startsWith("0")) raw = raw.substring(1);
+
+                        // Limit to 10 digits (the part after +63)
+                        if (raw.length > 10) raw = raw.substring(0, 10);
+
+                        // Format as +63 9XX XXX XXXX
+                        let formatted = "+63";
+                        if (raw.length > 0) {
+                          formatted += " " + raw.substring(0, 3);
                         }
-                        
-                        setPhone(formattedValue);
-                      }} 
-                      required 
-                    />           
+                        if (raw.length > 3) {
+                          formatted += " " + raw.substring(3, 6);
+                        }
+                        if (raw.length > 6) {
+                          formatted += " " + raw.substring(6, 10);
+                        }
+
+                        setPhone(raw.length === 0 ? "" : formatted);
+                      }}
+                      required
+                    />
                 </div>
            </div>
          </section>

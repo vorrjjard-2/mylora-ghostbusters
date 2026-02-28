@@ -163,8 +163,21 @@ export default function EmployeeEdit() {
                 </label>
                 <input
                   type="text"
+                  placeholder="+63 9XX XXX XXXX"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => {
+                    let raw = e.target.value.replace(/\D/g, "");
+                    if (raw.startsWith("63")) raw = raw.substring(2);
+                    if (raw.startsWith("0")) raw = raw.substring(1);
+                    if (raw.length > 10) raw = raw.substring(0, 10);
+
+                    let formatted = "+63";
+                    if (raw.length > 0) formatted += " " + raw.substring(0, 3);
+                    if (raw.length > 3) formatted += " " + raw.substring(3, 6);
+                    if (raw.length > 6) formatted += " " + raw.substring(6, 10);
+
+                    setFormData({ ...formData, phone: raw.length === 0 ? "" : formatted });
+                  }}
                   style={{
                     width: "100%",
                     padding: "10px",
