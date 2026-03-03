@@ -115,8 +115,9 @@ return (
           <h3 className="cd-section-title">Contact Information</h3>
           <div className="cd-form-row">
             <div className="cd-form-group">
-              <label className="cd-label">Phone Number</label>
+              <label htmlFor="cd-phone" className="cd-label">Phone Number</label>
               <input
+                id="cd-phone"
                 type="text"
                 value={customer.phone || "N/A"}
                 readOnly
@@ -124,8 +125,9 @@ return (
               />
             </div>
             <div className="cd-form-group">
-              <label className="cd-label">Email</label>
+              <label htmlFor="cd-email" className="cd-label">Email</label>
               <input
+                id="cd-email"
                 type="text"
                 value={customer.email || "N/A"}
                 readOnly
@@ -140,8 +142,9 @@ return (
           <h2 className="cd-section-title">Address Details</h2>
           
           <div className="cd-form-group">
-            <label className="cd-label">Address 1</label>
+            <label htmlFor="cd-address1" className="cd-label">Address 1</label>
             <input
+              id="cd-address1"
               type="text"
               value={customer.address1 || "N/A"}
               readOnly
@@ -150,8 +153,9 @@ return (
           </div>
 
           <div className="cd-form-group">
-            <label className="cd-label">Address 2</label>
+            <label htmlFor="cd-address2" className="cd-label">Address 2</label>
             <input
+              id="cd-address2"
               type="text"
               value={customer.address2 || "N/A"}
               readOnly
@@ -161,8 +165,9 @@ return (
 
           <div className="cd-form-row-triple">
             <div className="cd-form-group">
-              <label className="cd-label">Barangay</label>
+              <label htmlFor="cd-barangay" className="cd-label">Barangay</label>
               <input
+                id="cd-barangay"
                 type="text"
                 value={customer.barangay || "N/A"}
                 readOnly
@@ -170,8 +175,9 @@ return (
               />
             </div>
             <div className="cd-form-group">
-              <label className="cd-label">City</label>
+              <label htmlFor="cd-city" className="cd-label">City</label>
               <input
+                id="cd-city"
                 type="text"
                 value={customer.city || "N/A"}
                 readOnly
@@ -179,8 +185,9 @@ return (
               />
             </div>
             <div className="cd-form-group">
-              <label className="cd-label">Zip Code</label>
+              <label htmlFor="cd-zipcode" className="cd-label">Zip Code</label>
               <input
+                id="cd-zipcode"
                 type="text"
                 value={customer.zipcode || "N/A"}
                 readOnly

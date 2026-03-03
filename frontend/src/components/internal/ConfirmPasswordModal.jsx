@@ -23,6 +23,8 @@ export default function ConfirmPasswordModal({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••••"
+          aria-label="Enter password"
+          autoComplete="current-password"
           onKeyDown={(e) => { if (e.key === "Enter" && password) onConfirm(password); }}
           style={{
             width: "100%",
@@ -32,7 +34,7 @@ export default function ConfirmPasswordModal({
             borderRadius: "8px",
             fontFamily: "'Arimo', sans-serif",
             boxSizing: "border-box",
-            outline: "none",
+            outline: "2px solid transparent",
           }}
         />
 

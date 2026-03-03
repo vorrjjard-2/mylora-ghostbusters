@@ -81,6 +81,7 @@ export default function CreditAdjustment() {
               <input
                 type="text"
                 placeholder="Search"
+                aria-label="Search customers"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={styles.searchInput}

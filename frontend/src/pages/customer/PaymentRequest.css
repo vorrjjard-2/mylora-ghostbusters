@@ -169,7 +169,7 @@
     padding: 40px;
     background-color: #F9F9F9;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .upload-zone:hover {
@@ -273,4 +273,10 @@
     font-size: 13px;
     margin-top: 4px;
     display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upload-zone {
+    transition: none;
+  }
 }

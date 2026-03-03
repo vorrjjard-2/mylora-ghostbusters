@@ -193,6 +193,7 @@ export default function AllOrders() {
               <input
                 type="text"
                 placeholder="Search"
+                aria-label="Search orders"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{

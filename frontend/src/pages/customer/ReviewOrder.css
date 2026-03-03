@@ -325,3 +325,10 @@
     transition: transform 0.1s, background-color 0.2s;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ro-confirm-btn,
+  .ro-back-btn,
+  .ro-nav-btn {
+    transition: none;
+  }
+}

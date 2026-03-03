@@ -149,6 +149,7 @@ export default function CustomerDatabase() {
                 placeholder="Search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Search customers"
                 style={{
                   width: "100%",
                   padding: "10px 10px 10px 45px",

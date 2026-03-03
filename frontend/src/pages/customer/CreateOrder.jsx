@@ -121,6 +121,7 @@ export default function CreateOrder() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="order-search-input"
+                aria-label="Search products"
               />
 
               <div className="order-product-list">
@@ -186,6 +187,7 @@ export default function CreateOrder() {
                             min="1"
                             step="1"
                             className="order-quantity-input"
+                            aria-label={`Quantity for ${item.name}`}
                           />
                         </td>
                         <td className="order-td">
@@ -195,6 +197,7 @@ export default function CreateOrder() {
                           <button
                             onClick={() => handleRemoveItem(item.product_id)}
                             className="order-remove-btn"
+                            aria-label="Remove item"
                           >
                             ×
                           </button>

@@ -102,10 +102,11 @@ export default function EmployeeProfile() {
             {/* First Name and Last Name */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ep-firstname" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   First Name
                 </label>
                 <input
+                  id="ep-firstname"
                   type="text"
                   value={employee.first_name || "N/A"}
                   readOnly
@@ -119,10 +120,11 @@ export default function EmployeeProfile() {
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ep-lastname" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Last Name
                 </label>
                 <input
+                  id="ep-lastname"
                   type="text"
                   value={employee.last_name || "N/A"}
                   readOnly
@@ -140,10 +142,11 @@ export default function EmployeeProfile() {
             {/* Phone Number and Email */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ep-phone" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Phone Number
                 </label>
                 <input
+                  id="ep-phone"
                   type="text"
                   value={employee.phone || "N/A"}
                   readOnly
@@ -157,10 +160,11 @@ export default function EmployeeProfile() {
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ep-email" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Email
                 </label>
                 <input
+                  id="ep-email"
                   type="text"
                   value={employee.email || "N/A"}
                   readOnly
@@ -177,10 +181,11 @@ export default function EmployeeProfile() {
 
             {/* Role */}
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+              <label htmlFor="ep-role" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                 Role
               </label>
               <input
+                id="ep-role"
                 type="text"
                 value={getRoleDisplay(employee.role)}
                 readOnly
@@ -196,10 +201,11 @@ export default function EmployeeProfile() {
 
             {/* Password (masked) */}
             <div style={{ marginBottom: "30px" }}>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+              <label htmlFor="ep-password" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                 Password
               </label>
               <input
+                id="ep-password"
                 type="password"
                 value="••••••••••"
                 readOnly

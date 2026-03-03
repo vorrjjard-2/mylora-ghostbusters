@@ -205,6 +205,7 @@ export default function UMUpdateBalance() {
                     type="button"
                     className="ub-remove-file"
                     onClick={() => setPaymentForm((prev) => ({ ...prev, proof_of_payment: null }))}
+                    aria-label="Remove file"
                   >
                     ×
                   </button>

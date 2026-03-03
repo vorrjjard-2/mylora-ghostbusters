@@ -199,38 +199,43 @@ return (
             </label>
 
             <div className="delivery-form-group">
-              <label className="delivery-label">
+              <label className="delivery-label" htmlFor="delivery-address1">
                 Address 1<span className="delivery-required">*</span>
               </label>
               <input
+                id="delivery-address1"
                 type="text"
                 value={address1}
                 onChange={e => setAddress1(e.target.value)}
                 placeholder="UNIT 123, ABC STREET"
                 className={`delivery-input${useRegistered ? " delivery-input-readonly" : ""}`}
                 readOnly={useRegistered}
+                autoComplete="address-line1"
               />
             </div>
 
             <div className="delivery-form-group">
-              <label className="delivery-label">Address 2</label>
+              <label className="delivery-label" htmlFor="delivery-address2">Address 2</label>
               <input
+                id="delivery-address2"
                 type="text"
                 value={address2}
                 onChange={e => setAddress2(e.target.value)}
                 placeholder="LANDMARK STATUE"
                 className={`delivery-input${useRegistered ? " delivery-input-readonly" : ""}`}
                 readOnly={useRegistered}
+                autoComplete="address-line2"
               />
             </div>
 
             <div className="delivery-form-row">
               <div className="delivery-form-group">
-                <label className="delivery-label">
+                <label className="delivery-label" htmlFor="delivery-province">
                   Province<span className="delivery-required">*</span>
                 </label>
                 {useRegistered ? (
                   <input
+                    id="delivery-province"
                     type="text"
                     value={provinceName}
                     readOnly
@@ -238,6 +243,7 @@ return (
                   />
                 ) : (
                   <select
+                    id="delivery-province"
                     value={province}
                     onChange={e => {
                       const selected = provinces.find(p => p.code === e.target.value);
@@ -255,11 +261,12 @@ return (
               </div>
 
               <div className="delivery-form-group">
-                <label className="delivery-label">
+                <label className="delivery-label" htmlFor="delivery-city">
                   City / Municipality<span className="delivery-required">*</span>
                 </label>
                 {useRegistered ? (
                   <input
+                    id="delivery-city"
                     type="text"
                     value={city}
                     readOnly
@@ -267,6 +274,7 @@ return (
                   />
                 ) : (
                   <select
+                    id="delivery-city"
                     value={cityCode}
                     onChange={e => {
                       const selected = citiesMunicipalities.find(c => c.code === e.target.value);
@@ -285,11 +293,12 @@ return (
               </div>
 
               <div className="delivery-form-group">
-                <label className="delivery-label">
+                <label className="delivery-label" htmlFor="delivery-barangay">
                   Barangay<span className="delivery-required">*</span>
                 </label>
                 {useRegistered ? (
                   <input
+                    id="delivery-barangay"
                     type="text"
                     value={barangay}
                     readOnly
@@ -297,6 +306,7 @@ return (
                   />
                 ) : (
                   <select
+                    id="delivery-barangay"
                     value={barangay}
                     onChange={e => setBarangay(e.target.value)}
                     disabled={!cityCode}
@@ -312,10 +322,11 @@ return (
             </div>
 
             <div className="delivery-form-group" style={{ width: "calc(33% - 0.67rem)" }}>
-              <label className="delivery-label">
+              <label className="delivery-label" htmlFor="delivery-zipcode">
                 Zip Code<span className="delivery-required">*</span>
               </label>
               <input
+                id="delivery-zipcode"
                 type="text"
                 placeholder="9876"
                 value={zipCode}
@@ -325,6 +336,7 @@ return (
                 }}
                 className={`delivery-input${useRegistered ? " delivery-input-readonly" : ""}`}
                 readOnly={useRegistered}
+                autoComplete="postal-code"
               />
             </div>
           </div>

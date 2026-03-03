@@ -348,10 +348,11 @@ export default function EnrollmentReview() {
               Please provide a reason and enter your password to proceed.
             </p>
 
-            <label style={{ fontSize: "14px", fontWeight: 600, color: "#333", marginBottom: "4px", display: "block" }}>
+            <label htmlFor="er-reject-reason" style={{ fontSize: "14px", fontWeight: 600, color: "#333", marginBottom: "4px", display: "block" }}>
               Reason for Rejection
             </label>
             <textarea
+              id="er-reject-reason"
               value={rejectReason}
               onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
               placeholder="Enter reason for rejection..."
@@ -362,27 +363,28 @@ export default function EnrollmentReview() {
                 border: "1px solid #262626", borderRadius: "8px",
                 fontFamily: "'Arimo', sans-serif", boxSizing: "border-box",
                 resize: "vertical", marginBottom: rejectReasonError ? "0.5rem" : "1rem",
-                outline: "none",
               }}
             />
             {rejectReasonError && (
               <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectReasonError}</p>
             )}
 
-            <label style={{ fontSize: "14px", fontWeight: 600, color: "#333", marginBottom: "4px", display: "block" }}>
+            <label htmlFor="er-reject-password" style={{ fontSize: "14px", fontWeight: 600, color: "#333", marginBottom: "4px", display: "block" }}>
               Password
             </label>
             <input
+              id="er-reject-password"
               type="password"
               value={rejectPassword}
               onChange={(e) => { setRejectPassword(e.target.value); setRejectPasswordError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handleRejectSubmit()}
               placeholder="••••••••••"
+              autoComplete="current-password"
               style={{
                 width: "100%", padding: "10px 14px", fontSize: "15px",
                 border: "1px solid #262626", borderRadius: "8px",
                 fontFamily: "'Arimo', sans-serif", boxSizing: "border-box",
-                outline: "none", marginBottom: rejectPasswordError ? "0.5rem" : "1.5rem",
+                marginBottom: rejectPasswordError ? "0.5rem" : "1.5rem",
               }}
             />
             {rejectPasswordError && (

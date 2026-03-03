@@ -51,3 +51,9 @@
   width: 100%;
   transition: background 0.2s ease;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-btn {
+    transition: none;
+  }
+}

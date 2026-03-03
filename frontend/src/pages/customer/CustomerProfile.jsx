@@ -127,37 +127,43 @@ return (
         <h2 className="profile-section-title">Password</h2>
 
         <div className="profile-form-group">
-          <label className="profile-label">Current Password</label>
+          <label className="profile-label" htmlFor="profile-current-pw">Current Password</label>
           <input
+            id="profile-current-pw"
             type="password"
             name="current_password"
             value={passwordForm.current_password}
             onChange={handlePasswordChange}
             className="profile-input"
             placeholder="••••••••"
+            autoComplete="current-password"
           />
         </div>
 
         <div className="profile-form-group">
-          <label className="profile-label">New Password</label>
+          <label className="profile-label" htmlFor="profile-new-pw">New Password</label>
           <input
+            id="profile-new-pw"
             type="password"
             name="new_password"
             value={passwordForm.new_password}
             onChange={handlePasswordChange}
             className="profile-input"
             placeholder="Enter new password"
+            autoComplete="new-password"
           />
         </div>
 
         <div className="profile-form-group">
-          <label className="profile-label">Confirm New Password</label>
+          <label className="profile-label" htmlFor="profile-confirm-pw">Confirm New Password</label>
           <input
+            id="profile-confirm-pw"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="profile-input"
             placeholder="Re-enter new password"
+            autoComplete="new-password"
           />
         </div>
 

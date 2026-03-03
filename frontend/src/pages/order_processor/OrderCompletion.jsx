@@ -309,6 +309,8 @@ export default function OrderCompletion() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
               className="modal-input"
+              aria-label="Enter password"
+              autoComplete="current-password"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleConfirmComplete();
               }}

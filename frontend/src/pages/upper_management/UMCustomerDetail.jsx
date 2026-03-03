@@ -269,6 +269,8 @@ export default function UMCustomerDetail() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
+              aria-label="Enter password"
+              autoComplete="current-password"
               style={modal.passwordInput}
               onKeyDown={(e) => { if (e.key === "Enter") handleConfirmDelete(); }}
             />

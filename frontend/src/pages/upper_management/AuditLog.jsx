@@ -128,6 +128,7 @@ export default function AuditLog() {
               <input
                 type="text"
                 placeholder="Search by actor or action"
+                aria-label="Search audit log"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{

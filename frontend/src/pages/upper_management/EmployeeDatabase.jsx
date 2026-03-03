@@ -150,6 +150,7 @@ export default function EmployeeDatabase() {
               <input
                 type="text"
                 placeholder="Search"
+                aria-label="Search employees"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{

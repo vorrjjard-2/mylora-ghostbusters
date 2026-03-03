@@ -531,6 +531,7 @@ export default function CreditManagerDashboard() {
                   <input
                     type="text"
                     placeholder="Search"
+                    aria-label="Search"
                     style={{
                       width: "100%",
                       padding: "10px 10px 10px 45px",
@@ -612,6 +613,7 @@ export default function CreditManagerDashboard() {
                   <input
                     type="text"
                     placeholder="Search by order ID or customer"
+                    aria-label="Search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{
@@ -738,6 +740,7 @@ export default function CreditManagerDashboard() {
                   <input
                     type="text"
                     placeholder="Search"
+                    aria-label="Search"
                     style={{
                       width: "100%",
                       padding: "10px 10px 10px 45px",
@@ -819,6 +822,7 @@ export default function CreditManagerDashboard() {
                   <input
                     type="text"
                     placeholder="Search"
+                    aria-label="Search"
                     style={{
                       width: "100%",
                       padding: "10px 10px 10px 45px",
@@ -908,6 +912,7 @@ export default function CreditManagerDashboard() {
                   <input
                     type="text"
                     placeholder="Search"
+                    aria-label="Search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{

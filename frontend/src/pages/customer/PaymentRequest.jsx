@@ -216,8 +216,9 @@ return (
       <form onSubmit={handleSubmit} className="pr-payment-form">
         <div className="pr-form-row">
           <div className="pr-form-group">
-            <label className="pr-label">Invoice Number</label>
+            <label className="pr-label" htmlFor="payment-invoice">Invoice Number</label>
             <input
+              id="payment-invoice"
               type="text"
               name="inv_number"
               value={formData.inv_number}
@@ -228,9 +229,10 @@ return (
           </div>
 
           <div className="pr-form-group">
-            <label className="pr-label">Balance Paid</label>
+            <label className="pr-label" htmlFor="payment-balance">Balance Paid</label>
             <div className="pr-input-with-icon">
               <input
+                id="payment-balance"
                 type="text"
                 name="amount_paid"
                 value={`₱ ${displayAmount}`}
@@ -244,8 +246,9 @@ return (
         </div>
 
         <div className="pr-form-group full-width">
-          <label className="pr-label">Date of Payment</label>
+          <label className="pr-label" htmlFor="payment-date">Date of Payment</label>
           <input
+            id="payment-date"
             type="date"
             name="date_paid"
             value={formData.date_paid}
@@ -266,10 +269,11 @@ return (
               <div className="file-display-badge">
                 <img src={fileIcon} alt="File Icon" className="custom-file-icon" />                  
                 <span className="file-name">{formData.proof_payment.name}</span>
-                <button 
-                  type="button" 
-                  className="remove-file" 
+                <button
+                  type="button"
+                  className="remove-file"
                   onClick={() => setFormData(prev => ({ ...prev, proof_payment: null }))}
+                  aria-label="Remove file"
                 >
                   ×
                 </button>

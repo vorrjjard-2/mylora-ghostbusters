@@ -211,6 +211,8 @@ export default function OverrideReview() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
+              aria-label="Enter password"
+              autoComplete="current-password"
               style={styles.passwordInput}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleConfirmAction();

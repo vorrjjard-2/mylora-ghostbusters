@@ -123,6 +123,7 @@ export default function OrderHistory() {
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search orders"
           />
         </div>
 

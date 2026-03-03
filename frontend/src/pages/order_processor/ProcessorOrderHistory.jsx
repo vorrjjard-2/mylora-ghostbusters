@@ -184,6 +184,7 @@ export default function ProcessorOrderHistory() {
               <input
                 type="text"
                 placeholder="Search by order ID or customer"
+                aria-label="Search orders"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{

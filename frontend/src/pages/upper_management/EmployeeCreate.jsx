@@ -140,13 +140,15 @@ export default function EmployeeCreate() {
             {/* First Name and Last Name */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ec-firstname" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   First Name
                 </label>
                 <input
+                  id="ec-firstname"
                   type="text"
                   value={formData.first_name}
                   onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  autoComplete="given-name"
                   required
                   style={{
                     width: "100%",
@@ -157,13 +159,15 @@ export default function EmployeeCreate() {
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ec-lastname" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Last Name
                 </label>
                 <input
+                  id="ec-lastname"
                   type="text"
                   value={formData.last_name}
                   onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  autoComplete="family-name"
                   required
                   style={{
                     width: "100%",
@@ -178,12 +182,14 @@ export default function EmployeeCreate() {
             {/* Phone Number and Email */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ec-phone" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Phone Number
                 </label>
                 <input
+                  id="ec-phone"
                   type="text"
                   placeholder="+63 9XX XXX XXXX"
+                  autoComplete="tel"
                   value={formData.phone}
                   onChange={(e) => {
                     let raw = e.target.value.replace(/\D/g, "");
@@ -207,13 +213,15 @@ export default function EmployeeCreate() {
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label htmlFor="ec-email" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Email
                 </label>
                 <input
+                  id="ec-email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  autoComplete="email"
                   style={{
                     width: "100%",
                     padding: "10px",
@@ -226,10 +234,11 @@ export default function EmployeeCreate() {
 
             {/* Role */}
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+              <label htmlFor="ec-role" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                 Role
               </label>
               <select
+                id="ec-role"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 style={{
@@ -247,13 +256,15 @@ export default function EmployeeCreate() {
 
             {/* Username */}
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+              <label htmlFor="ec-username" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                 Username
               </label>
               <input
+                id="ec-username"
                 type="text"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                autoComplete="username"
                 required
                 style={{
                   width: "100%",
@@ -266,15 +277,17 @@ export default function EmployeeCreate() {
 
             {/* Password */}
             <div style={{ marginBottom: "30px" }}>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+              <label htmlFor="ec-password" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                 Password
               </label>
               <input
+                id="ec-password"
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 placeholder="••••••••••"
+                autoComplete="new-password"
                 style={{
                   width: "100%",
                   padding: "10px",
