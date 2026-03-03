@@ -22,7 +22,7 @@
 }
 
 .ch-logo-img {
-    height: var(--logo-height);
+    height: 50px;
     width: auto;
 }
 
@@ -30,12 +30,12 @@
     font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: var(--color-brand);
+    color: #395A31;
 }
 
 .ch-back-btn {
   padding: 8px 70px;
-  background: var(--color-primary);
+  background: #1f3d1a;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -91,13 +91,13 @@
 .ch-summary-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--color-primary);
+    color: #1f3d1a;
 }
 
 .ch-summary-value-red {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--color-error);
+    color: #b03a2e;
 }
 
 .ch-section {

@@ -10,24 +10,26 @@
 }
 
 .activate-page-wrapper .system-title {
-    color: var(--color-brand);
+    color: #395A31;
     font-weight: 700;
-    font-size: var(--title-size);
-    font-family: var(--font-family);
+    font-size: 32px;
+    font-family: 'Arimo', sans-serif;
     letter-spacing: -0.64px;
+    line-height: 38.4px;
 }
 
 .um-cancel-btn {
-    background: var(--color-primary);
-    border: 1.3px solid var(--color-primary);
+    background: #183112;
+    border: 1.3px solid #183112; 
     color: white;
-    padding: 6px 30px;
-    height: var(--header-btn-height);
-    width: var(--header-btn-width);
-    border-radius: var(--header-btn-radius);
+    padding: 6px 30px; 
+    height: 41px;
+    width: 186px;
+    margin-right: -40px;
+    border-radius: 10px; 
     font-weight: 600;
     font-size: 20px;
-    cursor: pointer;
+    cursor: pointer;    
 }
 
 
@@ -107,16 +109,16 @@
 
 .order-add-btn {
   padding: 0.5rem 1rem;
-  background: var(--color-primary);
+  background: #1f3d1a;
   color: white;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 4px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .order-add-btn:hover {
-  background: var(--color-primary-hover);
+  background: #2d5a27;
 }
 
 .order-right-panel {
@@ -199,16 +201,16 @@
 .order-total-amount {
   font-weight: 700;
   font-size: 1.5rem;
-  color: var(--color-primary);
+  color: #1f3d1a;
 }
 
 .order-continue-btn {
   width: 100%;
   padding: 1rem;
-  background: var(--color-primary);
+  background: #1f3d1a;
   color: white;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -216,7 +218,7 @@
 }
 
 .order-continue-btn:hover:not(.disabled) {
-  background: var(--color-primary-hover);
+  background: #2d5a27;
 }
 
 .order-continue-btn.disabled {
