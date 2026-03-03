@@ -120,15 +120,13 @@ export default function EmployeeEdit() {
             {/* First Name and Last Name */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               <div>
-                <label htmlFor="ee-firstname" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   First Name
                 </label>
                 <input
-                  id="ee-firstname"
                   type="text"
                   value={formData.first_name}
                   onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                  autoComplete="given-name"
                   required
                   style={{
                     width: "100%",
@@ -139,15 +137,13 @@ export default function EmployeeEdit() {
                 />
               </div>
               <div>
-                <label htmlFor="ee-lastname" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Last Name
                 </label>
                 <input
-                  id="ee-lastname"
                   type="text"
                   value={formData.last_name}
                   onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                  autoComplete="family-name"
                   required
                   style={{
                     width: "100%",
@@ -162,14 +158,12 @@ export default function EmployeeEdit() {
             {/* Phone Number and Email */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               <div>
-                <label htmlFor="ee-phone" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Phone Number
                 </label>
                 <input
-                  id="ee-phone"
                   type="text"
                   placeholder="+63 9XX XXX XXXX"
-                  autoComplete="tel"
                   value={formData.phone}
                   onChange={(e) => {
                     let raw = e.target.value.replace(/\D/g, "");
@@ -193,15 +187,13 @@ export default function EmployeeEdit() {
                 />
               </div>
               <div>
-                <label htmlFor="ee-email" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+                <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                   Email
                 </label>
                 <input
-                  id="ee-email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  autoComplete="email"
                   style={{
                     width: "100%",
                     padding: "10px",
@@ -214,11 +206,10 @@ export default function EmployeeEdit() {
 
             {/* Role */}
             <div style={{ marginBottom: "20px" }}>
-              <label htmlFor="ee-role" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+              <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                 Role
               </label>
               <select
-                id="ee-role"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 style={{
@@ -236,16 +227,14 @@ export default function EmployeeEdit() {
 
             {/* Password */}
             <div style={{ marginBottom: "30px" }}>
-              <label htmlFor="ee-password" style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
+              <label style={{ display: "block", fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>
                 Password (leave blank to keep current)
               </label>
               <input
-                id="ee-password"
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="••••••••••"
-                autoComplete="new-password"
                 style={{
                   width: "100%",
                   padding: "10px",

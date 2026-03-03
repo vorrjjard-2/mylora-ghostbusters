@@ -163,7 +163,6 @@
 
 .poh-search-input:focus {
   border-color: #395A31;
-  box-shadow: 0 0 0 2px rgba(31, 61, 26, 0.3);
 }
 
 .poh-sort-btn {

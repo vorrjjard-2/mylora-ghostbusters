@@ -39,13 +39,11 @@ return (
     <p className="sub-title">Enter email to begin application.</p>
     <form onSubmit={handleNext} className="apply-form">
       <div className="input-group">
-        <label htmlFor="apply-email">Email</label>
+        <label>Email</label>
         <input
-          id="apply-email"
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          autoComplete="email"
           required
         />
       </div>

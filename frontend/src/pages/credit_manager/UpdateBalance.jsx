@@ -175,9 +175,8 @@ return (
       <form className="ub-section" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div className="ub-form-row">
         <div className="ub-form-group">
-          <label htmlFor="ub-invoice" className="ub-label">Invoice Number</label>
+          <label className="ub-label">Invoice Number</label>
           <input
-            id="ub-invoice"
             type="text"
             name="invoice_number"
             value={paymentForm.invoice_number}
@@ -188,9 +187,8 @@ return (
         </div>
 
         <div className="ub-form-group">
-          <label htmlFor="ub-balance" className="ub-label">Balance Paid</label>
+          <label className="ub-label">Balance Paid</label>
           <input
-            id="ub-balance"
             type="text"
             name="balance_paid"
             value={formatAsCurrency(paymentForm.balance_paid)}
@@ -205,9 +203,8 @@ return (
         </div>
 
         <div className="ub-form-group">
-          <label htmlFor="ub-date" className="ub-label">Date of Payment</label>
+          <label className="ub-label">Date of Payment</label>
           <input
-            id="ub-date"
             type="date"
             name="date_of_payment"
             value={paymentForm.date_of_payment}
@@ -238,11 +235,10 @@ return (
               <div className="ub-file-display-badge">
                 <img src={fileIcon} alt="File Icon" className="ub-custom-file-icon" />                  
                 <span className="ub-file-name">{paymentForm.proof_of_payment.name}</span>
-                <button
-                  type="button"
-                  className="ub-remove-file"
+                <button 
+                  type="button" 
+                  className="ub-remove-file" 
                   onClick={() => setPaymentForm(prev => ({ ...prev, proof_of_payment: null }))}
-                  aria-label="Remove file"
                 >
                   ×
                 </button>
@@ -287,8 +283,6 @@ return (
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
-              aria-label="Enter password"
-              autoComplete="current-password"
               onKeyDown={(e) => e.key === "Enter" && handleConfirmUpdate()}
             />
             <div className="ub-modal-button-row">

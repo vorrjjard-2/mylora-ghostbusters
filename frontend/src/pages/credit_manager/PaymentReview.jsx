@@ -185,16 +185,15 @@ export default function PaymentReview() {
       {/* Payment Form Fields */}
       <div className="payment-form-row"> 
         <div className="payment-form-group flex-1">
-          <label htmlFor="pr-invoice" className="payment-label">Invoice Number</label>
-          <input id="pr-invoice" className="payment-input" readOnly value={payment.inv_number || ""} />
+          <label className="payment-label">Invoice Number</label>
+          <input className="payment-input" readOnly value={payment.inv_number || ""} />
         </div>
 
         <div className="payment-form-group flex-1">
-          <label htmlFor="pr-balance" className="payment-label">Balance Paid</label>
-          <div className="payment-input-with-symbol">
-            <input
-              id="pr-balance"
-              className="payment-input"
+          <label className="payment-label">Balance Paid</label>
+          <div className="payment-input-with-symbol"> 
+            <input 
+              className="payment-input" 
               readOnly 
               value={`₱ ${parseFloat(payment.amount_paid).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`} 
             />
@@ -203,8 +202,8 @@ export default function PaymentReview() {
       </div>
 
       <div className="payment-form-group">
-        <label htmlFor="pr-date" className="payment-label">Date of Payment</label>
-        <input id="pr-date" className="payment-input" readOnly value={payment.date_paid} />
+        <label className="payment-label">Date of Payment</label>
+        <input className="payment-input" readOnly value={payment.date_paid} />
       </div>
 
       <div className="payment-form-group">
@@ -248,7 +247,6 @@ export default function PaymentReview() {
                   value={rejectReason}
                   onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
                   placeholder="Enter reason for rejection..."
-                  aria-label="Rejection reason"
                   style={{ resize: "vertical", fontFamily: "inherit" }}
                 />
                 {rejectReasonError && (
@@ -263,8 +261,6 @@ export default function PaymentReview() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
-              aria-label="Enter password"
-              autoComplete="current-password"
             />
             <div className="payment-button-row">
               <button className="payment-cancel-btn" onClick={handleCancelPasswordModal}>Cancel</button>

@@ -252,12 +252,6 @@ input, select {
     background-color: #f0f4f0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .add-more-files {
-    transition: none;
-  }
-}
-
 .hidden-file-input {
     display: none;
 }

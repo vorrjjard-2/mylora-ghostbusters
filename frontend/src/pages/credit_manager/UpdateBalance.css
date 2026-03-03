@@ -184,7 +184,7 @@
     background-color: #F9F9F9;
     cursor: pointer;
     text-align: center;
-    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
 }
 
 .ub-upload-zone:hover {
@@ -372,8 +372,4 @@
   width: 100%;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ub-upload-zone {
-    transition: none;
-  }
-}
+

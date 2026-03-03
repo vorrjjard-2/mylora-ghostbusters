@@ -190,33 +190,29 @@ return (
 <div className="form-section">
     <form onSubmit={handleSubmit} className="activate-form">
       <div className="form-group">
-        <label htmlFor="activate-email" className="form-label">Email Address</label>
-        <input id="activate-email" type="email" className="form-input" value={userData?.email || ""} disabled />
+        <label className="form-label">Email Address</label>
+        <input type="email" className="form-input" value={userData?.email || ""} disabled />
       </div>
 
       <div className="form-group">
-        <label htmlFor="activate-password" className="form-label">Password</label>
+        <label className="form-label">Password</label>
         <p className="input-hint">Minimum of 8 characters</p>
         <input
-          id="activate-password"
           type="password"
           className="form-input"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
           required
         />
       </div>
 
       <div className="form-group">
-        <label htmlFor="activate-confirm-password" className="form-label">Confirm Password</label>
+        <label className="form-label">Confirm Password</label>
         <input
-          id="activate-confirm-password"
           type="password"
           className="form-input"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          autoComplete="new-password"
           required
         />
       </div>

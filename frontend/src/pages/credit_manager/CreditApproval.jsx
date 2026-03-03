@@ -205,17 +205,17 @@ export default function CreditApproval() {
       <h2 className="approval-subtitle">Customer Information</h2>
       <div className="info-grid">
         <div className="info-group">
-          <label htmlFor="ca-name" className="info-label">Name</label>
-          <input id="ca-name" className="info-input-name" readOnly value={order.customer_name} />
+          <label className="info-label">Name</label>
+          <input className="info-input-name" readOnly value={order.customer_name} />
         </div>
         <div className="info-row">
           <div className="info-group">
-            <label htmlFor="ca-phone" className="info-label">Phone Number</label>
-            <input id="ca-phone" className="info-input" readOnly value={order.phone || "—"} />
+            <label className="info-label">Phone Number</label>
+            <input className="info-input" readOnly value={order.phone || "—"} />
           </div>
           <div className="info-group">
-            <label htmlFor="ca-email" className="info-label">Email</label>
-            <input id="ca-email" className="info-input" readOnly value={order.email || "—"} />
+            <label className="info-label">Email</label>
+            <input className="info-input" readOnly value={order.email || "—"} />
           </div>
         </div>
       </div>
@@ -362,8 +362,6 @@ export default function CreditApproval() {
               onChange={(e) => { setApprovalPassword(e.target.value); setPasswordError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
               placeholder="••••••••••"
-              aria-label="Enter password to approve"
-              autoComplete="current-password"
               autoFocus
               style={{
                 width: "100%",
@@ -445,11 +443,10 @@ export default function CreditApproval() {
             }}>
               Please enter your password to reject ORDER {order.order_id}.
             </h3>
-            <label htmlFor="ca-reject-reason" style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
+            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
               Reason for Rejection
             </label>
             <textarea
-              id="ca-reject-reason"
               value={rejectReason}
               onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
               placeholder="Enter reason for rejection..."
@@ -470,17 +467,15 @@ export default function CreditApproval() {
             {rejectReasonError && (
               <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectReasonError}</p>
             )}
-            <label htmlFor="ca-reject-password" style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
+            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
               Password
             </label>
             <input
-              id="ca-reject-password"
               type="password"
               value={rejectPassword}
               onChange={(e) => { setRejectPassword(e.target.value); setRejectPasswordError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handleRejectPasswordSubmit()}
               placeholder="••••••••••"
-              autoComplete="current-password"
               style={{
                 width: "100%",
                 padding: "0.75rem",
@@ -544,9 +539,8 @@ export default function CreditApproval() {
                 <span className="text-warning-bold">insufficient credit balance</span>.
               </p>
             <div className="info-group">
-              <label htmlFor="ca-override-reason" className="info-label">Please enter reason for override:</label>
+              <label className="info-label">Please enter reason for override:</label>
               <textarea
-                id="ca-override-reason"
                 className="modal-textarea"
                 placeholder="Enter reason here..."
                 value={overrideReason}

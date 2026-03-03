@@ -234,11 +234,3 @@
 .status-approved { background: #d4edda; color: #155724; }
 .status-pending { background: #fff3cd; color: #856404; }
 .status-rejected { background: #f8d7da; color: #721c24; }
-
-@media (prefers-reduced-motion: reduce) {
-  .cd-nav-btn,
-  .cd-order-row,
-  .cd-status-badge {
-    transition: none;
-  }
-}

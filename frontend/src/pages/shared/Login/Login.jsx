@@ -118,14 +118,12 @@ export default function Login() {
          <form onSubmit={handleSubmit} className="login-form">
            {/* Email Group */}
            <div className="form-group">
-             <label htmlFor="login-email" className="form-label">Email</label>
+             <label className="form-label">Email</label>
              <input
-               id="login-email"
                type="text"
                className="form-input"
                value={username}
                onChange={(e) => setUsername(e.target.value)}
-               autoComplete="email"
                required
              />
            </div>
@@ -133,7 +131,7 @@ export default function Login() {
     {/* Password Group */}
     <div className="form-group">
       <div className="label-wrapper">
-        <label htmlFor="login-password" className="form-label">Password</label>
+        <label className="form-label">Password</label>
         
         {error && (
           <button 
@@ -147,12 +145,10 @@ export default function Login() {
       </div>
 
       <input
-        id="login-password"
         type="password"
         className="form-input"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        autoComplete="current-password"
         required
       />
     </div>

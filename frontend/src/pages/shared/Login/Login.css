@@ -81,7 +81,6 @@
 .login-page-wrapper .form-input:focus {
     outline: none;
     border-color: #1f3d1a;
-    box-shadow: 0 0 0 2px rgba(31, 61, 26, 0.3);
 }
 
 /* Buttons */
@@ -146,7 +145,7 @@
 .forgot-password-link {
   background: none;
   border: none;
-  color: #183112;
+  color: #183112; 
   text-decoration: underline;
   font-size: 14px;
   font-weight: 500;
@@ -154,14 +153,6 @@
   padding: 0;
   font-family: 'Arimo', sans-serif;
   transition: color 0.2s ease-in-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .login-page-wrapper .form-input,
-  .login-page-wrapper .enroll-link,
-  .forgot-password-link {
-    transition: none;
-  }
 }
 
 

@@ -183,11 +183,9 @@ export default function ApplyStep2() {
            <h2 className="section-title">01 Personal Information</h2>
            <div className="input-grid">
              <div className="input-group">
-               <label htmlFor="apply-firstname">First Name<span className="required">*</span></label>
+               <label>First Name<span className="required">*</span></label>
                 <input
-                  id="apply-firstname"
                   type="text"
-                  autoComplete="given-name"
                   value={firstName}
                   onChange={e => {
                     const value = e.target.value.toUpperCase();
@@ -200,11 +198,9 @@ export default function ApplyStep2() {
                 />
            </div>
            <div className="input-group">
-               <label htmlFor="apply-lastname">Last Name<span className="required">*</span></label>
+               <label>Last Name<span className="required">*</span></label>
                 <input
-                  id="apply-lastname"
                   type="text"
-                  autoComplete="family-name"
                   value={lastName}
                   onChange={e => {
                     const value = e.target.value.toUpperCase();
@@ -217,11 +213,9 @@ export default function ApplyStep2() {
                 />
            </div>
            <div className="input-group full-width">
-               <label htmlFor="apply-phone">Phone Number<span className="required">*</span></label>
+               <label>Phone Number<span className="required">*</span></label>
                 <input
-                      id="apply-phone"
                       type="text"
-                      autoComplete="tel"
                       placeholder="+63 9XX XXX XXXX"
                       value={phone}
                       onChange={e => {
@@ -260,33 +254,28 @@ export default function ApplyStep2() {
          <section className="form-section">
            <h2 className="section-title">02 Delivery Address</h2>
            <div className="input-group full-width">
-             <label htmlFor="apply-address1">Address 1<span className="required">*</span></label>
-              <input
-                  id="apply-address1"
-                  type="text"
-                  autoComplete="address-line1"
-                  placeholder="UNIT NO., BLDG NAME, STREET"
-                  value={address1}
-                  onChange={e => setAddress1(e.target.value.toUpperCase())}
-                  required
+             <label>Address 1<span className="required">*</span></label>
+              <input 
+                  type="text" 
+                  placeholder="UNIT NO., BLDG NAME, STREET" 
+                  value={address1} 
+                  onChange={e => setAddress1(e.target.value.toUpperCase())} 
+                  required 
                 />           
               </div>
            <div className="input-group full-width">
-             <label htmlFor="apply-address2">Address 2</label>
-                <input
-                    id="apply-address2"
-                    type="text"
-                    autoComplete="address-line2"
-                    placeholder="LANDMARK STATUE"
+             <label>Address 2</label>
+                <input 
+                    type="text" 
+                    placeholder="LANDMARK STATUE" 
                     value={address2}
-                    onChange={e => setAddress2(e.target.value.toUpperCase())}
+                    onChange={e => setAddress2(e.target.value.toUpperCase())} 
                   />           
               </div>
            <div className="input-grid three-col">
              <div className="input-group">
-               <label htmlFor="apply-province">Province<span className="required">*</span></label>
+               <label>Province<span className="required">*</span></label>
                <select
-                 id="apply-province"
                  value={province}
                  onChange={e => {
                    const selected = provinces.find(p => p.code === e.target.value);
@@ -302,9 +291,8 @@ export default function ApplyStep2() {
                </select>
              </div>
              <div className="input-group">
-               <label htmlFor="apply-city">City / Municipality<span className="required">*</span></label>
+               <label>City / Municipality<span className="required">*</span></label>
                <select
-                 id="apply-city"
                  value={cityCode}
                  onChange={e => {
                    const selected = citiesMunicipalities.find(c => c.code === e.target.value);
@@ -321,9 +309,8 @@ export default function ApplyStep2() {
                </select>
              </div>
              <div className="input-group">
-               <label htmlFor="apply-barangay">Barangay<span className="required">*</span></label>
+               <label>Barangay<span className="required">*</span></label>
                <select
-                 id="apply-barangay"
                  value={barangay}
                  onChange={e => setBarangay(e.target.value)}
                  disabled={!cityCode}
@@ -337,11 +324,9 @@ export default function ApplyStep2() {
              </div>
            </div>
            <div className="input-group">
-             <label htmlFor="apply-zipcode">Zip Code<span className="required">*</span></label>
+             <label>Zip Code<span className="required">*</span></label>
              <input
-               id="apply-zipcode"
                type="text"
-               autoComplete="postal-code"
                placeholder="XXXX"
                value={zipCode}
                onChange={e => {
@@ -352,8 +337,8 @@ export default function ApplyStep2() {
              />
            </div>
            <div className="input-group">
-             <label htmlFor="apply-branch">Default Store Branch<span className="required">*</span></label>
-             <select id="apply-branch" value={branch} onChange={e => setBranch(e.target.value)} required>
+             <label>Default Store Branch<span className="required">*</span></label>
+             <select value={branch} onChange={e => setBranch(e.target.value)} required>
                <option value="">Select your preferred branch</option>
                {branches.map(b => (
                  <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
@@ -366,12 +351,11 @@ export default function ApplyStep2() {
          <section className="form-section">
            <h2 className="section-title">03 Credit Line Application</h2>
             <div className="input-group full-width">
-                <label htmlFor="apply-credit-amount">How much credit are you applying for?</label>
-                <input
-                  id="apply-credit-amount"
-                  type="text"
-                  placeholder="₱0"
-                  // Display the formatted version
+                <label>How much credit are you applying for?</label>
+                <input 
+                  type="text" 
+                  placeholder="₱0" 
+                  // Display the formatted version 
                   value={formatAsCurrency(creditAmount)}
                   onChange={(e) => {
                     // Strip everything except numbers before saving to state 
@@ -381,8 +365,8 @@ export default function ApplyStep2() {
                 />
               </div>
            <div className="input-group">
-             <label htmlFor="apply-credit-term">What is your preferred credit term?</label>
-             <select id="apply-credit-term" onChange={e => setCreditTerm(e.target.value)}>
+             <label>What is your preferred credit term?</label>
+             <select onChange={e => setCreditTerm(e.target.value)}>
                <option value="">Select your preferred terms</option>
                <option value="30">30 Days</option>
                <option value="60">60 Days</option>
@@ -408,7 +392,7 @@ export default function ApplyStep2() {
                 <div key={index} className="file-display-badge">
                 <img src={fileIcon} alt="File Icon" className="custom-file-icon" />                  
                 <span className="file-name">{file.name}</span>
-                  <button type="button" className="remove-file" aria-label="Remove file" onClick={() => setSupportingDocs(supportingDocs.filter((_, i) => i !== index))}>×</button>
+                  <button type="button" className="remove-file" onClick={() => setSupportingDocs(supportingDocs.filter((_, i) => i !== index))}>×</button>
                 </div>
               ))}
               <button type="button" className="add-more-files" onClick={() => document.getElementById('docs-input').click()}>+ Add more</button>
@@ -446,7 +430,7 @@ export default function ApplyStep2() {
               <div className="file-display-badge">
                 <img src={fileIcon} alt="File Icon" className="custom-file-icon" />                  
                 <span className="file-name">{govId.name}</span>
-                <button type="button" className="remove-file" aria-label="Remove file" onClick={() => setGovId(null)}>×</button>
+                <button type="button" className="remove-file" onClick={() => setGovId(null)}>×</button>
               </div>
             </div>
           ) : (

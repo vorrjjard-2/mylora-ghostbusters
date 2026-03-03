@@ -21,7 +21,7 @@
     font-weight: 500;
     color: #333;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: all 0.2s ease;
     border-radius: 8px; 
 }
 
@@ -35,10 +35,4 @@
 
 .um-sidebar-item:hover:not(.active) {
   background-color: #E8E8E8;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .um-sidebar-item {
-    transition: none;
-  }
 }

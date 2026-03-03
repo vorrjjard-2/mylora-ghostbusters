@@ -122,12 +122,6 @@ box-sizing: border-box;
     margin-bottom: 10px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .apply1-page-wrapper .btn-continue {
-    transition: none;
-  }
-}
-
 
 
 

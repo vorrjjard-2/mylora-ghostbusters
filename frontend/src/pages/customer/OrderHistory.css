@@ -91,10 +91,6 @@
   width: 100%;
 }
 
-.history-search-input:focus {
-  box-shadow: 0 0 0 2px rgba(31, 61, 26, 0.3);
-}
-
 /* Sort */
 .history-sort-btn {
   padding: 0.6rem 1rem;
@@ -202,11 +198,4 @@
   text-align: center;
   color: #888;
   padding: 2rem;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .history-search-input,
-  .history-order-row {
-    transition: none;
-  }
 }

@@ -281,8 +281,3 @@
   width: 100%;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .progress-bar {
-    transition: none;
-  }
-}
