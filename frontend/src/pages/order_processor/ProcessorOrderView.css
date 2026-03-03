@@ -171,6 +171,12 @@
   margin-bottom: 2rem;
 }
 
+.view-rejection-note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
 .view-actions {
   display: flex;
   justify-content: flex-end;

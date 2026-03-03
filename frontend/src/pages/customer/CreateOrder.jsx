@@ -62,11 +62,30 @@ export default function CreateOrder() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
+    if (newQuantity === "") {
+      setSelectedItems(
+        selectedItems.map((item) =>
+          item.product_id === productId ? { ...item, quantity: "" } : item
+        )
+      );
+      return;
+    }
     const parsed = parseInt(newQuantity, 10);
-    const quantity = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+    if (isNaN(parsed)) return;
+    const quantity = parsed < 1 ? 1 : parsed;
     setSelectedItems(
       selectedItems.map((item) =>
         item.product_id === productId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  const handleQuantityBlur = (productId) => {
+    setSelectedItems(
+      selectedItems.map((item) =>
+        item.product_id === productId && (item.quantity === "" || item.quantity < 1)
+          ? { ...item, quantity: 1 }
+          : item
       )
     );
   };
@@ -76,7 +95,7 @@ export default function CreateOrder() {
   };
 
   const calculateTotal = () => {
-    return selectedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+    return selectedItems.reduce((sum, item) => sum + item.unit_price * (item.quantity || 0), 0);
   };
 
   const handleContinue = () => {
@@ -183,13 +202,14 @@ export default function CreateOrder() {
                             onChange={(e) =>
                               handleQuantityChange(item.product_id, e.target.value)
                             }
+                            onBlur={() => handleQuantityBlur(item.product_id)}
                             min="1"
                             step="1"
                             className="order-quantity-input"
                           />
                         </td>
                         <td className="order-td">
-                          ₱{(item.unit_price * item.quantity).toFixed(2)}
+                          ₱{(item.unit_price * (item.quantity || 0)).toFixed(2)}
                         </td>
                         <td className="order-td">
                           <button

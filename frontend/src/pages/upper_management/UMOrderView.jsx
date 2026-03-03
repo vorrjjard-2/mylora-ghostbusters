@@ -225,12 +225,15 @@ export default function UMOrderView() {
             <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029" }}>
               {order.rejection_reason}
             </div>
-            {order.rejected_by && (
-              <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
-                Rejected by: {order.rejected_by} {order.rejection_date ? `on ${order.rejection_date}` : ""}
-              </p>
-            )}
           </>
+        )}
+
+        {order.rejected_by && (
+          <p className="view-rejection-note">
+            Rejected by: <strong>{order.rejected_by}</strong>
+            <br />
+            Date &amp; Time: {order.rejection_date}
+          </p>
         )}
 
         <div className="view-actions">

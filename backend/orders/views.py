@@ -706,6 +706,39 @@ def um_approve_override(request, override_id):
             approval_date=timezone.now(),
         )
 
+    credit.refresh_from_db()
+
+    # Send order approval email to customer
+    customer_user = order.account.customer.user
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Approved!",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been approved via management override.
+
+Override reason:
+{override_req.reason}
+
+Your updated credit details:
+- Available Credit: ₱{credit.available_credit:,.2f}
+- Credit Limit: ₱{credit.credit_limit:,.2f}
+- Outstanding Balance: ₱{credit.outstanding_bal:,.2f}
+
+Thank you for your purchase!
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
     log_audit(user=request.user, action="APPROVE_OVERRIDE", details={"override_id": override_id, "order_id": order.order_id}, request=request)
     return Response({
         "success": True,
@@ -760,6 +793,32 @@ def um_reject_override(request, override_id):
         order = override_req.order
         order.order_status = "REJECTED"
         order.save()
+
+    # Send order rejection email to customer
+    customer_user = order.account.customer.user
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Rejected",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+We regret to inform you that your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been rejected.
+
+Override reason:
+{override_req.reason}
+
+If you have any questions, please contact your branch for further assistance.
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
 
     log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id}, request=request)
     return Response({
