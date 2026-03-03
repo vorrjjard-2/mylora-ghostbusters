@@ -12,11 +12,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 31px 78px;
-    margin-top: -18px;
-    margin-left: -37px;
-    background-color: #FCFCFC;
-    margin-bottom: 10px;
+    padding: 20px 40px;
+    margin-bottom: 2rem;
 }
 
 .um-brand-group {
@@ -26,26 +23,25 @@
 }
 
 .mylora-logo {
-    height: 50px;
-    margin-top: 5px;
+    height: var(--logo-height);
+    width: auto;
 }
 
 .um-system-title {
     font-size: 32px;
     font-weight: 700;
-    color: #395A31; 
-    font-family: 'Arimo', sans-serif;
+    color: var(--color-brand);
+    font-family: var(--font-family);
 }
 
 .um-logout-btn {
     background: white;
-    border: 1.3px solid #183112; 
-    color: #183112;
-    padding: 6px 30px; 
-    height: 41px;
-    width: 186px;
-    margin-right: -40px;
-    border-radius: 10px; 
+    border: 1.3px solid var(--color-primary);
+    color: var(--color-primary);
+    padding: 6px 30px;
+    height: var(--header-btn-height);
+    width: var(--header-btn-width);
+    border-radius: var(--header-btn-radius); 
     font-weight: 600;
     font-size: 20px;
     cursor: pointer;    

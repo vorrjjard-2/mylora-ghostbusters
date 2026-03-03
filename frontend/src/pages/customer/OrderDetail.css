@@ -18,19 +18,19 @@
 .order-brand-group {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .order-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
 .order-system-title {
-    font-size: 32px;
+    font-size: var(--title-size);
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .order-content{
@@ -137,11 +137,11 @@
 }
 
 .order-detail-back-btn {
-    background: #183112;
+    background: var(--color-primary);
     border: none;
     color: white;
     padding: 12px 140px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-weight: 700;
     font-size: 18px;
     letter-spacing: 0.5px;

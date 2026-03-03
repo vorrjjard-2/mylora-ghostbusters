@@ -22,7 +22,7 @@
 }
 
 .success-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
@@ -30,12 +30,12 @@
     font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .cancel-btn {
   padding: 8px 70px;
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -135,7 +135,7 @@
 }
 
 .success-outstanding-val {
-  color: #b03a2e;
+  color: var(--color-error);
   font-weight: 700;
 }
 
@@ -150,7 +150,7 @@
     display: flex;
     justify-content: flex-end;
     padding: 10px 100px;
-    background: #1f3d1a;
+    background: var(--color-primary);
     color: #fff;
     border: none;
     border-radius: 10px;

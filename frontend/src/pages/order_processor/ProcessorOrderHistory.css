@@ -30,7 +30,7 @@
 .poh-brand-name {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #395A31;
+  color: var(--color-brand);
   letter-spacing: -0.3px;
 }
 
@@ -83,7 +83,7 @@
 .poh-side-active {
   background: #eef2ed;
   font-weight: 600;
-  color: #1f3d1a;
+  color: var(--color-primary);
 }
 
 /* MAIN */
@@ -119,12 +119,12 @@
 }
 
 .poh-tab:hover {
-  color: #395A31;
+  color: var(--color-brand);
 }
 
 .poh-tab-active {
-  color: #1f3d1a;
-  border-bottom-color: #1f3d1a;
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 /* CONTROLS */
@@ -162,7 +162,7 @@
 }
 
 .poh-search-input:focus {
-  border-color: #395A31;
+  border-color: var(--color-brand);
   box-shadow: 0 0 0 2px rgba(31, 61, 26, 0.3);
 }
 
@@ -250,7 +250,7 @@
 }
 
 .poh-badge-completed {
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: #fff;
 }
 

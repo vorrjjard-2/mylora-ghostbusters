@@ -20,7 +20,7 @@
 }
 
 .modal-success-title {
-    color: #385930;
+    color: var(--color-brand);
     font-size: 36px;
     font-weight: 700;
     margin-bottom: 40px;
@@ -43,7 +43,7 @@
 .modal-return-btn {
     width: 100%;
     padding: 16px 0;
-    background-color: #183112;
+    background-color: var(--color-primary);
     color: white;
     border: none;
     border-radius: 10px;
@@ -54,5 +54,5 @@
 }
 
 .modal-return-btn:hover {
-    background-color: #254a1c;
+    background-color: var(--color-primary-hover);
 }

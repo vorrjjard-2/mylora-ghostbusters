@@ -22,7 +22,7 @@
 }
 
 .ub-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
@@ -30,12 +30,12 @@
     font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .ub-logout-btn {
   padding: 8px 70px;
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -103,7 +103,7 @@
 .cd-outstanding-amount {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #b03a2e;
+    color: var(--color-error);
 }
 
 .cd-button-row {
@@ -116,7 +116,7 @@
     cursor: pointer;
     font-size: 20px;
     font-weight: 500;
-    background: #1f3d1a;
+    background: var(--color-primary);
     color: white;
     padding: 25px;
     border-radius: 12px;
@@ -157,7 +157,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   font-size: 18px;
-  color: #183112;
+  color: var(--color-primary);
   margin-top: 10px;
   margin-bottom: 5px;
 }
@@ -181,7 +181,7 @@
 }
 
 .cd-back-btn {
-    background: #183112;
+    background: var(--color-primary);
     border: none;
     color: white;
     padding: 8px 60px;

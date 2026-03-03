@@ -18,12 +18,11 @@
 }
 
 .activate-page-wrapper .system-title {
-    color: #395A31;
+    color: var(--color-brand);
     font-weight: 700;
-    font-size: 32px;
-    font-family: 'Arimo', sans-serif;
+    font-size: var(--title-size);
+    font-family: var(--font-family);
     letter-spacing: -0.64px;
-    line-height: 38.4px;
 }
 
 .activate-page-wrapper .header-section {
@@ -78,7 +77,7 @@
     font-size: 20px;
     font-family: 'Arimo', sans-serif;
     margin-bottom: 0.5rem;
-    color: #1f3d1a;
+    color: var(--color-primary);
     margin-left: -100px;
     margin-top: 15px;
 }
@@ -98,7 +97,7 @@
     font-size: 20px;
     font-weight: 350;
     font-family: 'Arimo', sans-serif;
-    color: #183112;
+    color: var(--color-primary);
     margin-bottom: 1rem;
     line-height: 24px;
     margin-left: -100px;
@@ -116,7 +115,7 @@
     padding: 8px 59px;
     width: 715px;
     height: 41px;
-    background-color: #183112;
+    background-color: var(--color-primary);
     color: white;
     font-weight: 600;
     font-size: 20px;
@@ -133,7 +132,7 @@
 }
 
 .activate-page-wrapper .error-message {
-  color: #b03a2e;
+  color: var(--color-error);
   font-size: 14px;
   font-family: 'Arimo', sans-serif;
   margin-left: -100px;

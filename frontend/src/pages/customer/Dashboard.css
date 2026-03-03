@@ -9,16 +9,11 @@
 
 /* Header - Standardized with other pages */
 .cd-main-header {
-
-
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 31px 78px;
-    margin-top: -18px;
-    margin-left: -37px;
-    background-color: #FCFCFC;
-    margin-bottom: 10px;
+    padding: 20px 40px;
+    margin-bottom: 2rem;
 }
 
 .cd-brand-group {
@@ -28,13 +23,14 @@
 }
 
 .cd-logo-img {
-    height: 50px;
+    height: var(--logo-height);
+    width: auto;
 }
 
 .cd-system-title {
-    color: #395A31;
+    color: var(--color-brand);
     font-weight: 700;
-    font-size: 32px;
+    font-size: var(--title-size);
     letter-spacing: -0.64px;
 }
 
@@ -46,14 +42,14 @@
 
 .cd-profile-btn, .cd-logout-btn {
     background: white;
-    border: 1.3px solid #183112; 
-    color: #183112;
-    height: 41px;
+    border: 1.3px solid var(--color-primary);
+    color: var(--color-primary);
+    height: var(--header-btn-height);
     width: 160px;
-    border-radius: 10px; 
+    border-radius: var(--header-btn-radius);
     font-weight: 600;
     font-size: 18px;
-    cursor: pointer;   
+    cursor: pointer;
 }
 
 /* Content Area */
@@ -79,10 +75,10 @@
 }
 
 .cd-action-card {
-    background: #1f3d1a;
+    background: var(--color-primary);
     color: white;
     padding: 25px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     border: none;
     cursor: pointer;
     display: flex;
@@ -166,7 +162,7 @@
 .cd-balance-amount {
     font-size: 36px;
     font-weight: 800;
-    color: #911818;
+    color: var(--color-error);
 }
 
 /* Table Styles */
@@ -180,7 +176,7 @@
 .cd-view-all-btn {
     background: none;
     border: none;
-    color: #1f3d1a;
+    color: var(--color-primary);
     cursor: pointer;
     font-size: 16px;
     font-weight: 700;
@@ -231,9 +227,9 @@
     font-weight: 600;
 }
 
-.status-approved { background: #d4edda; color: #155724; }
-.status-pending { background: #fff3cd; color: #856404; }
-.status-rejected { background: #f8d7da; color: #721c24; }
+.status-approved { background: var(--badge-approved-bg); color: var(--badge-approved-fg); }
+.status-pending { background: var(--badge-pending-bg); color: var(--badge-pending-fg); }
+.status-rejected { background: var(--badge-rejected-bg); color: var(--badge-rejected-fg); }
 
 @media (prefers-reduced-motion: reduce) {
   .cd-nav-btn,

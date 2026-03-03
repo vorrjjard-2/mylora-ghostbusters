@@ -30,7 +30,7 @@
 .op-dash-brand-name {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #395A31;
+  color: var(--color-brand);
   letter-spacing: -0.3px;
 }
 
@@ -83,7 +83,7 @@
 .op-dash-side-active {
   background: #eef2ed;
   font-weight: 600;
-  color: #1f3d1a;
+  color: var(--color-primary);
 }
 
 /* MAIN */
@@ -105,7 +105,7 @@
 
 .op-dash-card {
   display: inline-block;
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: #fff;
   border-radius: 10px;
   padding: 20px 28px;

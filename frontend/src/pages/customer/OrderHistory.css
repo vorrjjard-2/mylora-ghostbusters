@@ -22,28 +22,28 @@
 }
 
 .history-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
 .history-system-title {
-    font-size: 32px;
+    font-size: var(--title-size);
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .history-back-btn {
-    background: #183112;
-    border: 1.3px solid #183112; 
+    background: var(--color-primary);
+    border: 1.3px solid var(--color-primary);
     color: white;
-    padding: 6px 30px; 
-    height: 41px;
-    width: 186px;
-    border-radius: 10px; 
+    padding: 6px 30px;
+    height: var(--header-btn-height);
+    width: var(--header-btn-width);
+    border-radius: var(--header-btn-radius);
     font-weight: 600;
     font-size: 20px;
-    cursor: pointer;   
+    cursor: pointer;
 }
 
 .order-history-content {
@@ -71,8 +71,8 @@
 .history-search-wrapper {
   display: flex;
   align-items: center;
-  border: 1px solid #183112;
-  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
   padding-left: 0.6rem;
   flex: 1;
   max-width: 260px;
@@ -99,8 +99,8 @@
 .history-sort-btn {
   padding: 0.6rem 1rem;
   background: #F8F8F8;
-  border: 1px solid #183112;
-  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.95rem;
   white-space: nowrap;
@@ -154,7 +154,7 @@
 }
 
 .history-checkbox {
-  accent-color: #1f3d1a;
+  accent-color: var(--color-primary);
   width: 16px;
   height: 16px;
   cursor: pointer;

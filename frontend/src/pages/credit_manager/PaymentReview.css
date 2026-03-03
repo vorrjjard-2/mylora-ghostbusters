@@ -22,7 +22,7 @@
 }
 
 .payment-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
@@ -30,12 +30,12 @@
     font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .payment-logout-btn {
   padding: 8px 70px;
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -127,7 +127,7 @@
 .balance-amount {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #b03a2e;
+  color: var(--color-error);
 }
 
 /* Form Styles */
@@ -184,7 +184,7 @@
 }
 
 .file-link {
-  color: #1f3d1a;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
 }
@@ -199,8 +199,8 @@
 
 .payment-cancel-btn {
     background: white;
-    border: 1px solid #183112;
-    color: #183112;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
     padding: 8px 60px;
     border-radius: 10px;
     font-weight: 600;
@@ -209,7 +209,7 @@
 }
 
 .payment-confirm-btn {
-    background: #183112;
+    background: var(--color-primary);
     border: none;
     color: white;
     padding: 8px 60px;
@@ -233,7 +233,7 @@
 
 .payment-modal {
   background: #fff;
-  border: 1px solid #183112;
+  border: 1px solid var(--color-primary);
   border-radius: 10px;
   max-width: 700px;
   padding: 2rem;
@@ -250,7 +250,7 @@
     margin-top: 10px;
     margin-bottom: 30px;
     padding: 5px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .success-message{
@@ -271,7 +271,7 @@
 
 .payment-return-btn {
   padding: 8px 2rem;
-  background: #183112;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 10px;

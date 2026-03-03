@@ -34,7 +34,7 @@
 .apply2-page-wrapper .header-title {
     font-size: 32px;
     font-weight: 700;
-    color: #385930; 
+    color: var(--color-brand);
 }
 
 .apply2-page-wrapper .main-title {
@@ -90,40 +90,41 @@
 
 .apply2-page-wrapper .required { color: #911818; }
 
-select {
-    appearance: none; 
+.apply2-page-wrapper select {
+    appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-  
+
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 15px center; 
+    background-position: right 15px center;
     background-size: 14px;
-  
-    padding-right: 40px; 
+
+    padding-right: 40px;
     cursor: pointer;
-    background-color: #F8F8F8;
+    background-color: var(--color-input-bg);
     border: 1px solid #BDBDBD;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     padding: 14px;
-    font-size: 16px;
+    font-size: var(--body-size);
     width: 100%;
-    font-family: 'Arimo', sans-serif;
+    font-family: var(--font-family);
 }
 
-input, select {
-    background-color: #F8F8F8;
-    border: 1px solid #183112;
-    border-radius: 10px;
+.apply2-page-wrapper input,
+.apply2-page-wrapper select {
+    background-color: var(--color-input-bg);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
     padding: 14px;
-    font-size: 16px;
+    font-size: var(--body-size);
     width: 100%;
     box-sizing: border-box;
 }
 
 .apply2-page-wrapper .upload-zone {
     display: block;
-    border: 1px solid #183112;
+    border: 1px solid var(--color-primary);
     border-radius: 12px;
     padding: 60px 12px;
     text-align: center;
@@ -160,7 +161,7 @@ input, select {
 }
 
 .apply2-page-wrapper .btn-next {
-    background-color: #183112;
+    background-color: var(--color-primary);
     color: white;
     border: none;
     padding: 8px 59px;
@@ -176,7 +177,7 @@ input, select {
 
 .apply2-page-wrapper .btn-back {
     background: white;
-    border: 1px solid #183112;
+    border: 1px solid var(--color-primary);
     padding: 8px 59px;
     border-radius: 10px;
     font-size: 20px;
@@ -200,7 +201,7 @@ input, select {
     display: flex;
     align-items: center;
     background-color: #F8F8F8;
-    border: 1px solid #183112;
+    border: 1px solid var(--color-primary);
     border-radius: 10px;
     padding: 10px 15px;
     min-width: 200px;
@@ -218,7 +219,7 @@ input, select {
 .file-name {
     flex-grow: 1;
     font-size: 16px;
-    color: #183112;
+    color: var(--color-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis; 
@@ -228,7 +229,7 @@ input, select {
 .remove-file {
     background: none;
     border: none;
-    color: #183112;
+    color: var(--color-primary);
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
@@ -238,10 +239,10 @@ input, select {
 
 .add-more-files {
     background: transparent;
-    border: 1px dashed #183112;
+    border: 1px dashed var(--color-primary);
     border-radius: 10px;
     padding: 10px 20px;
-    color: #183112;
+    color: var(--color-primary);
     cursor: pointer;
     font-family: 'Arimo', sans-serif;
     font-weight: 600;
@@ -265,7 +266,7 @@ input, select {
 .section-header-text, .id-hint-text {
     margin-left: -40px;
     margin-bottom: 15px;
-    color: #183112; 
+    color: var(--color-primary); 
     font-weight: 600;
     font-size: 20px;
 }

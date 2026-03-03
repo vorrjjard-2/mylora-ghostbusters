@@ -22,7 +22,7 @@
 }
 
 .ub-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
@@ -30,12 +30,12 @@
     font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .ub-logout-btn {
   padding: 8px 70px;
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -103,7 +103,7 @@
 .ub-outstanding-amount {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #911818; 
+    color: var(--color-error); 
 }
 
 .ub-form-row {
@@ -164,12 +164,12 @@
 
 .ub-id-hint-text {
     font-size: 14px;
-    color: #183112;
+    color: var(--color-primary);
     margin: 0 0 12px 0;
 }
 
 .ub-required {
-    color: #911818;
+    color: var(--color-error);
     margin-left: 4px;
 }
 
@@ -189,7 +189,7 @@
 
 .ub-upload-zone:hover {
     background-color: #F3F3F3;
-    border-color: #395A31; 
+    border-color: var(--color-brand); 
 }
 
 .ub-upload-text {
@@ -234,7 +234,7 @@
 .ub-remove-file {
     background: none;
     border: none;
-    color: #911818;
+    color: var(--color-error);
     font-size: 22px;
     font-weight: bold;
     cursor: pointer;
@@ -263,8 +263,8 @@
 
 .ub-cancel-btn {
     background: white;
-    border: 1px solid #183112;
-    color: #183112;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
     padding: 8px 60px;
     border-radius: 10px;
     font-weight: 600;
@@ -273,7 +273,7 @@
 }
 
 .ub-submit-btn {
-    background: #183112;
+    background: var(--color-primary);
     border: none;
     color: white;
     padding: 8px 60px;
@@ -297,7 +297,7 @@
 
 .ub-modal {
   background: #fff;
-  border: 1px solid #183112;
+  border: 1px solid var(--color-primary);
   border-radius: 10px;
   max-width: 700px;
   padding: 2rem;
@@ -330,8 +330,8 @@
 
 .ub-modal-cancel-btn {
     background: white;
-    border: 1px solid #183112;
-    color: #183112;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
     padding: 8px 60px;
     border-radius: 10px;
     font-weight: 600;
@@ -340,7 +340,7 @@
 }
 
 .ub-modal-confirm-btn {
-    background: #183112;
+    background: var(--color-primary);
     border: none;
     color: white;
     padding: 8px 60px;
@@ -357,12 +357,12 @@
     margin-top: 10px;
     margin-bottom: 50px;
     padding: 5px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .ub-return-btn {
   padding: 8px 2rem;
-  background: #183112;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 10px;

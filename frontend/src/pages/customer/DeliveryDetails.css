@@ -23,10 +23,10 @@
 
 .delivery-cancel-btn {
   padding: 0.75rem 2rem;
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 500;
@@ -86,9 +86,9 @@
 }
 
 .delivery-mode-button.active {
-  background: #1f3d1a;
+  background: var(--color-primary);
   color: white;
-  border-color: #1f3d1a;
+  border-color: var(--color-primary);
 }
 
 .delivery-mode-icon {
@@ -123,15 +123,14 @@
 }
 
 .delivery-required {
-  color: #e53e3e;
+  color: var(--color-error);
   margin-left: 0.25rem;
 }
 
 .delivery-input {
   padding: 16px 20px;
-  border: 1px solid #ccc;
-  border: 1px solid #183112;
-  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
   font-size: 1rem;
   font-family: inherit;
 }
@@ -151,7 +150,7 @@
   gap: 10px;
   font-size: 16px;
   font-weight: 600;
-  color: #183112;
+  color: var(--color-primary);
   cursor: pointer;
   margin-bottom: -0.5rem;
 }
@@ -160,7 +159,7 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #183112;
+  accent-color: var(--color-primary);
 }
 
 .delivery-input-readonly {
@@ -172,14 +171,14 @@
 .delivery-next-btn {
     width: 431px;
     padding: 10px 59px;
-    background: #1f3d1a;
+    background: var(--color-primary);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-size: 20px;
     font-weight: 600;
     cursor: pointer;
-    display: block;   
+    display: block;
     margin-left: auto;
     margin-right: 40px;
     margin-top: 50px;

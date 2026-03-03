@@ -21,29 +21,29 @@
 .review-brand-group {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .review-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
 .review-system-title {
-    font-size: 32px;
+    font-size: var(--title-size);
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .review-cancel-btn {
-    background: #183112;
-    border: 1.3px solid #183112; 
+    background: var(--color-primary);
+    border: 1.3px solid var(--color-primary);
     color: white;
-    padding: 6px 30px; 
-    height: 41px;
-    width: 186px;
-    border-radius: 10px; 
+    padding: 6px 30px;
+    height: var(--header-btn-height);
+    width: var(--header-btn-width);
+    border-radius: var(--header-btn-radius);
     font-weight: 600;
     font-size: 20px;
     cursor: pointer;
@@ -111,12 +111,12 @@
     font-weight: 700;
     margin-bottom: 8px;
     margin-left: -85px;
-    color: #183112;
+    color: var(--color-primary);
 }
 
 .review-readonly-box {
     background-color: #F8F8F8; 
-    border: 1px solid #183112;  
+    border: 1px solid var(--color-primary);
     border-radius: 10px;
     padding: 14px;
     font-size: 16px;
@@ -132,7 +132,7 @@
 .review-edit-link {
     background: none;
     border: none;
-    color: #395A31; 
+    color: var(--color-brand);
     text-decoration: underline;
     font-size: 16px;
     font-weight: 600;
@@ -155,30 +155,21 @@
     margin: 0;
 }
 
-.review-actions {
-    display: flex;
-    justify-content: space-between; 
-    align-items: center;
-    margin-top: 2rem;
-    margin-bottom: 5rem;
-}
-
-
 .review-submit-btn {
-    width: 431px; 
+    width: 431px;
     padding: 10px 59px;
-    background: #1f3d1a;
+    background: var(--color-primary);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-size: 20px;
     font-weight: 600;
     cursor: pointer;
 }
 
 .review-table-wrapper {
-    border: 1px solid #183112; 
-    border-radius: 12px;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-lg);
     padding: 20px;
     background-color: #FFFFFF;
     margin-left: -85px;
@@ -206,7 +197,7 @@
 
 .review-item-name {
     font-weight: 600;
-    font-size: 16px;;
+    font-size: 16px;
 }
 
 .review-item-unit {
@@ -219,7 +210,7 @@
 .review-text-right { text-align: right; }
 
 .review-total-row {
-    border-top: 3px solid #183112; 
+    border-top: 3px solid var(--color-primary);
 }
 
 .review-total-label {
@@ -235,7 +226,7 @@
     padding-top: 20px;
     font-size: 16px;
     font-weight: 700;
-    color: #183112; 
+    color: var(--color-primary);
     text-align: right;
 }
 
@@ -274,7 +265,7 @@
 .review-modal-title {
     font-size: 24px;
     font-weight: 700;
-    color: #911818;
+    color: var(--color-error);
     margin-bottom: 16px;
 }
 
@@ -286,10 +277,10 @@
 }
 
 .review-modal-accept-btn {
-    background: #183112;
+    background: var(--color-primary);
     color: #fff;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     padding: 12px 40px;
     font-size: 16px;
     font-weight: 600;
@@ -299,7 +290,7 @@
 .review-back-link {
     background: none;
     border: none;
-    color: #395A31;
+    color: var(--color-brand);
     font-size: 18px;
     font-weight: 600;
     text-decoration: underline;
@@ -313,10 +304,10 @@
     width: auto; 
     padding: 10px 100px; 
     margin-right: -60px;
-    background: #183112;
+    background: var(--color-primary);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-size: 20px;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -326,9 +317,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ro-confirm-btn,
-  .ro-back-btn,
-  .ro-nav-btn {
+  .review-submit-btn,
+  .review-back-link,
+  .review-edit-link {
     transition: none;
   }
 }

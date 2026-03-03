@@ -22,28 +22,28 @@
 }
 
 .profile-logo-img {
-    height: 50px;
+    height: var(--logo-height);
     width: auto;
 }
 
 .profile-system-title {
-    font-size: 32px;
+    font-size: var(--title-size);
     font-weight: 700;
     letter-spacing: -0.64px;
-    color: #395A31;
+    color: var(--color-brand);
 }
 
 .profile-back-btn {
-    background: #183112;
-    border: 1.3px solid #183112; 
+    background: var(--color-primary);
+    border: 1.3px solid var(--color-primary);
     color: white;
-    padding: 6px 30px; 
-    height: 41px;
-    width: 186px;
-    border-radius: 10px; 
+    padding: 6px 30px;
+    height: var(--header-btn-height);
+    width: var(--header-btn-width);
+    border-radius: var(--header-btn-radius);
     font-weight: 600;
     font-size: 20px;
-    cursor: pointer;   
+    cursor: pointer;
 }
 
 .profile-content {
@@ -87,8 +87,8 @@
   display: block;
   font-weight: 600;
   letter-spacing: 0.5px;
-  font-size: 20px;
-  color: #183112;
+  font-size: var(--label-size);
+  color: var(--color-primary);
   margin-top: -10px;
   margin-bottom: 5px;
 }
@@ -120,28 +120,28 @@
 .profile-save-password-btn {
   padding: 12px 120px;
   background: #D1D5D0;
-  color: #262626;
-  border: 1px solid #183112;
-  border-radius: 10px;
+  color: var(--color-text);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
 }
 
 .profile-error {
-  color: #b03a2e;
+  color: var(--color-error);
   font-size: 14px;
-  font-family: 'Arimo', sans-serif;
+  font-family: var(--font-family);
   margin-top: -8px;
   margin-bottom: 8px;
 }
 
 .profile-save-btn {
   padding: 12px 80px;
-  background: #183112;
-  color: #f2f2f2;
+  background: var(--color-primary);
+  color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
