@@ -346,7 +346,18 @@ export default function CreditApproval() {
             padding: "2rem",
             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
             fontFamily: "'Arimo', sans-serif",
+            position: "relative",
           }}>
+            <button
+              onClick={() => setShowPasswordModal(false)}
+              style={{
+                position: "absolute", top: "0.75rem", right: "0.75rem",
+                background: "none", border: "none", fontSize: "1.5rem",
+                cursor: "pointer", color: "#666", lineHeight: 1, padding: "0.25rem",
+              }}
+            >
+              &times;
+            </button>
             <h3 style={{
               fontSize: "1.25rem",
               fontWeight: 600,
@@ -433,7 +444,18 @@ export default function CreditApproval() {
             padding: "2rem",
             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
             fontFamily: "'Arimo', sans-serif",
+            position: "relative",
           }}>
+            <button
+              onClick={() => setShowRejectModal(false)}
+              style={{
+                position: "absolute", top: "0.75rem", right: "0.75rem",
+                background: "none", border: "none", fontSize: "1.5rem",
+                cursor: "pointer", color: "#666", lineHeight: 1, padding: "0.25rem",
+              }}
+            >
+              &times;
+            </button>
             <h3 style={{
               fontSize: "1.25rem",
               fontWeight: 600,
@@ -530,7 +552,17 @@ export default function CreditApproval() {
       {/* Override Request Modal */}
       {showOverrideModal && (
         <div className="modal-overlay">
-          <div className="modal-card">
+          <div className="modal-card" style={{ position: "relative" }}>
+            <button
+              onClick={() => setShowOverrideModal(false)}
+              style={{
+                position: "absolute", top: "0.75rem", right: "0.75rem",
+                background: "none", border: "none", fontSize: "1.5rem",
+                cursor: "pointer", color: "#666", lineHeight: 1, padding: "0.25rem",
+              }}
+            >
+              &times;
+            </button>
             <h3 className="modal-title-warning">WARNING!</h3>
               <p className="modal-text-body">
                 <span className="text-bold">ORDER {order.order_id}</span> amounting to{" "}

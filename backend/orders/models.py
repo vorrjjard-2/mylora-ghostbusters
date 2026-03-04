@@ -17,7 +17,7 @@ class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
     account = models.ForeignKey(
         'accounts.CreditAccount',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name='orders'
     )
     branch = models.ForeignKey(

@@ -739,7 +739,7 @@ Mylora Web Credit System
     except Exception as e:
         print(f"Email sending failed: {e}")
 
-    log_audit(user=request.user, action="APPROVE_OVERRIDE", details={"override_id": override_id, "order_id": order.order_id}, request=request)
+    log_audit(user=request.user, action="APPROVE_OVERRIDE", details={"override_id": override_id, "order_id": order.order_id, "approved_by": request.user.username}, request=request)
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -836,7 +836,7 @@ Mylora Web Credit System
     except Exception as e:
         print(f"Email sending failed: {e}")
 
-    log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id, "rejection_reason": rejection_reason}, request=request)
+    log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id, "rejection_reason": rejection_reason, "rejected_by": request.user.username}, request=request)
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -1572,12 +1572,18 @@ def um_delete_customer(request, customer_id):
         )
 
     customer_name = customer.user.get_full_name() or customer.user.username
-    with transaction.atomic():
-        user = customer.user
-        # Delete customer (cascade will handle related records)
-        customer.delete()
-        # Delete user account
-        user.delete()
+    try:
+        with transaction.atomic():
+            user = customer.user
+            # Delete customer (cascade will handle related records)
+            customer.delete()
+            # Delete user account
+            user.delete()
+    except Exception:
+        return Response(
+            {"error": "Cannot delete customer with existing orders. Remove their orders first."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     log_audit(user=request.user, action="DELETE_CUSTOMER", details={"customer_id": customer_id, "customer_name": customer_name}, request=request)
     return Response({"success": True, "message": "Customer deleted successfully"})
