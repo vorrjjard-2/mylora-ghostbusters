@@ -370,7 +370,7 @@ export default function Dashboard() {
                     <div
                       key={order.order_id}
                       className="um-request-item"
-                      onClick={() => navigate(`/upper-management/customer/${order.customer_id}/order/${order.order_id}`, { state: { from: "/upper-management" } })}
+                      onClick={() => navigate(`/upper-management/customer/${order.customer_id}/order/${order.order_id}`, { state: { from: "/upper-management/dashboard" } })}
                       style={{ cursor: "pointer" }}
                     >
                       <div className="um-request-info">
