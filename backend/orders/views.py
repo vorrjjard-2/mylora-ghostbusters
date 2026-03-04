@@ -768,11 +768,18 @@ def um_reject_override(request, override_id):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     from .models import OverrideRequest
     from django.utils import timezone
-    
+
     try:
-        override_req = OverrideRequest.objects.select_related("order__account").get(override_id=override_id)
+        override_req = OverrideRequest.objects.select_related("order__account__customer__user").get(override_id=override_id)
     except OverrideRequest.DoesNotExist:
         return Response({"error": "Override request not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -794,6 +801,15 @@ def um_reject_override(request, override_id):
         order.order_status = "REJECTED"
         order.save()
 
+        # Record the rejection
+        OrderApproval.objects.create(
+            user=request.user,
+            order=order,
+            approval_status="REJECTED",
+            approval_date=timezone.now(),
+            notes=rejection_reason,
+        )
+
     # Send order rejection email to customer
     customer_user = order.account.customer.user
     try:
@@ -805,8 +821,8 @@ Hello {customer_user.get_full_name()},
 
 We regret to inform you that your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been rejected.
 
-Override reason:
-{override_req.reason}
+Reason for rejection:
+{rejection_reason}
 
 If you have any questions, please contact your branch for further assistance.
 
@@ -820,7 +836,7 @@ Mylora Web Credit System
     except Exception as e:
         print(f"Email sending failed: {e}")
 
-    log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id}, request=request)
+    log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id, "rejection_reason": rejection_reason}, request=request)
     return Response({
         "success": True,
         "override_id": override_req.override_id,
