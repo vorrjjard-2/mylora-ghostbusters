@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -47,7 +48,7 @@ export default function EnrollmentReview() {
   }
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/enrollments/${applicationId}/`, {
+    fetch(`${API_BASE_URL}/api/enrollments/${applicationId}/`, {
       credentials: "include"
     })
       .then(res => {
@@ -81,7 +82,7 @@ export default function EnrollmentReview() {
     setLoading(true);
     setError("");
 
-    fetch(`http://localhost:8000/api/enrollments/${applicationId}/${pendingAction}/`, {
+    fetch(`${API_BASE_URL}/api/enrollments/${applicationId}/${pendingAction}/`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -126,7 +127,7 @@ export default function EnrollmentReview() {
     setLoading(true);
     setRejectPasswordError("");
 
-    fetch(`http://localhost:8000/api/enrollments/${applicationId}/reject/`, {
+    fetch(`${API_BASE_URL}/api/enrollments/${applicationId}/reject/`, {
       method: "POST",
       credentials: "include",
       headers: {

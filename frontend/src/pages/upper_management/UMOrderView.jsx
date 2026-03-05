@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -13,7 +14,7 @@ export default function UMOrderView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/um/order/${orderId}/view/`, {
+    fetch(`${API_BASE_URL}/api/um/order/${orderId}/view/`, {
       credentials: "include",
     })
       .then((res) => {

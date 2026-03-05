@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -13,7 +14,7 @@ export default function EmployeeDatabase() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/um/employees/", {
+    fetch(`${API_BASE_URL}/api/um/employees/`, {
       credentials: "include",
     })
       .then((res) => {

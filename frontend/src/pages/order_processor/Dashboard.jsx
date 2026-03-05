@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -19,8 +20,8 @@ export default function OrderProcessorDashboard() {
     const fetchData = async () => {
       try {
         const [ordersRes, meRes] = await Promise.all([
-          fetch("http://localhost:8000/api/op/pending-orders/", { credentials: "include" }),
-          fetch("http://localhost:8000/api/me/", { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/op/pending-orders/`, { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/me/`, { credentials: "include" }),
         ]);
         if (!ordersRes.ok) throw new Error("Failed to load orders");
         const ordersData = await ordersRes.json();
@@ -75,7 +76,7 @@ export default function OrderProcessorDashboard() {
   };
 
   const handleLogout = async () => {
-    await fetch("http://localhost:8000/api/logout/", {
+    await fetch(`${API_BASE_URL}/api/logout/`, {
       method: "POST",
       credentials: "include",
       headers: { "X-CSRFToken": getCookie("csrftoken") },

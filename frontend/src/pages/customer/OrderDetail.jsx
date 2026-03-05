@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -16,7 +17,7 @@ export default function OrderDetail() {
   const backTo = location.state?.from || "/orders";
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/orders/${orderId}/`, { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/orders/${orderId}/`, { credentials: "include" })
       .then((r) => {
         if (!r.ok) throw new Error("Order not found");
         return r.json();

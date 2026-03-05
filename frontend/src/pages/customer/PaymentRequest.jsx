@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -24,7 +25,7 @@ export default function PaymentRequest() {
 
   useEffect(() => {
     // Fetch credit info and user info to display on the page
-    fetch("http://localhost:8000/api/customer/dashboard/", {
+    fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -120,7 +121,7 @@ export default function PaymentRequest() {
       // Get CSRF token
       const csrfToken = getCookie("csrftoken");
       
-      const response = await fetch("http://localhost:8000/api/payments/submit/", {
+      const response = await fetch(`${API_BASE_URL}/api/payments/submit/`, {
         method: "POST",
         credentials: "include",
         headers: {

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -11,7 +12,7 @@ export default function ProcessorOrderView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/op/order/${orderId}/view/`, {
+    fetch(`${API_BASE_URL}/api/op/order/${orderId}/view/`, {
       credentials: "include",
     })
       .then((res) => {

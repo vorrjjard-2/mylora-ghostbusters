@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -33,7 +34,7 @@ export default function UpdateBalance() {
 
   useEffect(() => {
     // Fetch customer details
-    fetch("http://localhost:8000/api/cm/customers/", {
+    fetch(`${API_BASE_URL}/api/cm/customers/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -91,7 +92,7 @@ export default function UpdateBalance() {
       }
 
       const response = await fetch(
-        `http://localhost:8000/api/cm/customer/${customerId}/adjust-balance/`,
+        `${API_BASE_URL}/api/cm/customer/${customerId}/adjust-balance/`,
         {
           method: "POST",
           credentials: "include",

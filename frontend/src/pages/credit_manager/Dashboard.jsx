@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CMSidebar from "../../components/credit_manager/CMSidebar";
@@ -9,7 +10,7 @@ export default function CreditManagerDashboard() {
   const [user, setUser] = useState({ username: "" });
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/me/", { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/me/`, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => { if (data.username) setUser({ username: data.username }); })
       .catch(console.error);
@@ -42,11 +43,11 @@ export default function CreditManagerDashboard() {
 
   useEffect(() => {
     Promise.all([
-      fetch("http://localhost:8000/api/cm/pending-orders/", { credentials: "include" }).then((r) => r.json()),
-      fetch("http://localhost:8000/api/cm/all-orders/", { credentials: "include" }).then((r) => r.json()),
-      fetch("http://localhost:8000/api/cm/pending-payments/", { credentials: "include" }).then((r) => r.json()),
-      fetch("http://localhost:8000/api/cm/all-payments/", { credentials: "include" }).then((r) => r.json()),
-      fetch("http://localhost:8000/api/cm/customers/", { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/pending-orders/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/all-orders/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/pending-payments/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/all-payments/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/customers/`, { credentials: "include" }).then((r) => r.json()),
     ])
       .then(([cd, ao, pm, ap, cust]) => {
         setCreditData(cd);

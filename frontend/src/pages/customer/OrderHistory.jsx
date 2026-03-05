@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import searchIcon from "../../assets/search.png";
@@ -48,7 +49,7 @@ export default function OrderHistory() {
 
   /* ── fetch ── */
   useEffect(() => {
-    fetch("http://localhost:8000/api/orders/", { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/orders/`, { credentials: "include" })
       .then((r) => r.json())
       .then(setOrders)
       .catch(console.error)

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -29,7 +30,7 @@ export default function ReviewOrder() {
     setDeliveryDetails(JSON.parse(delivery));
 
     // Fetch customer info
-    fetch("http://localhost:8000/api/customer/dashboard/", {
+    fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -71,7 +72,7 @@ export default function ReviewOrder() {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/api/orders/create/", {
+      const res = await fetch(`${API_BASE_URL}/api/orders/create/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

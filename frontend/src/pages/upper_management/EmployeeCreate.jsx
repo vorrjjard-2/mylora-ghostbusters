@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -37,7 +38,7 @@ export default function EmployeeCreate() {
       role: formData.role,
     };
 
-    fetch("http://localhost:8000/api/um/employee/create/", {
+    fetch(`${API_BASE_URL}/api/um/employee/create/`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },

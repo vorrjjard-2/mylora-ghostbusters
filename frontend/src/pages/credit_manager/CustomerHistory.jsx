@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -12,10 +13,10 @@ export default function CustomerHistory() {
 
   useEffect(() => {
     Promise.all([
-      fetch("http://localhost:8000/api/cm/customers/", {
+      fetch(`${API_BASE_URL}/api/cm/customers/`, {
         credentials: "include",
       }).then((res) => res.json()),
-      fetch(`http://localhost:8000/api/cm/customer/${customerId}/history/`, {
+      fetch(`${API_BASE_URL}/api/cm/customer/${customerId}/history/`, {
         credentials: "include",
       }).then((res) => res.json()),
     ])

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -25,7 +26,7 @@ export default function CustomerProfile() {
 
   useEffect(() => {
     // Fetch customer profile data
-    fetch("http://localhost:8000/api/customer/profile/", {
+    fetch(`${API_BASE_URL}/api/customer/profile/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -69,7 +70,7 @@ export default function CustomerProfile() {
     const csrfToken = getCookie("csrftoken");
 
     try {
-      const response = await fetch("http://localhost:8000/api/customer/change-password/", {
+      const response = await fetch(`${API_BASE_URL}/api/customer/change-password/`, {
         method: "POST",
         credentials: "include",
         headers: {

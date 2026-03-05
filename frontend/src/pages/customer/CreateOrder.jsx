@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -16,7 +17,7 @@ export default function CreateOrder() {
 
   useEffect(() => {
     // Fetch available products
-    fetch("http://localhost:8000/api/products/", {
+    fetch(`${API_BASE_URL}/api/products/`, {
       credentials: "include",
     })
       .then((res) => {

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../utils/api";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getCookie } from "../../../utils/csrf";
@@ -19,7 +20,7 @@ export default function Login() {
 
     try {
       // 1️⃣ Login
-      const res = await fetch("http://localhost:8000/api/login/", {
+      const res = await fetch(`${API_BASE_URL}/api/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +39,7 @@ export default function Login() {
       }
 
       // 2️⃣ Get logged-in user + roles
-      const meRes = await fetch("http://localhost:8000/api/me/", {
+      const meRes = await fetch(`${API_BASE_URL}/api/me/`, {
         credentials: "include",
       });
 

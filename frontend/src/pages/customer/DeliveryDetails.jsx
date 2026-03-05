@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -72,7 +73,7 @@ export default function DeliveryDetails() {
       return;
     }
 
-    fetch("http://localhost:8000/api/customer/profile/", { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/customer/profile/`, { credentials: "include" })
       .then(r => r.json())
       .then(data => setProfileData(data))
       .catch(console.error);

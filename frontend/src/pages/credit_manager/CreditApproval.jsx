@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -35,7 +36,7 @@ export default function CreditApproval() {
   const [rejectReasonError, setRejectReasonError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/cm/order/${orderId}/`, { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/cm/order/${orderId}/`, { credentials: "include" })
       .then((r) => {
         if (!r.ok) throw new Error("Not found");
         return r.json();
@@ -62,7 +63,7 @@ export default function CreditApproval() {
       if (rejectionReason) payload.rejection_reason = rejectionReason;
       const body = Object.keys(payload).length > 0 ? JSON.stringify(payload) : undefined;
       const res = await fetch(
-        `http://localhost:8000/api/cm/order/${orderId}/${action}/`,
+        `${API_BASE_URL}/api/cm/order/${orderId}/${action}/`,
         {
           method: "POST",
           credentials: "include",
@@ -146,7 +147,7 @@ export default function CreditApproval() {
     setActing(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/api/cm/order/${orderId}/request-override/`,
+        `${API_BASE_URL}/api/cm/order/${orderId}/request-override/`,
         {
           method: "POST",
           credentials: "include",

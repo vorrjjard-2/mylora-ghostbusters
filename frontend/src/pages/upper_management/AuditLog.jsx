@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -14,7 +15,7 @@ export default function AuditLog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/um/audit-logs/", {
+    fetch(`${API_BASE_URL}/api/um/audit-logs/`, {
       credentials: "include",
     })
       .then((res) => {

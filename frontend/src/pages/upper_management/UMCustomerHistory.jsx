@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -20,8 +21,8 @@ export default function UMCustomerHistory() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`http://localhost:8000/api/um/customer/${customerId}/`, { credentials: "include" }).then((res) => res.json()),
-      fetch(`http://localhost:8000/api/um/customer/${customerId}/orders/`, { credentials: "include" }).then((res) => res.json()),
+      fetch(`${API_BASE_URL}/api/um/customer/${customerId}/`, { credentials: "include" }).then((res) => res.json()),
+      fetch(`${API_BASE_URL}/api/um/customer/${customerId}/orders/`, { credentials: "include" }).then((res) => res.json()),
     ])
       .then(([customerData, ordersData]) => {
         setCustomer(customerData);

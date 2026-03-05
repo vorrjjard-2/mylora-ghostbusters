@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -19,7 +20,7 @@ export default function OrderCompletion() {
   const [completionInfo, setCompletionInfo] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/op/order/${orderId}/`, {
+    fetch(`${API_BASE_URL}/api/op/order/${orderId}/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -128,7 +129,7 @@ export default function OrderCompletion() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/op/order/${orderId}/complete/`,
+        `${API_BASE_URL}/api/op/order/${orderId}/complete/`,
         {
           method: "POST",
           credentials: "include",

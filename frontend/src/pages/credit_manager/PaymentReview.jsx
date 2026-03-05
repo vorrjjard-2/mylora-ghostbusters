@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -20,7 +21,7 @@ export default function PaymentReview() {
   const [rejectReasonError, setRejectReasonError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/cm/payment/${paymentId}/`, { 
+    fetch(`${API_BASE_URL}/api/cm/payment/${paymentId}/`, { 
       credentials: "include",
     })
       .then((res) => {
@@ -68,7 +69,7 @@ export default function PaymentReview() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/cm/payment/${paymentId}/${pendingAction}/`,
+        `${API_BASE_URL}/api/cm/payment/${paymentId}/${pendingAction}/`,
         {
           method: "POST",
           credentials: "include",

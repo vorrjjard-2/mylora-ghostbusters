@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +9,7 @@ export default function CreditAdjustment() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/cm/customers/", {
+    fetch(`${API_BASE_URL}/api/cm/customers/`, {
       credentials: "include",
     })
       .then((res) => {

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -32,7 +33,7 @@ export default function UMUpdateBalance() {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/um/customer/${customerId}/`, {
+    fetch(`${API_BASE_URL}/api/um/customer/${customerId}/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -85,7 +86,7 @@ export default function UMUpdateBalance() {
       }
 
       const response = await fetch(
-        `http://localhost:8000/api/um/customer/${customerId}/update-balance/`,
+        `${API_BASE_URL}/api/um/customer/${customerId}/update-balance/`,
         {
           method: "POST",
           credentials: "include",

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -32,8 +33,8 @@ export default function ProcessorOrderHistory() {
     const fetchBoth = async () => {
       try {
         const [pendingRes, completedRes] = await Promise.all([
-          fetch("http://localhost:8000/api/op/pending-orders/", { credentials: "include" }),
-          fetch("http://localhost:8000/api/op/completed-orders/", { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/op/pending-orders/`, { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/op/completed-orders/`, { credentials: "include" }),
         ]);
         if (!pendingRes.ok || !completedRes.ok) throw new Error("Failed to load orders");
         const [pending, completed] = await Promise.all([pendingRes.json(), completedRes.json()]);
@@ -95,7 +96,7 @@ export default function ProcessorOrderHistory() {
   const getSortLabel = () => sortOptions.find((o) => o.value === sortBy)?.label ?? "Date Ordered";
 
   const handleLogout = async () => {
-    await fetch("http://localhost:8000/api/logout/", {
+    await fetch(`${API_BASE_URL}/api/logout/`, {
       method: "POST",
       credentials: "include",
       headers: { "X-CSRFToken": getCookie("csrftoken") },

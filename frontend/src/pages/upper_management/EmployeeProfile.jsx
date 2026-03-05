@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -15,7 +16,7 @@ export default function EmployeeProfile() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/um/employee/${userId}/`, {
+    fetch(`${API_BASE_URL}/api/um/employee/${userId}/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -32,7 +33,7 @@ export default function EmployeeProfile() {
   }, [userId, navigate]);
 
   const handleDeleteConfirm = (password) => {
-    fetch(`http://localhost:8000/api/um/employee/${userId}/delete/`, {
+    fetch(`${API_BASE_URL}/api/um/employee/${userId}/delete/`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },

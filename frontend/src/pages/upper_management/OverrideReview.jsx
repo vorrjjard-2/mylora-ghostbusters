@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -15,7 +16,7 @@ export default function OverrideReview() {
   const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/um/override/${overrideId}/`, {
+    fetch(`${API_BASE_URL}/api/um/override/${overrideId}/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -48,7 +49,7 @@ export default function OverrideReview() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/um/override/${overrideId}/${pendingAction}/`,
+        `${API_BASE_URL}/api/um/override/${overrideId}/${pendingAction}/`,
         {
           method: "POST",
           credentials: "include",
