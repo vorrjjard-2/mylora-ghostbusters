@@ -1,5 +1,5 @@
 import json
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,6 +9,7 @@ from accounts.models import log_audit
 
 
 @api_view(["POST"])
+@authentication_classes([])
 @parser_classes([MultiPartParser, FormParser])
 def create_application(request):
     try:
@@ -100,6 +101,7 @@ def create_application(request):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 def check_duplicate(request):
     """Check if email or phone number already exists"""
     email = request.data.get("email")
@@ -338,6 +340,7 @@ def verify_activation_token(request, token):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 def activate_account(request, token):
     """Create user account with password and set up customer profile"""
     from django.contrib.auth.models import User, Group
