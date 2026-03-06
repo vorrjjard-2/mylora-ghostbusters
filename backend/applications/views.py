@@ -71,28 +71,36 @@ def create_application(request):
         )
 
     # Create application
-    application = CreditEnrollment.objects.create(
-        email=email,
+    try:
+        application = CreditEnrollment.objects.create(
+            email=email,
 
-        first_name=step2["firstName"],
-        last_name=step2["lastName"],
-        phone_number=phone_number,
+            first_name=step2["firstName"],
+            last_name=step2["lastName"],
+            phone_number=phone_number,
 
-        address1=step2["address1"],
-        address2=step2.get("address2", ""),
-        province=step2.get("province", ""),
-        barangay=step2["barangay"],
-        city=step2["city"],
-        zipcode=step2["zipCode"],
-        branch_id=step2["branch"],
+            address1=step2["address1"],
+            address2=step2.get("address2", ""),
+            province=step2.get("province", ""),
+            barangay=step2["barangay"],
+            city=step2["city"],
+            zipcode=step2["zipCode"],
+            branch_id=step2["branch"],
 
-        credit_amt_request=step2["creditAmount"],
-        credit_term_request=step2["creditTerm"],
+            credit_amt_request=step2["creditAmount"],
+            credit_term_request=step2["creditTerm"],
 
-        doc1_file=request.FILES.get("doc1"),
-        doc2_file=request.FILES.get("doc2"),
-        gov_id=request.FILES.get("gov_id"),
-    )
+            doc1_file=request.FILES.get("doc1"),
+            doc2_file=request.FILES.get("doc2"),
+            gov_id=request.FILES.get("gov_id"),
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     return Response(
         {"application_id": str(application.application_id)},
