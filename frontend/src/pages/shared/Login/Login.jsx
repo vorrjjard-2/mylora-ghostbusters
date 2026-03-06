@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "../../../utils/api";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getCookie } from "../../../utils/csrf";
+import { getCookie, setCsrfToken } from "../../../utils/csrf";
 import "./Login.css";
 import logo from "../../../assets/mylora-logo.png";
 
@@ -38,6 +38,11 @@ export default function Login() {
         throw new Error(data.error || "Login failed");
       }
 
+      const loginData = await res.json();
+      if (loginData.csrfToken) {
+        setCsrfToken(loginData.csrfToken);
+      }
+
       // 2️⃣ Get logged-in user + roles
       const meRes = await fetch(`${API_BASE_URL}/api/me/`, {
         credentials: "include",
@@ -48,6 +53,9 @@ export default function Login() {
       }
 
       const me = await meRes.json();
+      if (me.csrfToken) {
+        setCsrfToken(me.csrfToken);
+      }
 
       if (me.roles.includes("upper_management")) {
         navigate("/internal/dashboard");

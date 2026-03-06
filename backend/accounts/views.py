@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.middleware.csrf import get_token
 
 from django.contrib.auth import logout
 from rest_framework.response import Response
@@ -30,7 +31,7 @@ def login_view(request):
 
     login(request, user)
     log_audit(user=user, action="LOGIN", details={"username": username}, request=request)
-    return Response({'message': 'Logged in'})
+    return Response({'message': 'Logged in', 'csrfToken': get_token(request)})
 
 @ensure_csrf_cookie
 @api_view(["GET"])
@@ -46,6 +47,7 @@ def me_view(request):
         "authenticated": True,
         "username": request.user.username,
         "roles": roles,
+        "csrfToken": get_token(request),
     })
 
 
