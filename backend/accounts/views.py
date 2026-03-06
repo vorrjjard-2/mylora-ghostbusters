@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from .models import Customer, CreditAccount, AuditLog, log_audit
 from orders.models import Order
 
+@ensure_csrf_cookie
 @api_view(['POST'])
 @authentication_classes([])
 def login_view(request):
