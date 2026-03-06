@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 
 from django.contrib.auth import logout
 from rest_framework.response import Response
@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from .models import Customer, CreditAccount, AuditLog, log_audit
 from orders.models import Order
 
+@csrf_exempt
 @api_view(['POST'])
 def login_view(request):
     username = request.data.get('username')
