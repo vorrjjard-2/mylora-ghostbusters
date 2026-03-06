@@ -1,4 +1,5 @@
 import json
+import os
 from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
@@ -220,7 +221,8 @@ def approve_enrollment(request, application_id):
     app.save()
     
     # Send activation email
-    activation_link = f"http://localhost:5173/activate/{app.activation_token}"
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+    activation_link = f"{frontend_url}/activate/{app.activation_token}"
     
     try:
         send_mail(
