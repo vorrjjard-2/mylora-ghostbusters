@@ -428,6 +428,13 @@ export default function EnrollmentReview() {
             <p style={{ fontSize: "16px", marginBottom: actionResult?.activation_link ? "16px" : "30px", color: "#666", fontFamily: "'Arimo', sans-serif" }}>
               Customer account for {data.first_name} {data.last_name} has been {actionResult?.action === "approve" ? "approved" : "rejected"}.
             </p>
+            {actionResult?.action === "approve" && (
+              <p style={{ fontSize: "14px", marginBottom: "16px", color: actionResult?.email_sent ? "#2e7d32" : "#b03a2e", fontWeight: 600 }}>
+                {actionResult?.email_sent
+                  ? `Activation email sent to ${data.email}`
+                  : `Failed to send email: ${actionResult?.email_error || "Unknown error"}`}
+              </p>
+            )}
             {actionResult?.activation_link && (
               <div style={{ marginBottom: "24px", textAlign: "left", background: "#f5f5f5", borderRadius: "8px", padding: "16px" }}>
                 <p style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px", color: "#333" }}>Activation Link:</p>

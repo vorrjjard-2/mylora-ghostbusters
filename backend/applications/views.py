@@ -243,16 +243,22 @@ If you did not apply for a credit account, please ignore this email.
 Best regards,
 Mylora Web Credit System
             """,
-            from_email="noreply@mylora.com",
+            from_email=None,
             recipient_list=[app.email],
             fail_silently=False,
         )
+        email_sent = True
+        email_error = None
     except Exception as e:
-        # Log the error but don't fail the approval
+        email_sent = False
+        email_error = str(e)
         print(f"Email sending failed: {e}")
-    
+
     log_audit(user=request.user, action="APPROVE_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email}, request=request)
-    return Response({"status": "approved", "email_sent": True, "activation_link": activation_link})
+    response_data = {"status": "approved", "email_sent": email_sent, "activation_link": activation_link}
+    if email_error:
+        response_data["email_error"] = email_error
+    return Response(response_data)
 
 
 @api_view(["POST"])
@@ -296,22 +302,32 @@ def reject_enrollment(request, application_id):
     # Send rejection email
     from django.core.mail import send_mail
     applicant_name = f"{app.first_name} {app.last_name}".strip() or "Applicant"
-    send_mail(
-        subject="Your Credit Account Application Has Been Rejected",
-        message=(
-            f"Dear {applicant_name},\n\n"
-            f"We regret to inform you that your credit account application has been rejected.\n\n"
-            f"Reason for rejection:\n{rejection_reason}\n\n"
-            f"If you have any questions, please contact our support team.\n\n"
-            f"Regards,\nMylora Web Credit System"
-        ),
-        from_email="noreply@mylora.com",
-        recipient_list=[app.email],
-        fail_silently=True,
-    )
+    try:
+        send_mail(
+            subject="Your Credit Account Application Has Been Rejected",
+            message=(
+                f"Dear {applicant_name},\n\n"
+                f"We regret to inform you that your credit account application has been rejected.\n\n"
+                f"Reason for rejection:\n{rejection_reason}\n\n"
+                f"If you have any questions, please contact our support team.\n\n"
+                f"Regards,\nMylora Web Credit System"
+            ),
+            from_email=None,
+            recipient_list=[app.email],
+            fail_silently=False,
+        )
+        email_sent = True
+        email_error = None
+    except Exception as e:
+        email_sent = False
+        email_error = str(e)
+        print(f"Rejection email sending failed: {e}")
 
     log_audit(user=request.user, action="REJECT_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email, "rejection_reason": rejection_reason}, request=request)
-    return Response({"status": "rejected"})
+    response_data = {"status": "rejected", "email_sent": email_sent}
+    if email_error:
+        response_data["email_error"] = email_error
+    return Response(response_data)
 
 
 @api_view(["GET"])
