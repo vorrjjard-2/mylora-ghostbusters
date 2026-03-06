@@ -216,7 +216,7 @@ def approve_enrollment(request, application_id):
     app.approved_by = request.user
     
     # Generate secure activation token
-    app.activation_token = secrets.token_urlsafe(32)
+    app.activation_token = secrets.token_urlsafe(15)
     app.activation_token_created = timezone.now()
     app.save()
     
