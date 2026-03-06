@@ -252,7 +252,7 @@ Mylora Web Credit System
         print(f"Email sending failed: {e}")
     
     log_audit(user=request.user, action="APPROVE_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email}, request=request)
-    return Response({"status": "approved", "email_sent": True})
+    return Response({"status": "approved", "email_sent": True, "activation_link": activation_link})
 
 
 @api_view(["POST"])
@@ -326,23 +326,30 @@ def verify_activation_token(request, token):
             enrollment_status="APPROVED",
             account_activated=False
         )
-        
+
         # Check if token is expired (24 hours)
         if app.activation_token_created:
             expiry = app.activation_token_created + timedelta(hours=24)
-            if timezone.now() > expiry:
+            now = timezone.now()
+            print(f"[DEBUG] Token created: {app.activation_token_created}, Expiry: {expiry}, Now: {now}")
+            if now > expiry:
                 return Response(
                     {"error": "Activation link has expired"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
+
         return Response({
             "valid": True,
             "email": app.email,
             "name": f"{app.first_name} {app.last_name}"
         })
-        
+
     except CreditEnrollment.DoesNotExist:
+        # Debug: check what exists
+        all_approved = CreditEnrollment.objects.filter(enrollment_status="APPROVED", account_activated=False)
+        print(f"[DEBUG] Token lookup failed for: {token[:20]}...")
+        for a in all_approved:
+            print(f"[DEBUG] Approved app: {a.application_id}, token={a.activation_token[:20] if a.activation_token else 'None'}...")
         return Response(
             {"error": "Invalid or expired activation link"},
             status=status.HTTP_400_BAD_REQUEST

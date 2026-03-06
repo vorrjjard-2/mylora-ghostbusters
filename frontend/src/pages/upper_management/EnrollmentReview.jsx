@@ -99,8 +99,8 @@ export default function EnrollmentReview() {
         }
         return res.json();
       })
-      .then(() => {
-        setActionResult(pendingAction);
+      .then((responseData) => {
+        setActionResult({ action: pendingAction, ...responseData });
         setShowModal(false);
         setShowSuccessModal(true);
       })
@@ -142,8 +142,8 @@ export default function EnrollmentReview() {
         }
         return res.json();
       })
-      .then(() => {
-        setActionResult("reject");
+      .then((responseData) => {
+        setActionResult({ action: "reject", ...responseData });
         setShowRejectModal(false);
         setShowSuccessModal(true);
       })
@@ -423,11 +423,24 @@ export default function EnrollmentReview() {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
           <div style={{ backgroundColor: "white", border: "1px solid #262626", borderRadius: "15px", padding: "40px", maxWidth: "500px", width: "90%", textAlign: "center", fontFamily: "'Arimo', sans-serif" }}>
             <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "15px", fontFamily: "'Arimo', sans-serif" }}>
-              {actionResult === "approve" ? "Account Approved" : "Account Rejected"}
+              {actionResult?.action === "approve" ? "Account Approved" : "Account Rejected"}
             </h2>
-            <p style={{ fontSize: "16px", marginBottom: "30px", color: "#666", fontFamily: "'Arimo', sans-serif" }}>
-              Customer account for {data.first_name} {data.last_name} has been {actionResult === "approve" ? "approved" : "rejected"}.
+            <p style={{ fontSize: "16px", marginBottom: actionResult?.activation_link ? "16px" : "30px", color: "#666", fontFamily: "'Arimo', sans-serif" }}>
+              Customer account for {data.first_name} {data.last_name} has been {actionResult?.action === "approve" ? "approved" : "rejected"}.
             </p>
+            {actionResult?.activation_link && (
+              <div style={{ marginBottom: "24px", textAlign: "left", background: "#f5f5f5", borderRadius: "8px", padding: "16px" }}>
+                <p style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px", color: "#333" }}>Activation Link:</p>
+                <input
+                  type="text"
+                  readOnly
+                  value={actionResult.activation_link}
+                  onClick={(e) => e.target.select()}
+                  style={{ width: "100%", padding: "8px", fontSize: "13px", border: "1px solid #ccc", borderRadius: "4px", boxSizing: "border-box", fontFamily: "monospace" }}
+                />
+                <p style={{ fontSize: "12px", color: "#888", marginTop: "8px" }}>Click to select, then copy. This link expires in 24 hours.</p>
+              </div>
+            )}
             <button
               onClick={() => navigate("/upper-management/dashboard")}
               style={{ padding: "12px 40px", fontSize: "16px", fontWeight: "600", fontFamily: "'Arimo', sans-serif", border: "none", borderRadius: "8px", backgroundColor: "#1E2D1A", color: "white", cursor: "pointer" }}
