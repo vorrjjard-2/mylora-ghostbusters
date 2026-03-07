@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CMSidebar from "../../components/credit_manager/CMSidebar";
@@ -6,14 +7,24 @@ import "../upper_management/Dashboard.css";
 
 export default function CreditManagerDashboard() {
   const navigate = useNavigate();
-  const user = { username: "CM1234" };
+  const [user, setUser] = useState({ username: "" });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/me/`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => { if (data.username) setUser({ username: data.username }); })
+      .catch(console.error);
+  }, []);
 
   const [creditData, setCreditData] = useState(null);
+  const [allOrders, setAllOrders] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [allPayments, setAllPayments] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(null);
+  const [dashTab, setDashTab] = useState("credit");
   
   // Sorting states
   const [sortBy, setSortBy] = useState("date");
@@ -25,43 +36,71 @@ export default function CreditManagerDashboard() {
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
 
+  // Dashboard home view sorted data
+  const [sortedDashOrders, setSortedDashOrders] = useState([]);
+  const [sortedDashPayments, setSortedDashPayments] = useState([]);
+
+
   useEffect(() => {
     Promise.all([
-      fetch("http://localhost:8000/api/cm/pending-orders/", { credentials: "include" }).then((r) => r.json()),
-      fetch("http://localhost:8000/api/cm/pending-payments/", { credentials: "include" }).then((r) => r.json()),
-      fetch("http://localhost:8000/api/cm/customers/", { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/pending-orders/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/all-orders/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/pending-payments/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/all-payments/`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${API_BASE_URL}/api/cm/customers/`, { credentials: "include" }).then((r) => r.json()),
     ])
-      .then(([cd, pm, cust]) => {
+      .then(([cd, ao, pm, ap, cust]) => {
         setCreditData(cd);
+        setAllOrders(ao);
         setPayments(pm);
+        setAllPayments(ap);
         setCustomers(cust);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
+
   // Update filtered and sorted data whenever dependencies change
   useEffect(() => {
-    // Credit Approval sorting
-    if (creditData?.pending_orders && (activeTab === "credit" || activeTab === "credit-all")) {
+    // Credit Approval - Pending tab
+    if (creditData?.pending_orders && activeTab === "credit") {
       const sorted = [...creditData.pending_orders].sort((a, b) => {
         let comparison = 0;
         if (sortBy === "order_id") {
           comparison = a.order_id - b.order_id;
-        } else if (sortBy === "status") {
-          comparison = (a.order_status || "").localeCompare(b.order_status || "");
         } else if (sortBy === "date") {
-          const dateA = new Date(a.date_ordered);
-          const dateB = new Date(b.date_ordered);
-          comparison = dateA - dateB;
+          comparison = new Date(a.date_ordered) - new Date(b.date_ordered);
         }
         return sortDirection === "asc" ? comparison : -comparison;
       });
       setFilteredOrders(sorted);
     }
 
-    // Payment Review sorting
-    if (payments && (activeTab === "payment" || activeTab === "payment-all")) {
+    // Credit Approval - View All tab
+    if (activeTab === "credit-all") {
+      const term = searchTerm.toLowerCase();
+      const filtered = allOrders.filter((o) =>
+        !term ||
+        String(o.order_id).includes(term) ||
+        o.customer_name.toLowerCase().includes(term)
+      );
+      const sorted = filtered.sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "order_id") {
+          comparison = a.order_id - b.order_id;
+        } else if (sortBy === "status") {
+          comparison = (a.status || "").localeCompare(b.status || "");
+        } else if (sortBy === "date") {
+          comparison = new Date(a.date_ordered) - new Date(b.date_ordered);
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setFilteredOrders(sorted);
+    }
+
+    // Payment Review - Pending tab
+    if (payments && activeTab === "payment") {
       const sorted = [...payments].sort((a, b) => {
         let comparison = 0;
         if (sortBy === "customer") {
@@ -69,9 +108,23 @@ export default function CreditManagerDashboard() {
         } else if (sortBy === "amount") {
           comparison = parseFloat(a.amount_paid) - parseFloat(b.amount_paid);
         } else if (sortBy === "date") {
-          const dateA = new Date(a.date_paid);
-          const dateB = new Date(b.date_paid);
-          comparison = dateA - dateB;
+          comparison = new Date(a.date_paid) - new Date(b.date_paid);
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setFilteredPayments(sorted);
+    }
+
+    // Payment Review - View All tab
+    if (activeTab === "payment-all") {
+      const sorted = [...allPayments].sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "customer") {
+          comparison = (a.customer_name || "").localeCompare(b.customer_name || "");
+        } else if (sortBy === "amount") {
+          comparison = parseFloat(a.amount_paid) - parseFloat(b.amount_paid);
+        } else if (sortBy === "date") {
+          comparison = new Date(a.date_paid) - new Date(b.date_paid);
         }
         return sortDirection === "asc" ? comparison : -comparison;
       });
@@ -83,7 +136,7 @@ export default function CreditManagerDashboard() {
       let filtered = customers.filter((c) =>
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      
+
       const sorted = [...filtered].sort((a, b) => {
         let comparison = 0;
         if (sortBy === "name") {
@@ -97,7 +150,37 @@ export default function CreditManagerDashboard() {
       });
       setFilteredCustomers(sorted);
     }
-  }, [activeTab, creditData, payments, customers, sortBy, sortDirection, searchTerm]);
+
+    // Dashboard home view - Pending Credit
+    if (!activeTab && dashTab === "credit" && creditData?.pending_orders) {
+      const sorted = [...creditData.pending_orders].sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "order_id") {
+          comparison = a.order_id - b.order_id;
+        } else if (sortBy === "date") {
+          comparison = new Date(a.date_ordered) - new Date(b.date_ordered);
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setSortedDashOrders(sorted);
+    }
+
+    // Dashboard home view - Pending Payment
+    if (!activeTab && dashTab === "payment" && payments) {
+      const sorted = [...payments].sort((a, b) => {
+        let comparison = 0;
+        if (sortBy === "customer") {
+          comparison = (a.customer_name || "").localeCompare(b.customer_name || "");
+        } else if (sortBy === "amount") {
+          comparison = parseFloat(a.amount_paid) - parseFloat(b.amount_paid);
+        } else if (sortBy === "date") {
+          comparison = new Date(a.date_paid) - new Date(b.date_paid);
+        }
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+      setSortedDashPayments(sorted);
+    }
+  }, [activeTab, dashTab, creditData, allOrders, payments, allPayments, customers, sortBy, sortDirection, searchTerm]);
 
   const handleSortChange = (newSortBy) => {
     if (newSortBy === sortBy) {
@@ -110,6 +193,7 @@ export default function CreditManagerDashboard() {
   };
 
   const getSortLabel = () => {
+    // Sidebar tabs
     if (activeTab === "credit" || activeTab === "credit-all") {
       if (sortBy === "date") return "Date Ordered";
       if (sortBy === "status") return "Status";
@@ -123,10 +207,20 @@ export default function CreditManagerDashboard() {
       if (sortBy === "credit_limit") return "Credit Limit";
       if (sortBy === "outstanding") return "Outstanding Balance";
     }
+    // Dashboard home view tabs
+    if (!activeTab && dashTab === "credit") {
+      if (sortBy === "date") return "Date Ordered";
+      if (sortBy === "order_id") return "Order ID";
+    } else if (!activeTab && dashTab === "payment") {
+      if (sortBy === "date") return "Date Paid";
+      if (sortBy === "customer") return "Customer Name";
+      if (sortBy === "amount") return "Amount Paid";
+    }
     return "Date";
   };
 
   const getSortOptions = () => {
+    // Sidebar tabs
     if (activeTab === "credit" || activeTab === "credit-all") {
       return [
         { value: "date", label: "Date Ordered" },
@@ -144,6 +238,19 @@ export default function CreditManagerDashboard() {
         { value: "name", label: "Customer Name" },
         { value: "credit_limit", label: "Credit Limit" },
         { value: "outstanding", label: "Outstanding Balance" }
+      ];
+    }
+    // Dashboard home view tabs
+    if (!activeTab && dashTab === "credit") {
+      return [
+        { value: "date", label: "Date Ordered" },
+        { value: "order_id", label: "Order ID" }
+      ];
+    } else if (!activeTab && dashTab === "payment") {
+      return [
+        { value: "date", label: "Date Paid" },
+        { value: "customer", label: "Customer Name" },
+        { value: "amount", label: "Amount Paid" }
       ];
     }
     return [];
@@ -213,7 +320,7 @@ export default function CreditManagerDashboard() {
   );
 
   const renderSortIndicator = () => (
-    <div style={{ marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
       <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
       <span style={{
         padding: "6px 12px",
@@ -291,18 +398,55 @@ export default function CreditManagerDashboard() {
                 </div>
               </div>
 
-              {/* Two-column layout for dashboard */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px", marginTop: "30px" }}>
-                {/* Left Column - Credit Approval */}
-                <div>
-                  <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "20px", borderBottom: "2px solid #262626", paddingBottom: "10px" }}>
+              {/* Tabbed full-width layout for dashboard */}
+              <div style={{ marginTop: "30px" }}>
+                <div style={{ display: "flex", gap: "30px", borderBottom: "2px solid #e0e0e0", marginBottom: "20px" }}>
+                  <button
+                    onClick={() => setDashTab("credit")}
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: dashTab === "credit" ? "#1f3d1a" : "#888",
+                      borderBottom: dashTab === "credit" ? "3px solid #1f3d1a" : "none",
+                      marginBottom: "-2px",
+                      paddingBottom: "10px",
+                      background: "none",
+                      border: "none",
+                      borderBottom: dashTab === "credit" ? "3px solid #1f3d1a" : "none",
+                      cursor: "pointer"
+                    }}
+                  >
                     Pending Credit Approval
-                  </h2>
+                  </button>
+                  <button
+                    onClick={() => setDashTab("payment")}
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: dashTab === "payment" ? "#1f3d1a" : "#888",
+                      borderBottom: dashTab === "payment" ? "3px solid #1f3d1a" : "none",
+                      marginBottom: "-2px",
+                      paddingBottom: "10px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Pending Payment Review
+                  </button>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                  {renderSortIndicator()}
+                  {renderSortDropdown()}
+                </div>
+
+                {dashTab === "credit" && (
                   <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                    {creditData?.pending_orders.length === 0 && (
+                    {sortedDashOrders.length === 0 && (
                       <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
                     )}
-                    {creditData?.pending_orders.map((order) => (
+                    {sortedDashOrders.map((order) => (
                       <div
                         key={order.order_id}
                         className="um-request-item"
@@ -310,25 +454,21 @@ export default function CreditManagerDashboard() {
                         style={{ cursor: "pointer" }}
                       >
                         <div className="um-request-info">
-                          <div className="um-request-id">ORDER ID XX{order.order_id}</div>
+                          <div className="um-request-id">ORDER ID {order.order_id}</div>
                           <div className="um-request-sub">Ordered by: {order.customer_name}</div>
                         </div>
                         <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
 
-                {/* Right Column - Payment Review */}
-                <div>
-                  <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "20px", borderBottom: "2px solid #262626", paddingBottom: "10px" }}>
-                    Pending Payment Review
-                  </h2>
+                {dashTab === "payment" && (
                   <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                    {payments.length === 0 && (
+                    {sortedDashPayments.length === 0 && (
                       <p style={{ color: "#888", padding: "1rem" }}>No pending payments.</p>
                     )}
-                    {payments.map((p) => (
+                    {sortedDashPayments.map((p) => (
                       <div
                         key={p.payment_id}
                         className="um-request-item"
@@ -343,7 +483,7 @@ export default function CreditManagerDashboard() {
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
               </div>
             </>
           )}
@@ -386,7 +526,7 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+              <div style={{ display: "flex", gap: "15px", alignItems: "center", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -402,10 +542,9 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
+                {renderSortIndicator()}
                 {renderSortDropdown()}
               </div>
-
-              {renderSortIndicator()}
 
               {/* Orders List */}
               <div className="um-list-container">
@@ -420,7 +559,7 @@ export default function CreditManagerDashboard() {
                     style={{ cursor: "pointer" }}
                   >
                     <div className="um-request-info">
-                      <div className="um-request-id">ORDER ID XX{order.order_id}</div>
+                      <div className="um-request-id">ORDER ID {order.order_id}</div>
                       <div className="um-request-sub">Ordered by: {order.customer_name}</div>
                     </div>
                     <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
@@ -468,12 +607,14 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+              <div style={{ display: "flex", gap: "15px", alignItems: "center", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
                     type="text"
-                    placeholder="Search"
+                    placeholder="Search by order ID or customer"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "10px 10px 10px 45px",
@@ -484,16 +625,15 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
+                {renderSortIndicator()}
                 {renderSortDropdown()}
               </div>
 
-              {renderSortIndicator()}
-
               {/* Table View */}
-              <div style={{ 
-                backgroundColor: "white", 
-                border: "1px solid #262626", 
-                borderRadius: "15px", 
+              <div style={{
+                backgroundColor: "white",
+                border: "1px solid #262626",
+                borderRadius: "15px",
                 overflow: "hidden"
               }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -507,34 +647,48 @@ export default function CreditManagerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredOrders.map((order, idx) => (
-                      <tr 
-                        key={order.order_id}
-                        onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
-                        style={{ 
-                          borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
-                          cursor: "pointer"
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
-                      >
-                        <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>XX{order.order_id}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>₱ 50,000.00</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>{order.date_ordered}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>{order.customer_name}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>
-                          <span style={{ 
-                            padding: "4px 12px", 
-                            borderRadius: "12px", 
-                            backgroundColor: "#D1E7DD",
-                            fontSize: "12px",
-                            fontWeight: "600"
-                          }}>
-                            Credit Approved
-                          </span>
-                        </td>
+                    {filteredOrders.length === 0 && (
+                      <tr>
+                        <td colSpan="5" style={{ padding: "20px", textAlign: "center", color: "#888" }}>No orders found.</td>
                       </tr>
-                    ))}
+                    )}
+                    {filteredOrders.map((order, idx) => {
+                      const statusStyles = {
+                        PENDING:   { backgroundColor: "#FFF3CD", color: "#856404" },
+                        APPROVED:  { backgroundColor: "#D1E7DD", color: "#0F5132" },
+                        REJECTED:  { backgroundColor: "#F8D7DA", color: "#842029" },
+                        COMPLETED: { backgroundColor: "#CCE5FF", color: "#004085" },
+                      };
+                      const badge = statusStyles[order.status] || { backgroundColor: "#e0e0e0", color: "#333" };
+                      return (
+                        <tr
+                          key={order.order_id}
+                          onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
+                          style={{
+                            borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
+                            cursor: "pointer"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
+                        >
+                          <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{order.order_id}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>₱ {fmt(order.amount)}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>{order.date_ordered}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>{order.customer_name}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>
+                            <span style={{
+                              padding: "4px 12px",
+                              borderRadius: "12px",
+                              fontSize: "12px",
+                              fontWeight: "600",
+                              ...badge
+                            }}>
+                              {order.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -579,7 +733,7 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+              <div style={{ display: "flex", gap: "15px", alignItems: "center", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -595,10 +749,9 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
+                {renderSortIndicator()}
                 {renderSortDropdown()}
               </div>
-
-              {renderSortIndicator()}
 
               {/* Payments List */}
               <div className="um-list-container">
@@ -661,7 +814,7 @@ export default function CreditManagerDashboard() {
               </div>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+              <div style={{ display: "flex", gap: "15px", alignItems: "center", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -677,10 +830,9 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
+                {renderSortIndicator()}
                 {renderSortDropdown()}
               </div>
-
-              {renderSortIndicator()}
 
               {/* Table View */}
               <div style={{ 
@@ -695,27 +847,48 @@ export default function CreditManagerDashboard() {
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>CUSTOMER</th>
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>AMOUNT PAID</th>
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>DATE PAID</th>
+                      <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>STATUS</th>
                       <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>CONFIRMED BY</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredPayments.map((p, idx) => (
-                      <tr 
-                        key={p.payment_id}
-                        onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
-                        style={{ 
-                          borderBottom: idx < filteredPayments.length - 1 ? "1px solid #e0e0e0" : "none",
-                          cursor: "pointer"
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
-                      >
-                        <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{p.customer_name}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>₱ {fmt(p.amount_paid)}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>{p.date_paid}</td>
-                        <td style={{ padding: "15px", fontSize: "14px" }}>CM1234</td>
+                    {filteredPayments.length === 0 && (
+                      <tr>
+                        <td colSpan="5" style={{ padding: "20px", textAlign: "center", color: "#888" }}>No payments found.</td>
                       </tr>
-                    ))}
+                    )}
+                    {filteredPayments.map((p, idx) => {
+                      const statusStyles = {
+                        PENDING:  { backgroundColor: "#FFF3CD", color: "#856404" },
+                        VERIFIED: { backgroundColor: "#D1E7DD", color: "#0F5132" },
+                        REJECTED: { backgroundColor: "#F8D7DA", color: "#842029" },
+                      };
+                      const badge = statusStyles[p.status] || { backgroundColor: "#e0e0e0", color: "#333" };
+                      return (
+                        <tr
+                          key={p.payment_id}
+                          onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
+                          style={{
+                            borderBottom: idx < filteredPayments.length - 1 ? "1px solid #e0e0e0" : "none",
+                            cursor: "pointer"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
+                        >
+                          <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{p.customer_name}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>₱ {fmt(p.amount_paid)}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>{p.date_paid}</td>
+                          <td style={{ padding: "15px", fontSize: "14px" }}>
+                            <span style={{ padding: "4px 12px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", ...badge }}>
+                              {p.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: "15px", fontSize: "14px", color: p.confirmed_by ? "inherit" : "#aaa" }}>
+                            {p.confirmed_by ?? "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -730,7 +903,7 @@ export default function CreditManagerDashboard() {
               </p>
 
               {/* Search and Sort */}
-              <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+              <div style={{ display: "flex", gap: "15px", alignItems: "center", marginBottom: "15px" }}>
                 <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
                   <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                   <input
@@ -748,10 +921,9 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
+                {renderSortIndicator()}
                 {renderSortDropdown()}
               </div>
-
-              {renderSortIndicator()}
 
               {/* Customer Cards */}
               <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>

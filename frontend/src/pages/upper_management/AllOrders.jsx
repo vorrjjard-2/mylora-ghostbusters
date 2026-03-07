@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -12,7 +13,7 @@ export default function AllOrders() {
   const [sortConfig, setSortConfig] = useState({ key: "date_submitted", direction: "desc" });
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/um/all-orders/", {
+    fetch(`${API_BASE_URL}/api/um/all-orders/`, {
       credentials: "include"
     })
       .then(res => {
@@ -308,9 +309,10 @@ export default function AllOrders() {
                   </tr>
                 )}
                 {filteredOrders.map((order) => (
-                  <tr 
-                    key={order.order_id} 
-                    style={{ 
+                  <tr
+                    key={order.order_id}
+                    onClick={() => navigate(`/upper-management/customer/${order.customer_id}/order/${order.order_id}`, { state: { from: "/upper-management/all-orders" } })}
+                    style={{
                       borderBottom: "1px solid #E9ECEF",
                       cursor: "pointer"
                     }}
@@ -318,7 +320,7 @@ export default function AllOrders() {
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
                   >
                     <td style={{ padding: "15px 20px", fontWeight: "700" }}>
-                      XX{order.order_id}
+                      {order.order_id}
                     </td>
                     <td style={{ padding: "15px 20px" }}>
                       ₱ {parseFloat(order.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

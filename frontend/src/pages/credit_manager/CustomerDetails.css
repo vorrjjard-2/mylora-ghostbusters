@@ -193,7 +193,24 @@
 }
 
 .cd-back-btn:hover {
-    background: #f9f9f9;
+    background: #2d5a25;
+}
+
+.cd-history-row:hover {
+    background-color: #f0f5ee;
+    cursor: pointer;
+}
+
+.cd-input-read-only {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    background: #f5f5f5;
+    color: #444;
+    font-family: inherit;
 }
 
 /* Responsiveness: Stack columns on mobile */

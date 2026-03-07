@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -17,12 +18,14 @@ export default function EmployeeCreate() {
     password: ""
   });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    setErrorMsg("");
     if (!formData.username || !formData.password) {
-      alert("Username and password are required");
+      setErrorMsg("Username and password are required");
       return;
     }
 
@@ -35,7 +38,7 @@ export default function EmployeeCreate() {
       role: formData.role,
     };
 
-    fetch("http://localhost:8000/api/um/employee/create/", {
+    fetch(`${API_BASE_URL}/api/um/employee/create/`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
@@ -53,7 +56,7 @@ export default function EmployeeCreate() {
         setShowSuccess(true);
       })
       .catch((err) => {
-        alert(err.message);
+        setErrorMsg(err.message);
       });
   };
 
@@ -181,8 +184,21 @@ export default function EmployeeCreate() {
                 </label>
                 <input
                   type="text"
+                  placeholder="+63 9XX XXX XXXX"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => {
+                    let raw = e.target.value.replace(/\D/g, "");
+                    if (raw.startsWith("63")) raw = raw.substring(2);
+                    if (raw.startsWith("0")) raw = raw.substring(1);
+                    if (raw.length > 10) raw = raw.substring(0, 10);
+
+                    let formatted = "+63";
+                    if (raw.length > 0) formatted += " " + raw.substring(0, 3);
+                    if (raw.length > 3) formatted += " " + raw.substring(3, 6);
+                    if (raw.length > 6) formatted += " " + raw.substring(6, 10);
+
+                    setFormData({ ...formData, phone: raw.length === 0 ? "" : formatted });
+                  }}
                   style={{
                     width: "100%",
                     padding: "10px",
@@ -302,6 +318,9 @@ export default function EmployeeCreate() {
                 Save
               </button>
             </div>
+            {errorMsg && (
+              <p style={{ color: "#dc3545", fontSize: "14px", marginTop: "12px" }}>{errorMsg}</p>
+            )}
           </form>
         </main>
       </div>

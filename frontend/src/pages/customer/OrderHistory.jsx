@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import searchIcon from "../../assets/search.png";
@@ -48,7 +49,7 @@ export default function OrderHistory() {
 
   /* ── fetch ── */
   useEffect(() => {
-    fetch("http://localhost:8000/api/orders/", { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/orders/`, { credentials: "include" })
       .then((r) => r.json())
       .then(setOrders)
       .catch(console.error)
@@ -74,7 +75,7 @@ export default function OrderHistory() {
     let list = orders.filter(
       (o) =>
         activeStatuses.has(o.order_status) &&
-        (`XX${o.order_id}`.toLowerCase().includes(search.toLowerCase()) ||
+        (`${o.order_id}`.toLowerCase().includes(search.toLowerCase()) ||
           o.order_status.toLowerCase().includes(search.toLowerCase()))
     );
 
@@ -200,7 +201,7 @@ export default function OrderHistory() {
                   className="history-row"
                   onClick={() => navigate(`/orders/${order.order_id}`, { state: { from: "/orders" } })}
                 >
-                  <td className="history-td">XX{order.order_id}</td>
+                  <td className="history-td">{order.order_id}</td>
                   <td className="history-td">
                     ₱ {parseFloat(order.total_amount).toLocaleString("en-PH", {
                       minimumFractionDigits: 2,

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -11,12 +12,11 @@ export default function CustomerHistory() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch customer details and payment history
     Promise.all([
-      fetch("http://localhost:8000/api/cm/customers/", {
+      fetch(`${API_BASE_URL}/api/cm/customers/`, {
         credentials: "include",
       }).then((res) => res.json()),
-      fetch(`http://localhost:8000/api/cm/customer/${customerId}/history/`, {
+      fetch(`${API_BASE_URL}/api/cm/customer/${customerId}/history/`, {
         credentials: "include",
       }).then((res) => res.json()),
     ])
@@ -29,9 +29,9 @@ export default function CustomerHistory() {
       .catch((err) => {
         console.error(err);
         alert("Failed to load customer history");
-        navigate("/credit-manager/adjustment");
+        navigate("/credit-manager/dashboard");
       })
-      .finally(() => setLoading(false)); 
+      .finally(() => setLoading(false));
   }, [customerId, navigate]);
 
   if (loading) {
@@ -50,7 +50,7 @@ return (
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
           <span className="ch-system-title">Web Credit System</span>
         </div>
-        <button className="ch-back-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}`)}>
+        <button className="ch-back-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}/details`)}>
           Back
         </button>
       </header>

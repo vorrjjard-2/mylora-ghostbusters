@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -16,7 +17,7 @@ export default function OrderDetail() {
   const backTo = location.state?.from || "/orders";
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/orders/${orderId}/`, { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/orders/${orderId}/`, { credentials: "include" })
       .then((r) => {
         if (!r.ok) throw new Error("Order not found");
         return r.json();
@@ -55,7 +56,7 @@ return (
 
     {/* order ID + date */}
   <main className="order-content">
-    <h1 className="order-detail-title">ORDER ID XX{order.order_id}</h1>
+    <h1 className="order-detail-title">ORDER ID {order.order_id}</h1>
     <p className="order-detail-date">
       <span className="meta-label">DATE SUBMITTED:</span> 
       <span className="meta-value">{formatDate(order.date_submitted)}</span>
@@ -111,6 +112,22 @@ return (
         </tfoot>
       </table>
     </div>
+
+    {/* rejection reason */}
+    {order.order_status === "REJECTED" && order.rejection_reason && (
+      <>
+        <hr className="order-detail-divider" />
+        <h2 className="order-detail-subtitle">Reason for Rejection</h2>
+        <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029" }}>
+          {order.rejection_reason}
+        </div>
+        {order.rejected_by && (
+          <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
+            Rejected by: {order.rejected_by} {order.rejection_date ? `on ${order.rejection_date}` : ""}
+          </p>
+        )}
+      </>
+    )}
 
     {/* back button */}
     <div className="order-actions-container">

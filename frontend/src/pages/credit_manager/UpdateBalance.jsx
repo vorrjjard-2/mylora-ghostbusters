@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -13,7 +14,7 @@ export default function UpdateBalance() {
   const [processing, setProcessing] = useState(false);
 
   // Modal states
-  const [showPasswordModal, setShowPasswordModal] = useState(true); 
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -24,10 +25,16 @@ export default function UpdateBalance() {
     date_of_payment: "",
     proof_of_payment: null,
   });
+  const formatAsCurrency = (value) => {
+    if (!value) return "";
+    const number = value.toString().replace(/\D/g, "");
+    if (!number) return "";
+    return "₱" + Number(number).toLocaleString("en-PH");
+  };
 
   useEffect(() => {
     // Fetch customer details
-    fetch("http://localhost:8000/api/cm/customers/", {
+    fetch(`${API_BASE_URL}/api/cm/customers/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -85,7 +92,7 @@ export default function UpdateBalance() {
       }
 
       const response = await fetch(
-        `http://localhost:8000/api/cm/customer/${customerId}/adjust-balance/`,
+        `${API_BASE_URL}/api/cm/customer/${customerId}/adjust-balance/`,
         {
           method: "POST",
           credentials: "include",
@@ -183,13 +190,15 @@ return (
         <div className="ub-form-group">
           <label className="ub-label">Balance Paid</label>
           <input
-            type="number"
+            type="text"
             name="balance_paid"
-            value={paymentForm.balance_paid}
-            onChange={handleFormChange}
+            value={formatAsCurrency(paymentForm.balance_paid)}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              setPaymentForm((prev) => ({ ...prev, balance_paid: raw }));
+            }}
             className="ub-input"
-            placeholder="₱ 0.00"
-            step="0.01"
+            placeholder="₱0"
           />
         </div>
         </div>
@@ -255,7 +264,7 @@ return (
 
 
         <div className="ub-button-row">
-          <button type="button" className="ub-cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
+          <button type="button" className="ub-cancel-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}/details`)}>
             Cancel
           </button>
           <button type="submit" className="ub-submit-btn">

@@ -11,7 +11,7 @@ export default function Sidebar() {
         <MenuItem to="/upper-management/all-orders" active={location.pathname === "/upper-management/all-orders"}>All Orders</MenuItem>
         <MenuItem to="/upper-management/customers" active={location.pathname.includes("/upper-management/customer")}>Customer Database</MenuItem>
         <MenuItem to="/upper-management/employees" active={location.pathname.includes("/upper-management/employee")}>Employee Database</MenuItem>
-        <MenuItem>Audit Log</MenuItem>
+        <MenuItem to="/upper-management/audit-log" active={location.pathname === "/upper-management/audit-log"}>Audit Log</MenuItem>
       </nav>
     </aside>
   );

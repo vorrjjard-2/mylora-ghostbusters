@@ -7,7 +7,7 @@ from datetime import datetime
 from django.db import transaction
 
 from .models import PaymentRequest
-from accounts.models import Customer
+from accounts.models import Customer, log_audit
 
 
 def _require_role(request, role_name):
@@ -96,6 +96,35 @@ def submit_payment(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cm_all_payments(request):
+    """All payment requests (any status) for the Payment Review View All tab."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    payments = (
+        PaymentRequest.objects.select_related(
+            "account__customer__user",
+            "approved_by",
+        ).order_by("-date_paid")
+    )
+
+    data = []
+    for p in payments:
+        customer = p.account.customer
+        data.append({
+            "payment_id": p.payment_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "amount_paid": str(p.amount_paid),
+            "date_paid": p.date_paid.strftime("%B %d, %Y"),
+            "status": p.payment_status,
+            "confirmed_by": p.approved_by.get_full_name() or p.approved_by.username if p.approved_by else None,
+        })
+
+    return Response(data)
 
 
 @api_view(["GET"])
@@ -239,6 +268,7 @@ def cm_approve_payment(request, payment_id):
         credit.available_credit = new_available
         credit.save()
 
+    log_audit(user=request.user, action="APPROVE_PAYMENT", details={"payment_id": payment_id, "amount": str(payment.amount_paid)}, request=request)
     return Response({
         "success": True,
         "payment_id": payment.payment_id,
@@ -266,10 +296,41 @@ def cm_reject_payment(request, payment_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if not rejection_reason or len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     payment.payment_status = "REJECTED"
     payment.approved_by = request.user
+    payment.rejection_reason = rejection_reason
     payment.save()
 
+    # Send rejection email to the customer
+    from django.core.mail import send_mail
+    customer = payment.account.customer
+    customer_name = customer.user.get_full_name() or customer.user.username
+    customer_email = customer.user.email
+    if customer_email:
+        send_mail(
+            subject="Your Payment Request Has Been Rejected",
+            message=(
+                f"Dear {customer_name},\n\n"
+                f"We regret to inform you that your payment request "
+                f"(Payment ID: {payment.payment_id}) for ₱{payment.amount_paid} "
+                f"has been rejected.\n\n"
+                f"Reason for rejection:\n{rejection_reason}\n\n"
+                f"If you have any questions, please contact our support team.\n\n"
+                f"Regards,\nMylora Web Credit System"
+            ),
+            from_email="noreply@mylora.ph",
+            recipient_list=[customer_email],
+            fail_silently=True,
+        )
+
+    log_audit(user=request.user, action="REJECT_PAYMENT", details={"payment_id": payment_id, "rejection_reason": rejection_reason}, request=request)
     return Response({
         "success": True,
         "payment_id": payment.payment_id,

@@ -1,20 +1,73 @@
-import { useState } from "react";
+import { API_BASE_URL } from "../../../utils/api";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ApplicationSubmittedModal from "../../../components/ApplicationSubmittedModal";
 import logo from "../../../assets/mylora-logo.png";
 import fileIcon from "../../../assets/file.png";
 import "./ApplyStep2.css";
 
 export default function ApplyStep2() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
 
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
-  const [barangay, setBarangay] = useState("");
+  const [province, setProvince] = useState("");
+  const [provinceName, setProvinceName] = useState("");
+  const [cityCode, setCityCode] = useState("");
   const [city, setCity] = useState("");
+  const [barangay, setBarangay] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [branch, setBranch] = useState("");
+
+  const [provinces, setProvinces] = useState([]);
+  const [citiesMunicipalities, setCitiesMunicipalities] = useState([]);
+  const [barangays, setBarangays] = useState([]);
+  const [branches, setBranches] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/branches/`)
+      .then(r => r.json())
+      .then(data => setBranches(data))
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    fetch("https://psgc.gitlab.io/api/provinces/")
+      .then(r => r.json())
+      .then(data => setProvinces(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (!province) {
+      setCitiesMunicipalities([]);
+      setCityCode("");
+      setCity("");
+      setProvinceName("");
+      setBarangays([]);
+      setBarangay("");
+      return;
+    }
+    fetch(`https://psgc.gitlab.io/api/provinces/${province}/cities-municipalities/`)
+      .then(r => r.json())
+      .then(data => setCitiesMunicipalities(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, [province]);
+
+  useEffect(() => {
+    if (!cityCode) {
+      setBarangays([]);
+      setBarangay("");
+      return;
+    }
+    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${cityCode}/barangays/`)
+      .then(r => r.json())
+      .then(data => setBarangays(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, [cityCode]);
 
   const [creditAmount, setCreditAmount] = useState("");
   const [creditTerm, setCreditTerm] = useState("");
@@ -70,6 +123,7 @@ export default function ApplyStep2() {
           phone,
           address1,
           address2,
+          province: provinceName,
           barangay,
           city,
           zipCode,
@@ -83,14 +137,17 @@ export default function ApplyStep2() {
       if (supportingDocs[1]) formData.append("doc2", supportingDocs[1]);
       if (govId) formData.append("gov_id", govId);
 
-      const res = await fetch("http://localhost:8000/api/applications/", {
+      const res = await fetch(`${API_BASE_URL}/api/applications/`, {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Submission failed");
-
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || "Submission failed");
+      }
+
       setApplicationId(data.application_id);
       setShowModal(true);
       localStorage.removeItem("application_step_1");
@@ -122,7 +179,7 @@ export default function ApplyStep2() {
        </div>
      </header>
      <div className="apply-container">
-       <h1 className="main-title">Enrol for a credit line.</h1>
+       <h1 className="main-title">Enroll for a credit line.</h1>
        <form onSubmit={handleSubmit} className="enroll-form">
 
          {/* Section 01 */}
@@ -131,63 +188,68 @@ export default function ApplyStep2() {
            <div className="input-grid">
              <div className="input-group">
                <label>First Name<span className="required">*</span></label>
-                <input 
-                  type="text" 
-                  value={firstName} 
+                <input
+                  type="text"
+                  value={firstName}
                   onChange={e => {
-                    const value = e.target.value.toUpperCase(); 
-                    // allows letters (a-z) and spaces, but blocks numbers/symbols
+                    const value = e.target.value.toUpperCase();
                     if (value === '' || /^[A-Z\s]+$/.test(value)) {
                       setFirstName(value);
                     }
-                  }} 
-                  required 
+                  }}
+                  style={{ textTransform: "uppercase" }}
+                  required
                 />
            </div>
            <div className="input-group">
                <label>Last Name<span className="required">*</span></label>
-                <input 
-                      type="text" 
-                      value={lastName}
-                      onChange={e => {
-                        const value = e.target.value.toUpperCase();
-                        // allows letters (a-z) and spaces, but blocks numbers/symbols
-                        if (value === '' || /^[a-zA-Z\s]+$/.test(value)) {
-                          setLastName(value);
-                        }
-                      }} 
-                      required 
-                    />
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={e => {
+                    const value = e.target.value.toUpperCase();
+                    if (value === '' || /^[A-Z\s]+$/.test(value)) {
+                      setLastName(value);
+                    }
+                  }}
+                  style={{ textTransform: "uppercase" }}
+                  required
+                />
            </div>
            <div className="input-group full-width">
                <label>Phone Number<span className="required">*</span></label>
-                <input 
-                      type="text" 
-                      placeholder="09XX XXX XXXX" 
-                      value={phone} 
+                <input
+                      type="text"
+                      placeholder="+63 9XX XXX XXXX"
+                      value={phone}
                       onChange={e => {
-                        // 1. Remove all non-numeric characters
-                        let rawValue = e.target.value.replace(/\D/g, "");
-                        
-                        // 2. Limit to 11 digits
-                        if (rawValue.length > 11) rawValue = rawValue.substring(0, 11);
-                        
-                        // 3. Apply the mask (09XX XXX XXXX)
-                        let formattedValue = "";
-                        if (rawValue.length > 0) {
-                          formattedValue += rawValue.substring(0, 4);
-                          if (rawValue.length > 4) {
-                            formattedValue += " " + rawValue.substring(4, 7);
-                          }
-                          if (rawValue.length > 7) {
-                            formattedValue += " " + rawValue.substring(7, 11);
-                          }
+                        // Strip everything except digits
+                        let raw = e.target.value.replace(/\D/g, "");
+
+                        // If user typed leading 63, strip it (we add the prefix)
+                        if (raw.startsWith("63")) raw = raw.substring(2);
+                        // If user typed leading 0 (e.g. 09...), strip the 0
+                        if (raw.startsWith("0")) raw = raw.substring(1);
+
+                        // Limit to 10 digits (the part after +63)
+                        if (raw.length > 10) raw = raw.substring(0, 10);
+
+                        // Format as +63 9XX XXX XXXX
+                        let formatted = "+63";
+                        if (raw.length > 0) {
+                          formatted += " " + raw.substring(0, 3);
                         }
-                        
-                        setPhone(formattedValue);
-                      }} 
-                      required 
-                    />           
+                        if (raw.length > 3) {
+                          formatted += " " + raw.substring(3, 6);
+                        }
+                        if (raw.length > 6) {
+                          formatted += " " + raw.substring(6, 10);
+                        }
+
+                        setPhone(raw.length === 0 ? "" : formatted);
+                      }}
+                      required
+                    />
                 </div>
            </div>
          </section>
@@ -216,47 +278,75 @@ export default function ApplyStep2() {
               </div>
            <div className="input-grid three-col">
              <div className="input-group">
-               <label>Barangay<span className="required">*</span></label>
-                <input 
-                    type="text" 
-                    value={barangay}
-                    onChange={e => setBarangay(e.target.value.toUpperCase())} 
-                    required
-                  />                
+               <label>Province<span className="required">*</span></label>
+               <select
+                 value={province}
+                 onChange={e => {
+                   const selected = provinces.find(p => p.code === e.target.value);
+                   setProvince(e.target.value);
+                   setProvinceName(selected ? selected.name : "");
+                 }}
+                 required
+               >
+                 <option value="">Select province</option>
+                 {provinces.map(p => (
+                   <option key={p.code} value={p.code}>{p.name}</option>
+                 ))}
+               </select>
              </div>
              <div className="input-group">
-               <label>City<span className="required">*</span></label>
-                <input 
-                    type="text" 
-                    value={city}
-                    onChange={e => setCity(e.target.value.toUpperCase())} 
-                    required
-                  />                 
-                </div>
+               <label>City / Municipality<span className="required">*</span></label>
+               <select
+                 value={cityCode}
+                 onChange={e => {
+                   const selected = citiesMunicipalities.find(c => c.code === e.target.value);
+                   setCityCode(e.target.value);
+                   setCity(selected ? selected.name : "");
+                 }}
+                 disabled={!province}
+                 required
+               >
+                 <option value="">Select city / municipality</option>
+                 {citiesMunicipalities.map(c => (
+                   <option key={c.code} value={c.code}>{c.name}</option>
+                 ))}
+               </select>
+             </div>
              <div className="input-group">
-               <label>Zip Code<span className="required">*</span></label>
-                <input 
-                      type="text" 
-                      placeholder="XXXX"
-                      value={zipCode} 
-                      onChange={e => {
-                        // Remove anything that isn't a number
-                        const value = e.target.value.replace(/\D/g, "");
-                        
-                        // Only update state if it's 4 digits or less
-                        if (value.length <= 4) {
-                          setZipCode(value);
-                        }
-                      }} 
-                      required 
-                    />             
-                </div>
+               <label>Barangay<span className="required">*</span></label>
+               <select
+                 value={barangay}
+                 onChange={e => setBarangay(e.target.value)}
+                 disabled={!cityCode}
+                 required
+               >
+                 <option value="">Select barangay</option>
+                 {barangays.map(b => (
+                   <option key={b.code} value={b.name}>{b.name}</option>
+                 ))}
+               </select>
+             </div>
+           </div>
+           <div className="input-group">
+             <label>Zip Code<span className="required">*</span></label>
+             <input
+               type="text"
+               placeholder="XXXX"
+               value={zipCode}
+               onChange={e => {
+                 const value = e.target.value.replace(/\D/g, "");
+                 if (value.length <= 4) setZipCode(value);
+               }}
+               required
+             />
            </div>
            <div className="input-group">
              <label>Default Store Branch<span className="required">*</span></label>
-             <select onChange={e => setBranch(e.target.value)} required>
+             <select value={branch} onChange={e => setBranch(e.target.value)} required>
                <option value="">Select your preferred branch</option>
-               <option value="branch-a">Branch A</option>
+               {branches.map(b => (
+                 <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+               ))}
              </select>
            </div>
          </section>
@@ -382,7 +472,7 @@ export default function ApplyStep2() {
   {showModal && (
     <ApplicationSubmittedModal
       applicationId={applicationId}
-      onClose={() => setShowModal(false)}
+      onClose={() => navigate("/login")}
     />
   )}
 </>

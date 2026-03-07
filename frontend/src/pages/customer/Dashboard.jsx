@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -9,7 +10,7 @@ export default function CustomerDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/customer/dashboard/", {
+    fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
       credentials: "include",
     })
       .then((res) => {

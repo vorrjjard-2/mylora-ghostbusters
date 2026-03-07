@@ -1,4 +1,18 @@
+let csrfToken = null;
+
+export function setCsrfToken(token) {
+  csrfToken = token;
+}
+
+export function getCsrfToken() {
+  return csrfToken;
+}
+
+// Keep for backwards compatibility
 export function getCookie(name) {
+  if (name === "csrftoken" && csrfToken) {
+    return csrfToken;
+  }
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
     const cookies = document.cookie.split(";");

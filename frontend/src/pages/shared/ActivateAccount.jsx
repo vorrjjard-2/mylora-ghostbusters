@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -14,10 +15,11 @@ export default function ActivateAccount() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     // Verify token on page load
-    fetch(`http://localhost:8000/api/activate/verify/${token}/`)
+    fetch(`${API_BASE_URL}/api/activate/verify/${token}/`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Invalid or expired activation link");
@@ -54,7 +56,7 @@ export default function ActivateAccount() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/activate/${token}/`, {
+      const res = await fetch(`${API_BASE_URL}/api/activate/${token}/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,9 +69,8 @@ export default function ActivateAccount() {
         throw new Error(data.error || "Account activation failed");
       }
 
-      // Success - redirect to login
-      alert("Account created successfully! You can now log in.");
-      navigate("/login");
+      // Success
+      setShowSuccessModal(true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -217,11 +218,32 @@ return (
         />
       </div>
 
+      {error && (
+        <p className="error-message">{error}</p>
+      )}
+
       <button type="submit" className="btn-submit" disabled={submitting}>
         {submitting ? "Processing..." : "Set Password"}
       </button>
     </form>
   </div>
+
+  {showSuccessModal && (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+      <div style={{ backgroundColor: "white", border: "1px solid #262626", borderRadius: "15px", padding: "40px", maxWidth: "500px", width: "90%", textAlign: "center", fontFamily: "'Arimo', sans-serif" }}>
+        <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "15px" }}>Account Created</h2>
+        <p style={{ fontSize: "16px", marginBottom: "30px", color: "#666" }}>
+          Your account has been created successfully. You can now log in.
+        </p>
+        <button
+          onClick={() => navigate("/login")}
+          style={{ padding: "12px 40px", fontSize: "16px", fontWeight: "600", border: "none", borderRadius: "8px", backgroundColor: "#1E2D1A", color: "white", cursor: "pointer", fontFamily: "'Arimo', sans-serif" }}
+        >
+          Go to Login
+        </button>
+      </div>
+    </div>
+  )}
 </div>
 );
 }

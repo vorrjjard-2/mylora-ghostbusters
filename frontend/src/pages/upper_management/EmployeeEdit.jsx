@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -9,6 +10,7 @@ export default function EmployeeEdit() {
   const navigate = useNavigate();
   const { userId } = useParams();
   const [loading, setLoading] = useState(true);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -19,7 +21,7 @@ export default function EmployeeEdit() {
   });
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/um/employee/${userId}/`, {
+    fetch(`${API_BASE_URL}/api/um/employee/${userId}/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -59,7 +61,7 @@ export default function EmployeeEdit() {
       updateData.password = formData.password;
     }
 
-    fetch(`http://localhost:8000/api/um/employee/${userId}/update/`, {
+    fetch(`${API_BASE_URL}/api/um/employee/${userId}/update/`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
@@ -74,8 +76,7 @@ export default function EmployeeEdit() {
         return res.json();
       })
       .then(() => {
-        alert("Employee updated successfully");
-        navigate(`/upper-management/employee/${userId}`);
+        setShowSuccessModal(true);
       })
       .catch((err) => {
         alert(err.message);
@@ -163,8 +164,21 @@ export default function EmployeeEdit() {
                 </label>
                 <input
                   type="text"
+                  placeholder="+63 9XX XXX XXXX"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => {
+                    let raw = e.target.value.replace(/\D/g, "");
+                    if (raw.startsWith("63")) raw = raw.substring(2);
+                    if (raw.startsWith("0")) raw = raw.substring(1);
+                    if (raw.length > 10) raw = raw.substring(0, 10);
+
+                    let formatted = "+63";
+                    if (raw.length > 0) formatted += " " + raw.substring(0, 3);
+                    if (raw.length > 3) formatted += " " + raw.substring(3, 6);
+                    if (raw.length > 6) formatted += " " + raw.substring(6, 10);
+
+                    setFormData({ ...formData, phone: raw.length === 0 ? "" : formatted });
+                  }}
                   style={{
                     width: "100%",
                     padding: "10px",
@@ -267,6 +281,23 @@ export default function EmployeeEdit() {
           </form>
         </main>
       </div>
+
+      {showSuccessModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ backgroundColor: "white", border: "1px solid #262626", borderRadius: "15px", padding: "40px", maxWidth: "500px", width: "90%", textAlign: "center", fontFamily: "'Arimo', sans-serif" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "15px" }}>Employee Updated</h2>
+            <p style={{ fontSize: "16px", marginBottom: "30px", color: "#666" }}>
+              Employee details have been updated successfully.
+            </p>
+            <button
+              onClick={() => navigate(`/upper-management/employee/${userId}`)}
+              style={{ padding: "12px 40px", fontSize: "16px", fontWeight: "600", border: "none", borderRadius: "8px", backgroundColor: "#1E2D1A", color: "white", cursor: "pointer", fontFamily: "'Arimo', sans-serif" }}
+            >
+              Back to Profile
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

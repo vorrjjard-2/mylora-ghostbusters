@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../../utils/api";
+import { getCsrfToken } from "../../utils/csrf";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -9,6 +11,7 @@ export default function ReviewOrder() {
   const [customerInfo, setCustomerInfo] = useState(null);
   const [deliveryDetails, setDeliveryDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
 
   useEffect(() => {
     // Load order items from localStorage
@@ -28,36 +31,26 @@ export default function ReviewOrder() {
     setDeliveryDetails(JSON.parse(delivery));
 
     // Fetch customer info
-    fetch("http://localhost:8000/api/customer/dashboard/", {
+    fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
         setCustomerInfo(data);
+        const items = JSON.parse(localStorage.getItem("order_items") || "[]");
+        const total = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+        const available = parseFloat(data.credit.available_credit);
+        if (total > available) setShowCreditModal(true);
       })
-      .catch((err) => console.error(err)); 
+      .catch((err) => console.error(err));
   }, [navigate]);
 
   const calculateTotal = () => {
     return orderItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
   };
 
-  const exceedsCredit = () => {
-    if (!customerInfo) return false;
-    const total = calculateTotal();
-    const available = parseFloat(customerInfo.credit.available_credit);
-    return total > available;
-  };
-
   const handleSubmit = async () => {
     setSubmitting(true);
-
-    // Get CSRF token from cookie
-    const getCookie = (name) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-    };
 
     // Build shipping address from delivery details
     let shippingAddress = "For Pickup";
@@ -73,11 +66,11 @@ export default function ReviewOrder() {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/api/orders/create/", {
+      const res = await fetch(`${API_BASE_URL}/api/orders/create/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
+          "X-CSRFToken": getCsrfToken(),
         },
         credentials: "include",
         body: JSON.stringify({
@@ -137,11 +130,21 @@ return (
     </div>
 
     <div className="review-content">
-      {/* Credit Warning */}
-      {exceedsCredit() && (
-        <div className="review-warning-box">
-          <strong>⚠️ Notice:</strong> This order exceeds your available credit limit. 
-          Your order will be submitted for override approval by management.
+      {/* Credit Warning Modal */}
+      {showCreditModal && (
+        <div className="review-modal-overlay">
+          <div className="review-modal">
+            <h2 className="review-modal-title">Credit Limit Exceeded</h2>
+            <p className="review-modal-body">
+              This order exceeds your available credit limit. Your order will need to be reviewed by management for approval.
+            </p>
+            <button
+              className="review-modal-accept-btn"
+              onClick={() => setShowCreditModal(false)}
+            >
+              I understand, continue
+            </button>
+          </div>
         </div>
       )}
 
@@ -224,15 +227,37 @@ return (
           </div>
         </div>
 
-        {deliveryDetails.deliveryMode === "DELIVERY" && (
+        {deliveryDetails.deliveryMode === "PICKUP" && customerInfo?.credit?.branch && (
           <div className="review-field-group">
-            <label className="review-field-label">Shipping Address</label>
+            <label className="review-field-label">Branch Address</label>
             <div className="review-readonly-box review-address-multi-line">
-              <p>{deliveryDetails.address1}</p>
-              {deliveryDetails.address2 && <p>{deliveryDetails.address2}</p>}
-              <p>{deliveryDetails.barangay}, {deliveryDetails.city} {deliveryDetails.zipCode}</p>
+              <p><strong>{customerInfo.credit.branch.name}</strong></p>
+              <p>{customerInfo.credit.branch.address}</p>
             </div>
           </div>
+        )}
+
+        {deliveryDetails.deliveryMode === "DELIVERY" && (
+          <>
+            <div className="review-field-group">
+              <label className="review-field-label">Shipping Address</label>
+              <div className="review-readonly-box review-address-multi-line">
+                <p>{deliveryDetails.address1}</p>
+                {deliveryDetails.address2 && <p>{deliveryDetails.address2}</p>}
+                <p>{deliveryDetails.barangay}, {deliveryDetails.city} {deliveryDetails.zipCode}</p>
+              </div>
+            </div>
+
+            {customerInfo?.credit?.branch && (
+              <div className="review-field-group">
+                <label className="review-field-label">Branch Address</label>
+                <div className="review-readonly-box review-address-multi-line">
+                  <p><strong>{customerInfo.credit.branch.name}</strong></p>
+                  <p>{customerInfo.credit.branch.address}</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

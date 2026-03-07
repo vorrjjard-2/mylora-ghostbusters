@@ -1,8 +1,21 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
 import { getCookie } from "../../utils/csrf";
-import "./ProcessorOrderHistory.css";
+import "../upper_management/Dashboard.css";
+import "../../components/internal/Sidebar.css";
+
+const STATUS_STYLES = {
+  APPROVED:  { backgroundColor: "#D1E7DD", color: "#0F5132" },
+  COMPLETED: { backgroundColor: "#CCE5FF", color: "#004085" },
+  PENDING:   { backgroundColor: "#FFF3CD", color: "#856404" },
+  REJECTED:  { backgroundColor: "#F8D7DA", color: "#842029" },
+};
+
+function fmt(n) {
+  return parseFloat(n).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 export default function ProcessorOrderHistory() {
   const navigate = useNavigate();
@@ -20,8 +33,8 @@ export default function ProcessorOrderHistory() {
     const fetchBoth = async () => {
       try {
         const [pendingRes, completedRes] = await Promise.all([
-          fetch("http://localhost:8000/api/op/pending-orders/", { credentials: "include" }),
-          fetch("http://localhost:8000/api/op/completed-orders/", { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/op/pending-orders/`, { credentials: "include" }),
+          fetch(`${API_BASE_URL}/api/op/completed-orders/`, { credentials: "include" }),
         ]);
         if (!pendingRes.ok || !completedRes.ok) throw new Error("Failed to load orders");
         const [pending, completed] = await Promise.all([pendingRes.json(), completedRes.json()]);
@@ -37,41 +50,30 @@ export default function ProcessorOrderHistory() {
     fetchBoth();
   }, []);
 
-  // Update filtered and sorted orders when dependencies change
   useEffect(() => {
-    const orders = activeTab === "pending" ? pendingOrders : completedOrders;
-    
-    // First, filter by search term
-    let filtered = orders.filter((o) => {
-      const name = (o.customer_name || "").toLowerCase();
-      const id = (o.order_id || "").toString();
-      const term = searchTerm.toLowerCase();
-      return name.includes(term) || id.includes(term);
+    const source = activeTab === "pending" ? pendingOrders : [...pendingOrders, ...completedOrders];
+
+    const term = searchTerm.toLowerCase();
+    let filtered = source.filter((o) =>
+      (o.customer_name || "").toLowerCase().includes(term) ||
+      String(o.order_id).includes(term)
+    );
+
+    const sorted = [...filtered].sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === "order_id") {
+        comparison = a.order_id - b.order_id;
+      } else if (sortBy === "status") {
+        comparison = (a.order_status || "").localeCompare(b.order_status || "");
+      } else if (sortBy === "date") {
+        comparison = new Date(a.date_ordered) - new Date(b.date_ordered);
+      } else if (sortBy === "amount") {
+        comparison = parseFloat(a.total_amount || 0) - parseFloat(b.total_amount || 0);
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
     });
 
-    // Then, sort
-    if (filtered.length > 0) {
-      const sorted = [...filtered].sort((a, b) => {
-        let comparison = 0;
-
-        if (sortBy === "order_id") {
-          comparison = a.order_id - b.order_id;
-        } else if (sortBy === "status") {
-          comparison = a.order_status.localeCompare(b.order_status);
-        } else if (sortBy === "date") {
-          // For pending: use date_ordered, for completed: use completion_date
-          const dateField = activeTab === "pending" ? "date_ordered" : "completion_date";
-          const dateA = new Date(a[dateField]);
-          const dateB = new Date(b[dateField]);
-          comparison = dateA - dateB;
-        }
-
-        return sortDirection === "asc" ? comparison : -comparison;
-      });
-      setFilteredOrders(sorted);
-    } else {
-      setFilteredOrders([]);
-    }
+    setFilteredOrders(sorted);
   }, [activeTab, pendingOrders, completedOrders, searchTerm, sortBy, sortDirection]);
 
   const handleSortChange = (newSortBy) => {
@@ -84,27 +86,22 @@ export default function ProcessorOrderHistory() {
     setShowSortMenu(false);
   };
 
-  const getSortLabel = () => {
-    if (sortBy === "date") return activeTab === "pending" ? "Date Ordered" : "Date Completed";
-    if (sortBy === "status") return "Status";
-    if (sortBy === "order_id") return "Order ID";
-  };
+  const sortOptions = [
+    { value: "date", label: "Date Ordered" },
+    { value: "amount", label: "Amount" },
+    { value: "status", label: "Status" },
+    { value: "order_id", label: "Order ID" },
+  ];
+
+  const getSortLabel = () => sortOptions.find((o) => o.value === sortBy)?.label ?? "Date Ordered";
 
   const handleLogout = async () => {
-    await fetch("http://localhost:8000/api/logout/", {
+    await fetch(`${API_BASE_URL}/api/logout/`, {
       method: "POST",
       credentials: "include",
       headers: { "X-CSRFToken": getCookie("csrftoken") },
     });
     navigate("/login");
-  };
-
-  const handleOrderClick = (order) => {
-    if (activeTab === "pending") {
-      navigate(`/order-processor/order/${order.order_id}`);
-    } else {
-      navigate(`/order-processor/order/${order.order_id}/view`);
-    }
   };
 
   const handleTabChange = (tab) => {
@@ -114,79 +111,114 @@ export default function ProcessorOrderHistory() {
     setSortDirection("desc");
   };
 
+  const handleOrderClick = (order) => {
+    if (order.order_status === "COMPLETED") {
+      navigate(`/order-processor/order/${order.order_id}/view`);
+    } else {
+      navigate(`/order-processor/order/${order.order_id}`);
+    }
+  };
+
   return (
-    <div className="poh-root">
+    <div className="um-dashboard-wrapper">
       {/* HEADER */}
-      <header className="poh-header">
-        <div className="poh-brand">
-          <img src={logo} alt="Logo" className="poh-logo" />
-          <span className="poh-brand-name">Web Credit System</span>
+      <header className="um-header-section">
+        <div className="um-brand-group">
+          <img src={logo} alt="Logo" className="mylora-logo" />
+          <span className="um-system-title">Web Credit System</span>
         </div>
-        <button className="poh-logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <div className="um-header-actions">
+          <button className="um-logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </header>
 
-      <div className="poh-body">
+      <div className="um-dashboard-body" style={{ display: "flex", flex: 1 }}>
         {/* SIDEBAR */}
-        <aside className="poh-sidebar">
-          <div
-            className="poh-side-item"
-            onClick={() => navigate("/order-processor/dashboard")}
-          >
-            Dashboard
-          </div>
-          <div className="poh-side-item poh-side-active">Order History</div>
+        <aside className="um-sidebar">
+          <nav className="um-sidebar-nav">
+            <div
+              className="um-sidebar-item"
+              onClick={() => navigate("/order-processor/dashboard")}
+            >
+              Dashboard
+            </div>
+            <div className="um-sidebar-item active">Order History</div>
+          </nav>
         </aside>
 
         {/* MAIN */}
-        <main className="poh-main">
-          <h1 className="poh-title">View Orders</h1>
+        <main className="um-dashboard-content">
+          <h1 className="um-welcome-text">Order History</h1>
 
           {/* TABS */}
-          <div className="poh-tabs">
-            <button
-              className={`poh-tab ${activeTab === "pending" ? "poh-tab-active" : ""}`}
-              onClick={() => handleTabChange("pending")}
-            >
-              Pending Orders
-            </button>
-            <button
-              className={`poh-tab ${activeTab === "completed" ? "poh-tab-active" : ""}`}
-              onClick={() => handleTabChange("completed")}
-            >
-              Completed Orders
-            </button>
+          <div style={{ display: "flex", gap: "30px", borderBottom: "2px solid #e0e0e0", marginBottom: "20px" }}>
+            {[
+              { key: "pending", label: "Pending" },
+              { key: "all", label: "All Orders" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => handleTabChange(tab.key)}
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  color: activeTab === tab.key ? "#1f3d1a" : "#888",
+                  borderBottom: activeTab === tab.key ? "3px solid #1f3d1a" : "none",
+                  marginBottom: "-2px",
+                  paddingBottom: "10px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* CONTROLS */}
-          <div className="poh-controls">
-            <div className="poh-search-wrap">
-              <span className="poh-search-icon">
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                  <circle cx="6.5" cy="6.5" r="5.5" stroke="#888" strokeWidth="1.5" />
-                  <path d="M11 11L14 14" stroke="#888" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </span>
+          {/* SEARCH + SORT */}
+          <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+            <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
+              <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
               <input
-                className="poh-search-input"
                 type="text"
-                placeholder="Search"
+                placeholder="Search by order ID or customer"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 10px 10px 45px",
+                  fontSize: "16px",
+                  border: "1px solid #262626",
+                  borderRadius: "8px",
+                  backgroundColor: "white",
+                }}
               />
             </div>
-            
-            {/* Sort Button with Dropdown */}
+
             <div style={{ position: "relative" }}>
-              <button 
-                className="poh-sort-btn"
+              <button
                 onClick={() => setShowSortMenu(!showSortMenu)}
+                style={{
+                  padding: "10px 20px",
+                  fontSize: "16px",
+                  border: "1px solid #262626",
+                  borderRadius: "8px",
+                  backgroundColor: "white",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontWeight: "600",
+                }}
               >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginRight: 6 }}>
-                  <path d="M1 3h12M3 7h8M5 11h4" stroke="#444" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-                Sort By: {getSortLabel()} {sortDirection === "asc" ? "↑" : "↓"}
+                <span>↕</span>
+                <span>Sort By: {getSortLabel()}</span>
+                <span style={{ fontSize: "12px", color: "#666" }}>
+                  {sortDirection === "asc" ? "↑" : "↓"}
+                </span>
               </button>
 
               {showSortMenu && (
@@ -199,69 +231,37 @@ export default function ProcessorOrderHistory() {
                   borderRadius: "8px",
                   boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                   minWidth: "200px",
-                  zIndex: 1000
+                  zIndex: 1000,
                 }}>
-                  <div
-                    onClick={() => handleSortChange("date")}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid #e0e0e0",
-                      backgroundColor: sortBy === "date" ? "#f5f5f5" : "white",
-                      fontWeight: sortBy === "date" ? "600" : "400",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === "date" ? "#f5f5f5" : "white"}
-                  >
-                    <span>{activeTab === "pending" ? "Date Ordered" : "Date Completed"}</span>
-                    {sortBy === "date" && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
-                  </div>
-                  <div
-                    onClick={() => handleSortChange("status")}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid #e0e0e0",
-                      backgroundColor: sortBy === "status" ? "#f5f5f5" : "white",
-                      fontWeight: sortBy === "status" ? "600" : "400",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === "status" ? "#f5f5f5" : "white"}
-                  >
-                    <span>Status</span>
-                    {sortBy === "status" && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
-                  </div>
-                  <div
-                    onClick={() => handleSortChange("order_id")}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      backgroundColor: sortBy === "order_id" ? "#f5f5f5" : "white",
-                      fontWeight: sortBy === "order_id" ? "600" : "400",
-                      borderRadius: "0 0 8px 8px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === "order_id" ? "#f5f5f5" : "white"}
-                  >
-                    <span>Order ID</span>
-                    {sortBy === "order_id" && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
-                  </div>
+                  {sortOptions.map((option, index) => (
+                    <div
+                      key={option.value}
+                      onClick={() => handleSortChange(option.value)}
+                      style={{
+                        padding: "12px 16px",
+                        cursor: "pointer",
+                        borderBottom: index < sortOptions.length - 1 ? "1px solid #e0e0e0" : "none",
+                        backgroundColor: sortBy === option.value ? "#f5f5f5" : "white",
+                        fontWeight: sortBy === option.value ? "600" : "400",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderRadius: index === sortOptions.length - 1 ? "0 0 8px 8px" : "0",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === option.value ? "#f5f5f5" : "white"}
+                    >
+                      <span>{option.label}</span>
+                      {sortBy === option.value && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Sorting indicator chip */}
-          <div style={{ marginBottom: "15px", marginTop: "15px", display: "flex", alignItems: "center", gap: "10px" }}>
+          {/* SORT INDICATOR */}
+          <div style={{ marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
             <span style={{
               padding: "6px 12px",
@@ -272,45 +272,69 @@ export default function ProcessorOrderHistory() {
               fontWeight: "600",
               display: "inline-flex",
               alignItems: "center",
-              gap: "6px"
+              gap: "6px",
             }}>
               {getSortLabel()}
               <span style={{ fontSize: "12px" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
             </span>
           </div>
 
-          {/* LIST */}
+          {/* TABLE */}
           {loading ? (
-            <div className="poh-empty">Loading...</div>
+            <p style={{ color: "#888", padding: "1rem" }}>Loading...</p>
           ) : filteredOrders.length === 0 ? (
-            <div className="poh-empty">No {activeTab} orders found.</div>
+            <p style={{ color: "#888", padding: "1rem" }}>No orders found.</p>
           ) : (
-            <div className="poh-list">
-              {filteredOrders.map((order) => (
-                <div
-                  key={order.order_id}
-                  className="poh-list-item"
-                  onClick={() => handleOrderClick(order)}
-                >
-                  <div className="poh-item-left">
-                    <div className="poh-order-id">ORDER ID XX{order.order_id}</div>
-                    <div className="poh-order-sub">Ordered by: {order.customer_name}</div>
-                  </div>
-                  <div className="poh-item-right">
-                    <div className="poh-badges">
-                      <span className="poh-badge poh-badge-approved">APPROVED</span>
-                      {activeTab === "completed" && (
-                        <span className="poh-badge poh-badge-completed">COMPLETED</span>
-                      )}
-                    </div>
-                    <div className="poh-order-date">
-                      {activeTab === "pending"
-                        ? `Date Ordered: ${order.date_ordered}`
-                        : `Date Completed: ${order.completion_date}`}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div style={{
+              backgroundColor: "white",
+              border: "1px solid #262626",
+              borderRadius: "15px",
+              overflow: "hidden",
+            }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#f5f5f5", borderBottom: "1px solid #262626" }}>
+                    <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>ORDER ID</th>
+                    <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>AMOUNT</th>
+                    <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>DATE ORDERED</th>
+                    <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>ORDERED BY</th>
+                    <th style={{ padding: "15px", textAlign: "left", fontWeight: "600", fontSize: "14px" }}>STATUS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order, idx) => {
+                    const badge = STATUS_STYLES[order.order_status] || { backgroundColor: "#e0e0e0", color: "#333" };
+                    return (
+                      <tr
+                        key={order.order_id}
+                        onClick={() => handleOrderClick(order)}
+                        style={{
+                          borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
+                      >
+                        <td style={{ padding: "15px", fontSize: "14px", fontWeight: "600" }}>{order.order_id}</td>
+                        <td style={{ padding: "15px", fontSize: "14px" }}>₱ {fmt(order.total_amount || 0)}</td>
+                        <td style={{ padding: "15px", fontSize: "14px" }}>{order.date_ordered}</td>
+                        <td style={{ padding: "15px", fontSize: "14px" }}>{order.customer_name}</td>
+                        <td style={{ padding: "15px", fontSize: "14px" }}>
+                          <span style={{
+                            padding: "4px 12px",
+                            borderRadius: "12px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            ...badge,
+                          }}>
+                            {order.order_status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </main>

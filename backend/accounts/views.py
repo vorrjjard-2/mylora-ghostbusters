@@ -1,20 +1,23 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.middleware.csrf import get_token
 
 from django.contrib.auth import logout
 from rest_framework.response import Response
 
 from django.contrib.auth.models import User
-from .models import Customer, CreditAccount
+from .models import Customer, CreditAccount, AuditLog, log_audit
 from orders.models import Order
 
+@ensure_csrf_cookie
 @api_view(['POST'])
+@authentication_classes([])
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -27,7 +30,8 @@ def login_view(request):
         )
 
     login(request, user)
-    return Response({'message': 'Logged in'})
+    log_audit(user=user, action="LOGIN", details={"username": username}, request=request)
+    return Response({'message': 'Logged in', 'csrfToken': get_token(request)})
 
 @ensure_csrf_cookie
 @api_view(["GET"])
@@ -43,11 +47,14 @@ def me_view(request):
         "authenticated": True,
         "username": request.user.username,
         "roles": roles,
+        "csrfToken": get_token(request),
     })
 
 
 @api_view(["POST"])
 def logout_view(request):
+    user = request.user
+    log_audit(user=user if user.is_authenticated else None, action="LOGOUT", details={"username": user.username if user.is_authenticated else "anonymous"}, request=request)
     logout(request)
     return Response({"success": True})
 
@@ -94,21 +101,27 @@ def customer_dashboard(request):
         orders_data = []
         for order in recent_orders:
             orders_data.append({
-                'order_id': f"XX{order.order_id}",
+                'order_id': order.order_id,
                 'raw_id': order.order_id,
                 'amount': str(order.total_amount),
                 'date_ordered': order.date_ordered.strftime('%B %d, %Y'),
                 'status': order.order_status
             })
         
+        available_credit = credit_account.credit_limit - credit_account.outstanding_bal
+
         return Response({
             'user': {
                 'name': request.user.get_full_name() or request.user.username,
             },
             'credit': {
-                'available_credit': str(credit_account.available_credit),
+                'available_credit': str(available_credit),
                 'credit_limit': str(credit_account.credit_limit),
-                'outstanding_balance': str(credit_account.outstanding_bal)
+                'outstanding_balance': str(credit_account.outstanding_bal),
+                'branch': {
+                    'name': credit_account.branch.name,
+                    'address': credit_account.branch.address,
+                },
             },
             'recent_orders': orders_data
         })
@@ -150,6 +163,7 @@ def customer_profile(request):
             'email': app.email if app else request.user.email,
             'address1': app.address1 if app else "",
             'address2': app.address2 if app else "",
+            'province': app.province if app else "",
             'barangay': app.barangay if app else "",
             'city': app.city if app else "",
             'zipcode': app.zipcode if app else "",
@@ -319,12 +333,20 @@ def um_create_employee(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    if User.objects.filter(username=username).exists():
+    employee_users = User.objects.filter(groups__name__in=["credit_manager", "order_processor"])
+
+    if employee_users.filter(username=username).exists():
         return Response(
             {"error": "Username already exists"},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+    if email and employee_users.filter(email=email).exists():
+        return Response(
+            {"error": "Email already exists"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     try:
         # Create user
         user = User.objects.create_user(
@@ -339,6 +361,7 @@ def um_create_employee(request):
         group, _ = Group.objects.get_or_create(name=role)
         user.groups.add(group)
         
+        log_audit(user=request.user, action="CREATE_EMPLOYEE", details={"employee_id": user.id, "username": username, "role": role}, request=request)
         return Response({
             "success": True,
             "message": "Employee created successfully",
@@ -365,14 +388,24 @@ def um_update_employee(request, user_id):
     except User.DoesNotExist:
         return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    # Update basic info
-    if "email" in request.data:
+    # Validate uniqueness before updating
+    employee_users = User.objects.filter(groups__name__in=["credit_manager", "order_processor"]).exclude(id=user_id)
+
+    if "username" in request.data and request.data["username"] != emp.username:
+        if employee_users.filter(username=request.data["username"]).exists():
+            return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        emp.username = request.data["username"]
+
+    if "email" in request.data and request.data["email"]:
+        if employee_users.filter(email=request.data["email"]).exists():
+            return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
         emp.email = request.data["email"]
+
     if "first_name" in request.data:
         emp.first_name = request.data["first_name"]
     if "last_name" in request.data:
         emp.last_name = request.data["last_name"]
-    
+
     # Update password if provided
     if "password" in request.data and request.data["password"]:
         emp.set_password(request.data["password"])
@@ -384,7 +417,8 @@ def um_update_employee(request, user_id):
         emp.groups.add(group)
     
     emp.save()
-    
+
+    log_audit(user=request.user, action="UPDATE_EMPLOYEE", details={"employee_id": user_id, "username": emp.username}, request=request)
     return Response({
         "success": True,
         "message": "Employee updated successfully"
@@ -416,7 +450,40 @@ def um_delete_employee(request, user_id):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        username = emp.username
         emp.delete()
+        log_audit(user=request.user, action="DELETE_EMPLOYEE", details={"employee_id": user_id, "username": username}, request=request)
         return Response({"success": True, "message": "Employee deleted successfully"})
     except User.DoesNotExist:
         return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["GET"])
+def branches_list(request):
+    from .models import Branch
+    branches = Branch.objects.all().order_by("name")
+    data = [{"branch_id": b.branch_id, "name": b.name} for b in branches]
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_audit_logs(request):
+    """Get all audit logs for upper management"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    logs = AuditLog.objects.select_related('user').order_by('-timestamp')
+
+    data = []
+    for log in logs:
+        data.append({
+            "log_id": log.log_id,
+            "actor": log.user.get_full_name() or log.user.username if log.user else "System",
+            "action": log.action,
+            "timestamp": log.timestamp.isoformat(),
+            "details": log.details,
+            "ip_address": log.ip_address,
+        })
+
+    return Response(data)

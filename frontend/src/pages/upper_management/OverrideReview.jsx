@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -12,9 +13,10 @@ export default function OverrideReview() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/um/override/${overrideId}/`, {
+    fetch(`${API_BASE_URL}/api/um/override/${overrideId}/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -47,7 +49,7 @@ export default function OverrideReview() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/um/override/${overrideId}/${pendingAction}/`,
+        `${API_BASE_URL}/api/um/override/${overrideId}/${pendingAction}/`,
         {
           method: "POST",
           credentials: "include",
@@ -55,7 +57,10 @@ export default function OverrideReview() {
             "Content-Type": "application/json",
             "X-CSRFToken": csrfToken,
           },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify({
+            password,
+            ...(pendingAction === "reject" && { rejection_reason: rejectionReason }),
+          }),
         }
       );
 
@@ -65,12 +70,7 @@ export default function OverrideReview() {
       }
 
       setShowPasswordModal(false);
-      if (pendingAction === "approve") {
-        setShowSuccessModal(true);
-      } else {
-        alert("Override request rejected");
-        navigate("/upper-management/dashboard");
-      }
+      setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
       alert(err.message || `Failed to ${pendingAction} override request`);
@@ -82,6 +82,7 @@ export default function OverrideReview() {
   const handleCancelPasswordModal = () => {
     setShowPasswordModal(false);
     setPassword("");
+    setRejectionReason("");
     setPendingAction(null);
   };
 
@@ -110,7 +111,7 @@ export default function OverrideReview() {
       </div>
 
       {/* Title */}
-      <h1 style={styles.title}>ORDER ID XX{override.order_id}</h1>
+      <h1 style={styles.title}>ORDER ID {override.order_id}</h1>
       <p style={styles.dateSubmitted}>DATE SUBMITTED: {override.date_submitted}</p>
 
       {/* Customer Info */}
@@ -210,7 +211,25 @@ export default function OverrideReview() {
       {showPasswordModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
+            <button
+              style={styles.modalCloseBtn}
+              onClick={handleCancelPasswordModal}
+            >
+              &times;
+            </button>
             <h3 style={styles.modalTitle}>Please enter user password to proceed.</h3>
+            {pendingAction === "reject" && (
+              <>
+                <label style={styles.reasonLabel}>Reason for Rejection</label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Please provide a reason for rejecting this override request (at least 5 words)..."
+                  style={styles.reasonTextarea}
+                  rows={4}
+                />
+              </>
+            )}
             <input
               type="password"
               value={password}
@@ -227,14 +246,14 @@ export default function OverrideReview() {
                 onClick={handleCancelPasswordModal}
                 disabled={processing}
               >
-                Reject
+                Cancel
               </button>
               <button
-                style={styles.modalConfirmBtn}
+                style={pendingAction === "reject" ? styles.modalRejectBtn : styles.modalConfirmBtn}
                 onClick={handleConfirmAction}
                 disabled={processing}
               >
-                {processing ? "Processing..." : "Approve"}
+                {processing ? "Processing..." : pendingAction === "reject" ? "Reject" : "Approve"}
               </button>
             </div>
           </div>
@@ -245,9 +264,13 @@ export default function OverrideReview() {
       {showSuccessModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
-            <h3 style={styles.successTitle}>Override approved!</h3>
+            <h3 style={styles.successTitle}>
+              {pendingAction === "approve" ? "Override approved!" : "Override rejected"}
+            </h3>
             <p style={styles.successMessage}>
-              Credit override request has been approved and order has been approved.
+              {pendingAction === "approve"
+                ? "Credit override request has been approved and order has been approved."
+                : "Credit override request has been rejected."}
             </p>
             <button
               style={styles.returnBtn}
@@ -417,12 +440,43 @@ const styles = {
     width: "90%",
     padding: "2rem",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    position: "relative",
+  },
+  modalCloseBtn: {
+    position: "absolute",
+    top: "0.75rem",
+    right: "0.75rem",
+    background: "none",
+    border: "none",
+    fontSize: "1.5rem",
+    cursor: "pointer",
+    color: "#666",
+    lineHeight: 1,
+    padding: "0.25rem",
   },
   modalTitle: {
     fontSize: "1.25rem",
     fontWeight: 600,
     marginBottom: "1.5rem",
     textAlign: "center",
+  },
+  reasonLabel: {
+    fontSize: "0.9rem",
+    fontWeight: 600,
+    marginBottom: "0.5rem",
+    display: "block",
+    color: "#333",
+  },
+  reasonTextarea: {
+    width: "100%",
+    padding: "0.75rem",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    boxSizing: "border-box",
+    marginBottom: "1rem",
+    resize: "vertical",
+    fontFamily: "inherit",
   },
   passwordInput: {
     width: "100%",
@@ -445,6 +499,16 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
     fontSize: "1rem",
+  },
+  modalRejectBtn: {
+    padding: "0.75rem 2rem",
+    background: "#b03a2e",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "1rem",
+    fontWeight: 600,
   },
   modalConfirmBtn: {
     padding: "0.75rem 2rem",

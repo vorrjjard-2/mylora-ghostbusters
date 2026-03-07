@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -9,11 +10,14 @@ export default function CreateOrder() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(() => {
+    const saved = localStorage.getItem("order_items");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
     // Fetch available products
-    fetch("http://localhost:8000/api/products/", {
+    fetch(`${API_BASE_URL}/api/products/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -59,15 +63,32 @@ export default function CreateOrder() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity <= 0) {
-      setSelectedItems(selectedItems.filter((item) => item.product_id !== productId));
-    } else {
+    if (newQuantity === "") {
       setSelectedItems(
         selectedItems.map((item) =>
-          item.product_id === productId ? { ...item, quantity: parseFloat(newQuantity) } : item
+          item.product_id === productId ? { ...item, quantity: "" } : item
         )
       );
+      return;
     }
+    const parsed = parseInt(newQuantity, 10);
+    if (isNaN(parsed)) return;
+    const quantity = parsed < 1 ? 1 : parsed;
+    setSelectedItems(
+      selectedItems.map((item) =>
+        item.product_id === productId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  const handleQuantityBlur = (productId) => {
+    setSelectedItems(
+      selectedItems.map((item) =>
+        item.product_id === productId && (item.quantity === "" || item.quantity < 1)
+          ? { ...item, quantity: 1 }
+          : item
+      )
+    );
   };
 
   const handleRemoveItem = (productId) => {
@@ -75,7 +96,7 @@ export default function CreateOrder() {
   };
 
   const calculateTotal = () => {
-    return selectedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+    return selectedItems.reduce((sum, item) => sum + item.unit_price * (item.quantity || 0), 0);
   };
 
   const handleContinue = () => {
@@ -182,13 +203,14 @@ export default function CreateOrder() {
                             onChange={(e) =>
                               handleQuantityChange(item.product_id, e.target.value)
                             }
-                            min="0"
-                            step="0.01"
+                            onBlur={() => handleQuantityBlur(item.product_id)}
+                            min="1"
+                            step="1"
                             className="order-quantity-input"
                           />
                         </td>
                         <td className="order-td">
-                          ₱{(item.unit_price * item.quantity).toFixed(2)}
+                          ₱{(item.unit_price * (item.quantity || 0)).toFixed(2)}
                         </td>
                         <td className="order-td">
                           <button

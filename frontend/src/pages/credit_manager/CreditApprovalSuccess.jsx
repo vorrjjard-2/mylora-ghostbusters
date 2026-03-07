@@ -32,8 +32,8 @@ return (
       <main className="success-content">
 
       {/* headline */}
-      <h1 className="view-title">Order XX{orderId} has been approved!</h1>
-      <p className="success-desc-id">ORDER ID XX{orderId} has been sent for processing.</p>
+      <h1 className="view-title">Order {orderId} has been approved!</h1>
+      <p className="success-desc-id">ORDER ID {orderId} has been sent for processing.</p>
       <p className="success-desc">
         Customer {order.customer_name || "—"}'s credit balance has been updated.
       </p>

@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../utils/api";
+import { setCsrfToken } from "../utils/csrf";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
@@ -10,7 +12,7 @@ export default function ProtectedRoute({ children, requiredRole }) {
 
   useEffect(() => {
     // Check if user is authenticated
-    fetch("http://localhost:8000/api/me/", {
+    fetch(`${API_BASE_URL}/api/me/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -20,6 +22,9 @@ export default function ProtectedRoute({ children, requiredRole }) {
         return res.json();
       })
       .then((data) => {
+        if (data.csrfToken) {
+          setCsrfToken(data.csrfToken);
+        }
         setAuthState({
           loading: false,
           authenticated: data.authenticated,

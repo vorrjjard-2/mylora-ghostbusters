@@ -26,10 +26,16 @@ class CreditEnrollment(models.Model):
     # Address
     address1 = models.CharField(max_length=255)
     address2 = models.CharField(max_length=255, blank=True)
+    province = models.CharField(max_length=100, blank=True)
     barangay = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
-    default_branch = models.CharField(max_length=100)
+    branch = models.ForeignKey(
+        'accounts.Branch',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
 
     # Credit request
     credit_amt_request = models.DecimalField(
@@ -61,6 +67,8 @@ class CreditEnrollment(models.Model):
         related_name="approved_enrollments",
     )
     
+    rejection_reason = models.TextField(blank=True)
+
     # Activation token for password setup
     activation_token = models.CharField(max_length=64, blank=True, null=True)
     activation_token_created = models.DateTimeField(blank=True, null=True)

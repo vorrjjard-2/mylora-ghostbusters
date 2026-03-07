@@ -1,14 +1,9 @@
+import { API_BASE_URL } from "../../utils/api";
+import { getCookie } from "../../utils/csrf";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
 import "./CreditApproval.css";
-
-
-const getCookie = (name) => {
-  const v = `; ${document.cookie}`;
-  const parts = v.split(`; ${name}=`);
-  return parts.length === 2 ? parts.pop().split(";").shift() : "";
-};
 
 export default function CreditApproval() {
   const { orderId } = useParams();
@@ -22,8 +17,20 @@ export default function CreditApproval() {
   const [overrideReason, setOverrideReason] = useState("");
   const [showOverrideSuccess, setShowOverrideSuccess] = useState(false);
 
+  // Password modal state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [approvalPassword, setApprovalPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  // Reject password modal state
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectPassword, setRejectPassword] = useState("");
+  const [rejectPasswordError, setRejectPasswordError] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReasonError, setRejectReasonError] = useState("");
+
   useEffect(() => {
-    fetch(`http://localhost:8000/api/cm/order/${orderId}/`, { credentials: "include" })
+    fetch(`${API_BASE_URL}/api/cm/order/${orderId}/`, { credentials: "include" })
       .then((r) => {
         if (!r.ok) throw new Error("Not found");
         return r.json();
@@ -41,16 +48,24 @@ export default function CreditApproval() {
     return totalAmount > availableCredit;
   };
 
-  const postAction = async (action) => {
+  const postAction = async (action, password = null, rejectionReason = null) => {
     // action = "approve" | "reject"
     setActing(true);
     try {
+      const payload = {};
+      if (password) payload.password = password;
+      if (rejectionReason) payload.rejection_reason = rejectionReason;
+      const body = Object.keys(payload).length > 0 ? JSON.stringify(payload) : undefined;
       const res = await fetch(
-        `http://localhost:8000/api/cm/order/${orderId}/${action}/`,
+        `${API_BASE_URL}/api/cm/order/${orderId}/${action}/`,
         {
           method: "POST",
           credentials: "include",
-          headers: { "X-CSRFToken": getCookie("csrftoken") },
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            ...(body ? { "Content-Type": "application/json" } : {}),
+          },
+          body,
         }
       );
       if (!res.ok) {
@@ -74,6 +89,44 @@ export default function CreditApproval() {
     }
   };
 
+  const handleApproveClick = () => {
+    setApprovalPassword("");
+    setPasswordError("");
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!approvalPassword.trim()) {
+      setPasswordError("Password is required.");
+      return;
+    }
+    setShowPasswordModal(false);
+    await postAction("approve", approvalPassword);
+  };
+
+  const handleRejectClick = () => {
+    setRejectPassword("");
+    setRejectPasswordError("");
+    setRejectReason("");
+    setRejectReasonError("");
+    setShowRejectModal(true);
+  };
+
+  const handleRejectPasswordSubmit = async () => {
+    let hasError = false;
+    if (rejectReason.trim().split(/\s+/).length < 5) {
+      setRejectReasonError("Please provide at least 5 words for the rejection reason.");
+      hasError = true;
+    }
+    if (!rejectPassword.trim()) {
+      setRejectPasswordError("Password is required.");
+      hasError = true;
+    }
+    if (hasError) return;
+    setShowRejectModal(false);
+    await postAction("reject", rejectPassword, rejectReason.trim());
+  };
+
   const handleRequestOverride = () => {
     setShowOverrideModal(true);
     setOverrideReason("");
@@ -88,7 +141,7 @@ export default function CreditApproval() {
     setActing(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/api/cm/order/${orderId}/request-override/`,
+        `${API_BASE_URL}/api/cm/order/${orderId}/request-override/`,
         {
           method: "POST",
           credentials: "include",
@@ -141,13 +194,13 @@ export default function CreditApproval() {
 
       <main className="approval-content">
 
-      <h1 className="approval-title">ORDER ID XX{order.order_id}</h1>
+      <h1 className="approval-title">ORDER ID {order.order_id}</h1>
 
       {/* Customer Information */}
       <h2 className="approval-subtitle">Customer Information</h2>
       <div className="info-grid">
         <div className="info-group">
-          <label className="info-label-">Name</label>
+          <label className="info-label">Name</label>
           <input className="info-input-name" readOnly value={order.customer_name} />
         </div>
         <div className="info-row">
@@ -167,7 +220,7 @@ export default function CreditApproval() {
         <div className="credit-warning-box">
           <strong>WARNING!</strong>
           <br />
-          ORDER XX{order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
+          ORDER {order.order_id} amounting to ₱ {fmt(order.total_amount)} is over the available
           credit limit. {order.customer_name} has insufficient credit balance.
         </div>
       )}
@@ -226,12 +279,27 @@ export default function CreditApproval() {
         </table>
       </div>
 
+      {/* Rejection Reason (for already-rejected orders) */}
+      {order.order_status === "REJECTED" && order.rejection_reason && (
+        <>
+          <h2 className="approval-subtitle">Reason for Rejection</h2>
+          <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029", marginBottom: "1.5rem" }}>
+            {order.rejection_reason}
+          </div>
+          {order.rejected_by && (
+            <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "1.5rem" }}>
+              Rejected by: {order.rejected_by} {order.rejection_date ? `on ${order.rejection_date}` : ""}
+            </p>
+          )}
+        </>
+      )}
+
       {/* Action Buttons */}
       <div className="approval-actions">
         <button
           className="reject-btn"
           disabled={acting}
-          onClick={() => postAction("reject")}
+          onClick={handleRejectClick}
         >
           Reject Order
         </button>
@@ -247,20 +315,252 @@ export default function CreditApproval() {
           <button
             className="approve-btn"
             disabled={acting}
-            onClick={() => postAction("approve")}
+            onClick={handleApproveClick}
           >
             Approve Order
           </button>
         )}
       </div>
 
+      {/* Password Approval Modal */}
+      {showPasswordModal && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: "8px",
+            maxWidth: "500px",
+            width: "90%",
+            padding: "2rem",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            fontFamily: "'Arimo', sans-serif",
+            position: "relative",
+          }}>
+            <button
+              onClick={() => setShowPasswordModal(false)}
+              style={{
+                position: "absolute", top: "0.75rem", right: "0.75rem",
+                background: "none", border: "none", fontSize: "1.5rem",
+                cursor: "pointer", color: "#666", lineHeight: 1, padding: "0.25rem",
+              }}
+            >
+              &times;
+            </button>
+            <h3 style={{
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              marginBottom: "1.5rem",
+              textAlign: "center",
+              color: "#1E2D1A",
+            }}>
+              Please enter your password to approve ORDER {order.order_id}.
+            </h3>
+            <input
+              type="password"
+              value={approvalPassword}
+              onChange={(e) => { setApprovalPassword(e.target.value); setPasswordError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
+              placeholder="••••••••••"
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+                marginBottom: passwordError ? "0.5rem" : "1.5rem",
+              }}
+            />
+            {passwordError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{passwordError}</p>
+            )}
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  fontFamily: "'Arimo', sans-serif",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordSubmit}
+                disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#1f3d1a",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: acting ? "not-allowed" : "pointer",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  fontFamily: "'Arimo', sans-serif",
+                }}
+              >
+                {acting ? "Approving..." : "Approve"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Reject Modal */}
+      {showRejectModal && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: "8px",
+            maxWidth: "500px",
+            width: "90%",
+            padding: "2rem",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            fontFamily: "'Arimo', sans-serif",
+            position: "relative",
+          }}>
+            <button
+              onClick={() => setShowRejectModal(false)}
+              style={{
+                position: "absolute", top: "0.75rem", right: "0.75rem",
+                background: "none", border: "none", fontSize: "1.5rem",
+                cursor: "pointer", color: "#666", lineHeight: 1, padding: "0.25rem",
+              }}
+            >
+              &times;
+            </button>
+            <h3 style={{
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              marginBottom: "1.5rem",
+              textAlign: "center",
+              color: "#1E2D1A",
+            }}>
+              Please enter your password to reject ORDER {order.order_id}.
+            </h3>
+            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
+              Reason for Rejection
+            </label>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
+              placeholder="Enter reason for rejection..."
+              autoFocus
+              rows={3}
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+                fontFamily: "'Arimo', sans-serif",
+                resize: "vertical",
+                marginBottom: rejectReasonError ? "0.5rem" : "1rem",
+              }}
+            />
+            {rejectReasonError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectReasonError}</p>
+            )}
+            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={rejectPassword}
+              onChange={(e) => { setRejectPassword(e.target.value); setRejectPasswordError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleRejectPasswordSubmit()}
+              placeholder="••••••••••"
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+                marginBottom: rejectPasswordError ? "0.5rem" : "1.5rem",
+              }}
+            />
+            {rejectPasswordError && (
+              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectPasswordError}</p>
+            )}
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setShowRejectModal(false)}
+                disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  fontFamily: "'Arimo', sans-serif",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectPasswordSubmit}
+                disabled={acting}
+                style={{
+                  padding: "0.75rem 2rem",
+                  background: "#b03a2e",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: acting ? "not-allowed" : "pointer",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  fontFamily: "'Arimo', sans-serif",
+                }}
+              >
+                {acting ? "Rejecting..." : "Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Override Request Modal */}
       {showOverrideModal && (
         <div className="modal-overlay">
-          <div className="modal-card">
+          <div className="modal-card" style={{ position: "relative" }}>
+            <button
+              onClick={() => setShowOverrideModal(false)}
+              style={{
+                position: "absolute", top: "0.75rem", right: "0.75rem",
+                background: "none", border: "none", fontSize: "1.5rem",
+                cursor: "pointer", color: "#666", lineHeight: 1, padding: "0.25rem",
+              }}
+            >
+              &times;
+            </button>
             <h3 className="modal-title-warning">WARNING!</h3>
               <p className="modal-text-body">
-                <span className="text-bold">ORDER XX{order.order_id}</span> amounting to{" "}
+                <span className="text-bold">ORDER {order.order_id}</span> amounting to{" "}
                 <span className="text-bold">₱ {fmt(order.total_amount)}</span> is over the available 
                 credit limit. {order.customer_name} has{" "}
                 <span className="text-warning-bold">insufficient credit balance</span>.

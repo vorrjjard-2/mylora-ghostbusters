@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -11,7 +12,7 @@ export default function ProcessorOrderView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/op/order/${orderId}/view/`, {
+    fetch(`${API_BASE_URL}/api/op/order/${orderId}/view/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -42,14 +43,90 @@ export default function ProcessorOrderView() {
     });
 
   const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
-};
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+  };
+
+  const handleGeneratePDF = () => {
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;width:0;height:0;border:0;visibility:hidden;";
+    document.body.appendChild(iframe);
+    const rows = order.items.map(
+      (item) => `
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #e0e0e0;">${item.name}</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #e0e0e0;text-align:center;">${item.quantity}</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #e0e0e0;text-align:right;">₱ ${fmt(item.subtotal)}</td>
+        </tr>`
+    ).join("");
+    const content = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Form — ${order.order_id}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 48px; color: #111; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    p { margin: 4px 0; font-size: 14px; }
+    .section-label { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #555; margin: 20px 0 6px 0; }
+    hr { border: none; border-top: 1px solid #ccc; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 16px; }
+    thead tr { background: #f5f5f5; }
+    th { padding: 10px 16px; text-align: left; font-weight: 600; border-bottom: 2px solid #ccc; }
+    th:last-child { text-align: right; }
+    tfoot td { padding: 12px 16px; font-weight: 700; border-top: 2px solid #ccc; }
+    tfoot td:last-child { text-align: right; }
+  </style>
+</head>
+<body>
+  <h1>ORDER ID ${order.order_id}</h1>
+  <p><strong>Customer:</strong> ${order.customer_name}</p>
+  <p><strong>Phone:</strong> ${order.phone || "—"}</p>
+  <p><strong>Date Submitted:</strong> ${order.date_submitted}</p>
+  <hr/>
+  <p class="section-label">Order Items</p>
+  <table>
+    <thead>
+      <tr>
+        <th>ITEM</th>
+        <th style="text-align:center;">QUANTITY</th>
+        <th style="text-align:right;">AMOUNT</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">TOTAL</td>
+        <td>₱ ${fmt(order.total_amount)}</td>
+      </tr>
+    </tfoot>
+  </table>
+  <hr/>
+  <p class="section-label">Delivery Details</p>
+  <p><strong>Delivery Mode:</strong> ${order.delivery_mode || "—"}</p>
+  ${order.delivery_mode === "PICKUP"
+    ? `<p><strong>${order.branch_name || "—"}</strong></p><p>${order.branch_address || "—"}</p>`
+    : `<p><strong>Shipping Address:</strong> ${order.shipping_address || "—"}</p>`
+  }
+  <hr/>
+  <p class="section-label">Approved by Credit Manager</p>
+  <p><strong>Username:</strong> ${order.approved_by || "—"}</p>
+  <p><strong>Date &amp; Time:</strong> ${order.approval_date || "—"}</p>
+  <hr/>
+  <p class="section-label">Processed and Closed by Order Processor</p>
+  <p><strong>Username:</strong> ${order.processed_by || "—"}</p>
+  <p><strong>Date &amp; Time:</strong> ${order.completion_date || "—"}</p>
+</body>
+</html>`;
+    iframe.srcdoc = content;
+    iframe.onload = () => {
+      iframe.contentWindow.print();
+    };
+  };
 
 
   return (
@@ -64,7 +141,7 @@ export default function ProcessorOrderView() {
 
     <main className="view-content">
 
-      <h1 className="view-title">ORDER ID XX{order.order_id}</h1>
+      <h1 className="view-title">ORDER ID {order.order_id}</h1>
       <p className="view-date-submitted">
         <span className="meta-label">DATE SUBMITTED:</span> 
         <span className="meta-value">{formatDate(order.date_submitted)}</span>
@@ -116,33 +193,39 @@ export default function ProcessorOrderView() {
       {/* Delivery Details */}
       <h3 className="view-section-title">Delivery Details</h3>
       <div className="view-address-box">
-        {order.shipping_address && (
+        <div>Delivery Mode: {order.delivery_mode}</div>
+        {order.delivery_mode === "PICKUP" ? (
           <>
-            <div>{order.shipping_address}</div>
-            {order.delivery_mode && <div>Delivery Mode: {order.delivery_mode}</div>}
+            <div><strong>{order.branch_name || "—"}</strong></div>
+            <div>{order.branch_address || "—"}</div>
           </>
+        ) : (
+          <div>{order.shipping_address || "—"}</div>
         )}
       </div>
 
       <p className="view-approval-note">
-        Order approved {order.approval_date}.
+        Approved by Credit Manager: <strong>{order.approved_by}</strong>
         <br />
-        Approved by: {order.approved_by}
+        Date &amp; Time: {order.approval_date}
       </p>
 
       <p className="view-completion-note">
-        Order processed and closed {order.completion_date}.
+        Processed and closed by Order Processor: <strong>{order.processed_by}</strong>
         <br />
-        Processed by: {order.processed_by}
+        Date &amp; Time: {order.completion_date}
       </p>
 
-      {/* Back Button */}
+      {/* Actions */}
       <div className="view-actions">
         <button
           className="view-back-btn"
           onClick={() => navigate("/order-processor/history")}
         >
           Back
+        </button>
+        <button className="view-generate-btn" onClick={handleGeneratePDF}>
+          Generate Order Form
         </button>
       </div>
       </main>

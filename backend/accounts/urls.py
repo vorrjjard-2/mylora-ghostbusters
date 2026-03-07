@@ -1,9 +1,9 @@
 from django.urls import path
 from .views import (
-    login_view, 
-    me_view, 
-    logout_view, 
-    signup_view, 
+    login_view,
+    me_view,
+    logout_view,
+    signup_view,
     customer_dashboard,
     customer_profile,
     change_password,
@@ -13,6 +13,8 @@ from .views import (
     um_create_employee,
     um_update_employee,
     um_delete_employee,
+    branches_list,
+    um_audit_logs,
 )
 
 urlpatterns = [
@@ -31,4 +33,6 @@ urlpatterns = [
     path("api/um/employee/create/", um_create_employee),
     path("api/um/employee/<int:user_id>/update/", um_update_employee),
     path("api/um/employee/<int:user_id>/delete/", um_delete_employee),
+    path("api/branches/", branches_list),
+    path("api/um/audit-logs/", um_audit_logs),
 ]

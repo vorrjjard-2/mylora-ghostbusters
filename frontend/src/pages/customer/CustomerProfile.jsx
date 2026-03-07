@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -9,28 +10,23 @@ export default function CustomerProfile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   // Customer data
   const [customerData, setCustomerData] = useState(null);
-  
+
   // Password form
   const [passwordForm, setPasswordForm] = useState({
     current_password: "",
     new_password: "",
   });
-  
-  // Address form
-  const [addressForm, setAddressForm] = useState({
-    address1: "",
-    address2: "",
-    barangay: "",
-    city: "",
-    zipcode: "",
-  });
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
 
   useEffect(() => {
     // Fetch customer profile data
-    fetch("http://localhost:8000/api/customer/profile/", {
+    fetch(`${API_BASE_URL}/api/customer/profile/`, {
       credentials: "include",
     })
       .then((res) => {
@@ -39,20 +35,12 @@ export default function CustomerProfile() {
       })
       .then((data) => {
         setCustomerData(data);
-        // Pre-fill address form
-        setAddressForm({
-          address1: data.address1 || "",
-          address2: data.address2 || "",
-          barangay: data.barangay || "",
-          city: data.city || "",
-          zipcode: data.zipcode || "",
-        });
       })
       .catch((err) => {
         console.error(err);
         alert("Failed to load profile data");
       })
-      .finally(() => setLoading(false)); 
+      .finally(() => setLoading(false));
   }, []);
 
   const handlePasswordChange = (e) => {
@@ -60,14 +48,21 @@ export default function CustomerProfile() {
     setPasswordForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddressChange = (e) => {
-    const { name, value } = e.target;
-    setAddressForm((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSavePassword = async () => {
+    setPasswordError("");
+
     if (!passwordForm.current_password || !passwordForm.new_password) {
-      alert("Please fill in both password fields");
+      setPasswordError("Please fill in all password fields.");
+      return;
+    }
+
+    if (passwordForm.new_password.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+
+    if (passwordForm.new_password !== confirmPassword) {
+      setPasswordError("Passwords do not match.");
       return;
     }
 
@@ -75,7 +70,7 @@ export default function CustomerProfile() {
     const csrfToken = getCookie("csrftoken");
 
     try {
-      const response = await fetch("http://localhost:8000/api/customer/change-password/", {
+      const response = await fetch(`${API_BASE_URL}/api/customer/change-password/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -90,40 +85,12 @@ export default function CustomerProfile() {
         throw new Error(errorData.error || "Failed to change password");
       }
 
-      alert("Password changed successfully");
       setPasswordForm({ current_password: "", new_password: "" });
+      setConfirmPassword("");
+      setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
-      alert(err.message || "Failed to change password");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveAddress = async () => {
-    setSaving(true);
-    const csrfToken = getCookie("csrftoken");
-
-    try {
-      const response = await fetch("http://localhost:8000/api/customer/update-address/", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-        body: JSON.stringify(addressForm),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update address");
-      }
-
-      alert("Address updated successfully");
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Failed to update address");
+      setPasswordError(err.message || "Failed to change password");
     } finally {
       setSaving(false);
     }
@@ -148,7 +115,7 @@ return (
         <div className="profile-header-actions">
           <button className="profile-back-btn" onClick={() => navigate("/customer/dashboard")}>
             Back
-          </button> 
+          </button>
         </div>
       </header>
 
@@ -159,7 +126,7 @@ return (
       {/* Password Section */}
       <div className="profile-section">
         <h2 className="profile-section-title">Password</h2>
-        
+
         <div className="profile-form-group">
           <label className="profile-label">Current Password</label>
           <input
@@ -184,6 +151,21 @@ return (
           />
         </div>
 
+        <div className="profile-form-group">
+          <label className="profile-label">Confirm New Password</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="profile-input"
+            placeholder="Re-enter new password"
+          />
+        </div>
+
+        {passwordError && (
+          <p className="profile-error">{passwordError}</p>
+        )}
+
         <div className="profile-button-row">
           <button
             className="profile-save-password-btn"
@@ -198,7 +180,7 @@ return (
       {/* Customer Information Section - Read Only */}
       <div className="profile-section">
         <h2 className="profile-section-title">Customer Information</h2>
-        
+
         <div className="profile-form-group">
           <label className="profile-label">Name</label>
           <input
@@ -231,19 +213,17 @@ return (
         </div>
       </div>
 
-      {/* Address Details Section - Editable */}
+      {/* Address Details Section - Read Only */}
       <div className="profile-section">
         <h2 className="profile-section-title">Address Details</h2>
-        
+
         <div className="profile-form-group">
-          <label className="profile-label">Address 1*</label>
+          <label className="profile-label">Address 1</label>
           <input
             type="text"
-            name="address1"
-            value={addressForm.address1}
-            onChange={handleAddressChange}
-            className="profile-input"
-            placeholder="UNIT 123, ABC STREET"
+            value={customerData.address1 || ""}
+            readOnly
+            className="profile-input-readonly"
           />
         </div>
 
@@ -251,61 +231,69 @@ return (
           <label className="profile-label">Address 2</label>
           <input
             type="text"
-            name="address2"
-            value={addressForm.address2}
-            onChange={handleAddressChange}
-            className="profile-input"
-            placeholder="LANDMARK STATUE"
+            value={customerData.address2 || ""}
+            readOnly
+            className="profile-input-readonly"
           />
         </div>
 
         <div className="profile-form-row">
           <div className="profile-form-group">
-            <label className="profile-label">Barangay*</label>
+            <label className="profile-label">Province</label>
             <input
               type="text"
-              name="barangay"
-              value={addressForm.barangay}
-              onChange={handleAddressChange}
-              className="profile-input"
-              placeholder="BRGY SAN JOSE"
+              value={customerData.province || ""}
+              readOnly
+              className="profile-input-readonly"
             />
           </div>
           <div className="profile-form-group">
-            <label className="profile-label">City*</label>
+            <label className="profile-label">City / Municipality</label>
             <input
               type="text"
-              name="city"
-              value={addressForm.city}
-              onChange={handleAddressChange}
-              className="profile-input"
-              placeholder="CEBU CITY"
+              value={customerData.city || ""}
+              readOnly
+              className="profile-input-readonly"
             />
           </div>
           <div className="profile-form-group">
-            <label className="profile-label">Zip Code*</label>
+            <label className="profile-label">Barangay</label>
             <input
               type="text"
-              name="zipcode"
-              value={addressForm.zipcode}
-              onChange={handleAddressChange}
-              className="profile-input"
-              placeholder="9876"
+              value={customerData.barangay || ""}
+              readOnly
+              className="profile-input-readonly"
             />
           </div>
         </div>
-
-        <div className="profile-button-row">
-          <button
-            className="profile-save-btn"
-            onClick={handleSaveAddress}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
+        <div className="profile-form-group">
+          <label className="profile-label">Zip Code</label>
+          <input
+            type="text"
+            value={customerData.zipcode || ""}
+            readOnly
+            className="profile-input-readonly"
+          />
         </div>
       </div>
       </main>
+
+      {showSuccessModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ backgroundColor: "white", border: "1px solid #262626", borderRadius: "15px", padding: "40px", maxWidth: "500px", width: "90%", textAlign: "center", fontFamily: "'Arimo', sans-serif" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "15px" }}>Password Updated</h2>
+            <p style={{ fontSize: "16px", marginBottom: "30px", color: "#666" }}>
+              Your password has been changed successfully.
+            </p>
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              style={{ padding: "12px 40px", fontSize: "16px", fontWeight: "600", border: "none", borderRadius: "8px", backgroundColor: "#1E2D1A", color: "white", cursor: "pointer", fontFamily: "'Arimo', sans-serif" }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

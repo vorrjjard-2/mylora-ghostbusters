@@ -1,13 +1,16 @@
 import json
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+import os
+from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CreditEnrollment
+from accounts.models import log_audit
 
 
 @api_view(["POST"])
+@authentication_classes([])
 @parser_classes([MultiPartParser, FormParser])
 def create_application(request):
     try:
@@ -69,27 +72,36 @@ def create_application(request):
         )
 
     # Create application
-    application = CreditEnrollment.objects.create(
-        email=email,
+    try:
+        application = CreditEnrollment.objects.create(
+            email=email,
 
-        first_name=step2["firstName"],
-        last_name=step2["lastName"],
-        phone_number=phone_number,
+            first_name=step2["firstName"],
+            last_name=step2["lastName"],
+            phone_number=phone_number,
 
-        address1=step2["address1"],
-        address2=step2.get("address2", ""),
-        barangay=step2["barangay"],
-        city=step2["city"],
-        zipcode=step2["zipCode"],
-        default_branch=step2["branch"],
+            address1=step2["address1"],
+            address2=step2.get("address2", ""),
+            province=step2.get("province", ""),
+            barangay=step2["barangay"],
+            city=step2["city"],
+            zipcode=step2["zipCode"],
+            branch_id=step2["branch"],
 
-        credit_amt_request=step2["creditAmount"],
-        credit_term_request=step2["creditTerm"],
+            credit_amt_request=step2["creditAmount"],
+            credit_term_request=step2["creditTerm"],
 
-        doc1_file=request.FILES.get("doc1"),
-        doc2_file=request.FILES.get("doc2"),
-        gov_id=request.FILES.get("gov_id"),
-    )
+            doc1_file=request.FILES.get("doc1"),
+            doc2_file=request.FILES.get("doc2"),
+            gov_id=request.FILES.get("gov_id"),
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     return Response(
         {"application_id": str(application.application_id)},
@@ -98,6 +110,7 @@ def create_application(request):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 def check_duplicate(request):
     """Check if email or phone number already exists"""
     email = request.data.get("email")
@@ -159,6 +172,7 @@ def enrollment_detail(request, application_id):
         "phone_number": app.phone_number,
         "address1": app.address1,
         "address2": app.address2,
+        "province": app.province,
         "barangay": app.barangay,
         "city": app.city,
         "zipcode": app.zipcode,
@@ -174,10 +188,9 @@ def enrollment_detail(request, application_id):
 @permission_classes([IsAuthenticated])
 def approve_enrollment(request, application_id):
     from django.contrib.auth import authenticate
-    from django.core.mail import send_mail
     from django.utils import timezone
     import secrets
-    
+
     # Verify password
     password = request.data.get("password")
     if not password:
@@ -202,41 +215,39 @@ def approve_enrollment(request, application_id):
     app.approved_by = request.user
     
     # Generate secure activation token
-    app.activation_token = secrets.token_urlsafe(32)
+    app.activation_token = secrets.token_urlsafe(15)
     app.activation_token_created = timezone.now()
     app.save()
     
     # Send activation email
-    activation_link = f"http://localhost:5173/activate/{app.activation_token}"
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+    activation_link = f"{frontend_url}/activate/{app.activation_token}"
     
     try:
-        send_mail(
+        from utils.email import send_email
+        send_email(
+            to=app.email,
             subject="Your Mylora Credit Account Has Been Approved!",
-            message=f"""
-Hello {app.first_name},
-
-Congratulations! Your credit account application has been approved.
-
-To complete your account setup, please click the link below to create your password:
-
-{activation_link}
-
-This link will expire in 24 hours.
-
-If you did not apply for a credit account, please ignore this email.
-
-Best regards,
-Mylora Web Credit System
-            """,
-            from_email="noreply@mylora.com",
-            recipient_list=[app.email],
-            fail_silently=False,
+            message=f"Hello {app.first_name},\n\n"
+                    f"Congratulations! Your credit account application has been approved.\n\n"
+                    f"To complete your account setup, please click the link below to create your password:\n\n"
+                    f"{activation_link}\n\n"
+                    f"This link will expire in 24 hours.\n\n"
+                    f"If you did not apply for a credit account, please ignore this email.\n\n"
+                    f"Best regards,\nMylora Web Credit System",
         )
+        email_sent = True
+        email_error = None
     except Exception as e:
-        # Log the error but don't fail the approval
+        email_sent = False
+        email_error = str(e)
         print(f"Email sending failed: {e}")
-    
-    return Response({"status": "approved", "email_sent": True})
+
+    log_audit(user=request.user, action="APPROVE_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email}, request=request)
+    response_data = {"status": "approved", "email_sent": email_sent, "activation_link": activation_link}
+    if email_error:
+        response_data["email_error"] = email_error
+    return Response(response_data)
 
 
 @api_view(["POST"])
@@ -262,12 +273,48 @@ def reject_enrollment(request, application_id):
             status=status.HTTP_403_FORBIDDEN
         )
     
+    # Validate rejection reason
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     # Proceed with rejection
     app = CreditEnrollment.objects.get(application_id=application_id)
     app.enrollment_status = "REJECTED"
     app.approved_by = request.user
+    app.rejection_reason = rejection_reason
     app.save()
-    return Response({"status": "rejected"})
+
+    # Send rejection email
+    from utils.email import send_email
+    applicant_name = f"{app.first_name} {app.last_name}".strip() or "Applicant"
+    try:
+        send_email(
+            to=app.email,
+            subject="Your Credit Account Application Has Been Rejected",
+            message=(
+                f"Dear {applicant_name},\n\n"
+                f"We regret to inform you that your credit account application has been rejected.\n\n"
+                f"Reason for rejection:\n{rejection_reason}\n\n"
+                f"If you have any questions, please contact our support team.\n\n"
+                f"Regards,\nMylora Web Credit System"
+            ),
+        )
+        email_sent = True
+        email_error = None
+    except Exception as e:
+        email_sent = False
+        email_error = str(e)
+        print(f"Rejection email sending failed: {e}")
+
+    log_audit(user=request.user, action="REJECT_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email, "rejection_reason": rejection_reason}, request=request)
+    response_data = {"status": "rejected", "email_sent": email_sent}
+    if email_error:
+        response_data["email_error"] = email_error
+    return Response(response_data)
 
 
 @api_view(["GET"])
@@ -282,23 +329,30 @@ def verify_activation_token(request, token):
             enrollment_status="APPROVED",
             account_activated=False
         )
-        
+
         # Check if token is expired (24 hours)
         if app.activation_token_created:
             expiry = app.activation_token_created + timedelta(hours=24)
-            if timezone.now() > expiry:
+            now = timezone.now()
+            print(f"[DEBUG] Token created: {app.activation_token_created}, Expiry: {expiry}, Now: {now}")
+            if now > expiry:
                 return Response(
                     {"error": "Activation link has expired"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
+
         return Response({
             "valid": True,
             "email": app.email,
             "name": f"{app.first_name} {app.last_name}"
         })
-        
+
     except CreditEnrollment.DoesNotExist:
+        # Debug: check what exists
+        all_approved = CreditEnrollment.objects.filter(enrollment_status="APPROVED", account_activated=False)
+        print(f"[DEBUG] Token lookup failed for: {token[:20]}...")
+        for a in all_approved:
+            print(f"[DEBUG] Approved app: {a.application_id}, token={a.activation_token[:20] if a.activation_token else 'None'}...")
         return Response(
             {"error": "Invalid or expired activation link"},
             status=status.HTTP_400_BAD_REQUEST
@@ -306,12 +360,13 @@ def verify_activation_token(request, token):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 def activate_account(request, token):
     """Create user account with password and set up customer profile"""
     from django.contrib.auth.models import User, Group
     from django.utils import timezone
     from datetime import timedelta
-    from accounts.models import Customer, Branch, CreditAccount
+    from accounts.models import Customer, CreditAccount
     from django.db import transaction
     
     password = request.data.get("password")
@@ -358,11 +413,8 @@ def activate_account(request, token):
                 application=app
             )
             
-            # 4. Get or create Branch
-            branch, created = Branch.objects.get_or_create(
-                name=app.default_branch,
-                defaults={'address': 'To be updated'}
-            )
+            # 4. Get Branch from FK
+            branch = app.branch
             
             # 5. Create CreditAccount with approved credit info
             credit_account = CreditAccount.objects.create(

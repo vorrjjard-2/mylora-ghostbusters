@@ -3,6 +3,7 @@ from .views import (
     create_order, 
     customer_orders, 
     order_detail,
+    cm_all_orders,
     cm_pending_orders,
     cm_order_detail,
     cm_approve_order,
@@ -27,6 +28,7 @@ from .views import (
     um_delete_customer,
     um_customer_orders,
     um_all_orders,
+    um_order_view,
 )
 
 urlpatterns = [
@@ -35,6 +37,7 @@ urlpatterns = [
     path('api/orders/<int:order_id>/', order_detail),
     
     # Credit Manager endpoints
+    path('api/cm/all-orders/', cm_all_orders),
     path('api/cm/pending-orders/', cm_pending_orders),
     path('api/cm/order/<int:order_id>/', cm_order_detail),
     path('api/cm/order/<int:order_id>/approve/', cm_approve_order),
@@ -56,6 +59,7 @@ urlpatterns = [
     path('api/um/customer/<int:customer_id>/delete/', um_delete_customer),
     path('api/um/customer/<int:customer_id>/orders/', um_customer_orders),
     path('api/um/all-orders/', um_all_orders),
+    path('api/um/order/<int:order_id>/view/', um_order_view),
     
     # Order Processor endpoints
     path('api/op/pending-orders/', op_pending_orders),

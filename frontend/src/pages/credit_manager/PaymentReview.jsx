@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
@@ -13,11 +14,14 @@ export default function PaymentReview() {
   const [processing, setProcessing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [password, setPassword] = useState("");
   const [pendingAction, setPendingAction] = useState(null); // 'approve' or 'reject'
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReasonError, setRejectReasonError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/cm/payment/${paymentId}/`, { 
+    fetch(`${API_BASE_URL}/api/cm/payment/${paymentId}/`, { 
       credentials: "include",
     })
       .then((res) => {
@@ -37,6 +41,8 @@ export default function PaymentReview() {
     setPendingAction(action);
     setShowPasswordModal(true);
     setPassword("");
+    setRejectReason("");
+    setRejectReasonError("");
   };
 
   const handleConfirmAction = async () => {
@@ -45,12 +51,25 @@ export default function PaymentReview() {
       return;
     }
 
+    if (pendingAction === "reject") {
+      if (rejectReason.trim().split(/\s+/).length < 5) {
+        setRejectReasonError("Please provide at least 5 words for the rejection reason.");
+        return;
+      }
+      setRejectReasonError("");
+    }
+
     setProcessing(true);
     const csrfToken = getCookie("csrftoken");
 
+    const bodyData = { password };
+    if (pendingAction === "reject") {
+      bodyData.rejection_reason = rejectReason;
+    }
+
     try {
       const response = await fetch(
-        `http://localhost:8000/api/cm/payment/${paymentId}/${pendingAction}/`,
+        `${API_BASE_URL}/api/cm/payment/${paymentId}/${pendingAction}/`,
         {
           method: "POST",
           credentials: "include",
@@ -58,7 +77,7 @@ export default function PaymentReview() {
             "Content-Type": "application/json",
             "X-CSRFToken": csrfToken,
           },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify(bodyData),
         }
       );
 
@@ -71,7 +90,6 @@ export default function PaymentReview() {
       if (pendingAction === "approve") {
         setShowSuccessModal(true);
       } else {
-        alert("Payment rejected");
         navigate("/credit-manager/dashboard");
       }
     } catch (err) {
@@ -193,9 +211,9 @@ export default function PaymentReview() {
         <label className="payment-label">Proof of Payment</label>
         <div className="file-display">
           {payment.proof_payment_url ? (
-            <a href={payment.proof_payment_url} target="_blank" className="file-link">
+            <span className="file-link" onClick={() => setShowImageModal(true)} style={{ cursor: "pointer" }}>
               View Proof of Payment
-            </a>
+            </span>
           ) : "No file uploaded"}
         </div>
       </div>
@@ -205,15 +223,38 @@ export default function PaymentReview() {
         <button className="payment-cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
           Cancel
         </button>
-        <button className="payment-confirm-btn" onClick={() => initiateAction("approve")}>
-          Confirm Payment
-        </button>
+        {payment.payment_status === "PENDING" && (
+          <>
+            <button className="payment-cancel-btn" onClick={() => initiateAction("reject")}>
+              Reject Payment
+            </button>
+            <button className="payment-confirm-btn" onClick={() => initiateAction("approve")}>
+              Confirm Payment
+            </button>
+          </>
+        )}
       </div>
 
       {/* Modals remain structurally similar but use CSS classes */}
       {showPasswordModal && (
         <div className="modal-overlay">
           <div className="payment-modal">
+            {pendingAction === "reject" && (
+              <>
+                <h3 className="section-title">Reason for Rejection</h3>
+                <textarea
+                  className="password-input"
+                  rows={4}
+                  value={rejectReason}
+                  onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
+                  placeholder="Enter reason for rejection..."
+                  style={{ resize: "vertical", fontFamily: "inherit" }}
+                />
+                {rejectReasonError && (
+                  <p style={{ color: "#b03a2e", fontSize: "0.85rem", marginTop: "4px" }}>{rejectReasonError}</p>
+                )}
+              </>
+            )}
             <h3 className="section-title">Please enter user password to proceed.</h3>
             <input
               type="password"
@@ -224,8 +265,28 @@ export default function PaymentReview() {
             />
             <div className="payment-button-row">
               <button className="payment-cancel-btn" onClick={handleCancelPasswordModal}>Cancel</button>
-              <button className="payment-confirm-btn" onClick={handleConfirmAction}>Confirm Payment</button>
+              <button className="payment-confirm-btn" onClick={handleConfirmAction}>
+                {pendingAction === "reject" ? "Reject Payment" : "Confirm Payment"}
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showImageModal && (
+        <div className="modal-overlay" onClick={() => setShowImageModal(false)}>
+          <div style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowImageModal(false)}
+              style={{ position: "absolute", top: "-12px", right: "-12px", background: "#1f3d1a", color: "#fff", border: "none", borderRadius: "50%", width: "28px", height: "28px", fontSize: "16px", cursor: "pointer", lineHeight: 1 }}
+            >
+              ×
+            </button>
+            <img
+              src={payment.proof_payment_url}
+              alt="Proof of Payment"
+              style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: "8px", display: "block" }}
+            />
           </div>
         </div>
       )}

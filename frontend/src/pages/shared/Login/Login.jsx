@@ -1,6 +1,7 @@
+import { API_BASE_URL } from "../../../utils/api";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getCookie } from "../../../utils/csrf";
+import { getCookie, setCsrfToken } from "../../../utils/csrf";
 import "./Login.css";
 import logo from "../../../assets/mylora-logo.png";
 
@@ -19,7 +20,7 @@ export default function Login() {
 
     try {
       // 1️⃣ Login
-      const res = await fetch("http://localhost:8000/api/login/", {
+      const res = await fetch(`${API_BASE_URL}/api/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,8 +38,13 @@ export default function Login() {
         throw new Error(data.error || "Login failed");
       }
 
+      const loginData = await res.json();
+      if (loginData.csrfToken) {
+        setCsrfToken(loginData.csrfToken);
+      }
+
       // 2️⃣ Get logged-in user + roles
-      const meRes = await fetch("http://localhost:8000/api/me/", {
+      const meRes = await fetch(`${API_BASE_URL}/api/me/`, {
         credentials: "include",
       });
 
@@ -47,6 +53,9 @@ export default function Login() {
       }
 
       const me = await meRes.json();
+      if (me.csrfToken) {
+        setCsrfToken(me.csrfToken);
+      }
 
       if (me.roles.includes("upper_management")) {
         navigate("/internal/dashboard");
@@ -160,9 +169,9 @@ export default function Login() {
              <button type="submit" className="btn-submit" disabled={loading}>
                {loading ? "Logging in..." : "Login"}
              </button>
-             
+
              <Link to="/apply/step-1" className="enroll-link">
-               Enrol for a credit account
+               Enroll for a credit account
              </Link>
            </div>
          </form>

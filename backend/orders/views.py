@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 from datetime import datetime
 
 from .models import Order, OrderItem, OrderApproval
-from accounts.models import Customer, CreditAccount
+from accounts.models import Customer, CreditAccount, log_audit
 from products.models import Product
 from payments.models import PaymentRequest
 
@@ -40,7 +40,8 @@ def create_order(request):
             total_amount += quantity * unit_price
         
         # Allow orders that exceed credit limit - they will require override approval
-        exceeds_credit = total_amount > credit_account.available_credit
+        available = credit_account.credit_limit - credit_account.outstanding_bal
+        exceeds_credit = total_amount > available
         
         # Create order and items in transaction
         with transaction.atomic():
@@ -64,9 +65,6 @@ def create_order(request):
                     unit_price=Decimal(str(item_data["unit_price"]))
                 )
             
-            # Reduce available credit (reserve it)
-            # If order exceeds limit, available_credit may go negative
-            credit_account.available_credit -= total_amount
             credit_account.save()
         
         return Response({
@@ -125,6 +123,16 @@ def order_detail(request, order_id):
                 'subtotal': str(item.subtotal),
             })
 
+        # Check for rejection info
+        rejection_reason = ""
+        rejected_by = ""
+        rejection_date = ""
+        rejection = OrderApproval.objects.filter(order=order, approval_status="REJECTED").first()
+        if rejection:
+            rejection_reason = rejection.notes or ""
+            rejected_by = rejection.user.username if rejection.user else ""
+            rejection_date = rejection.approval_date.strftime('%B %d, %Y at %I:%M %p') if rejection.approval_date else ""
+
         return Response({
             'order_id': order.order_id,
             'date_submitted': order.date_ordered.strftime('%B %d, %Y'),
@@ -135,6 +143,9 @@ def order_detail(request, order_id):
             'order_status': order.order_status,
             'total_amount': str(order.total_amount),
             'items': items_data,
+            'rejection_reason': rejection_reason,
+            'rejected_by': rejected_by,
+            'rejection_date': rejection_date,
         })
 
     except Order.DoesNotExist:
@@ -194,6 +205,32 @@ def customer_orders(request):
 def _require_role(request, role_name):
     """Return True if the user has the given group."""
     return request.user.groups.filter(name=role_name).exists()
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cm_all_orders(request):
+    """All orders (any status) for the credit manager View All tab."""
+    if not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    orders = Order.objects.select_related(
+        "account__customer__user",
+        "account__customer__application",
+    ).order_by("-date_ordered")
+
+    data = []
+    for order in orders:
+        customer = order.account.customer
+        data.append({
+            "order_id": order.order_id,
+            "amount": str(order.total_amount),
+            "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "status": order.order_status,
+        })
+
+    return Response(data)
 
 
 @api_view(["GET"])
@@ -266,6 +303,16 @@ def cm_order_detail(request, order_id):
         for item in order.items.select_related("product").all()
     ]
 
+    # Check for rejection info
+    rejection_reason = ""
+    rejected_by = ""
+    rejection_date = ""
+    rejection = OrderApproval.objects.filter(order=order, approval_status="REJECTED").first()
+    if rejection:
+        rejection_reason = rejection.notes or ""
+        rejected_by = rejection.user.username if rejection.user else ""
+        rejection_date = rejection.approval_date.strftime("%B %d, %Y at %I:%M %p") if rejection.approval_date else ""
+
     return Response({
         "order_id": order.order_id,
         "order_status": order.order_status,
@@ -275,9 +322,12 @@ def cm_order_detail(request, order_id):
         "email": app.email if app else customer.user.email,
         "items": items_data,
         "total_amount": str(order.total_amount),
-        "available_credit": str(credit.available_credit),
+        "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
+        "rejection_reason": rejection_reason,
+        "rejected_by": rejected_by,
+        "rejection_date": rejection_date,
     })
 
 
@@ -288,8 +338,14 @@ def cm_approve_order(request, order_id):
     if not _require_role(request, "credit_manager"):
         return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
+    password = request.data.get("password")
+    if not password:
+        return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.check_password(password):
+        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+
     try:
-        order = Order.objects.select_related("account").get(order_id=order_id)
+        order = Order.objects.select_related("account__customer__user").get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -300,12 +356,14 @@ def cm_approve_order(request, order_id):
         )
 
     from django.utils import timezone
+    from django.core.mail import send_mail
 
     with transaction.atomic():
         order.order_status = "APPROVED"
         order.save()
 
         credit = order.account
+        credit.available_credit -= order.total_amount
         credit.outstanding_bal += order.total_amount
         credit.save()
 
@@ -317,11 +375,40 @@ def cm_approve_order(request, order_id):
         )
 
     credit.refresh_from_db()
+
+    # Send order approval email to customer
+    customer_user = order.account.customer.user
+    try:
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Approved!",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been approved.
+
+Your updated credit details:
+- Available Credit: ₱{credit.available_credit:,.2f}
+- Credit Limit: ₱{credit.credit_limit:,.2f}
+- Outstanding Balance: ₱{credit.outstanding_bal:,.2f}
+
+Thank you for your purchase!
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
+    log_audit(user=request.user, action="APPROVE_ORDER", details={"order_id": order_id}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
         "order_status": order.order_status,
-        "available_credit": str(credit.available_credit),
+        "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
     })
@@ -363,6 +450,7 @@ def cm_request_override(request, order_id):
         override_status="PENDING",
     )
 
+    log_audit(user=request.user, action="REQUEST_OVERRIDE", details={"order_id": order_id, "reason": reason}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -377,8 +465,21 @@ def cm_reject_order(request, order_id):
     if not _require_role(request, "credit_manager"):
         return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
+    password = request.data.get("password")
+    if not password:
+        return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.check_password(password):
+        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     try:
-        order = Order.objects.select_related("account").get(order_id=order_id)
+        order = Order.objects.select_related("account__customer__user").get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -389,23 +490,46 @@ def cm_reject_order(request, order_id):
         )
 
     from django.utils import timezone
+    from django.core.mail import send_mail
 
     with transaction.atomic():
         order.order_status = "REJECTED"
         order.save()
-
-        # Return the reserved credit to the customer
-        credit = order.account
-        credit.available_credit += order.total_amount
-        credit.save()
 
         OrderApproval.objects.create(
             user=request.user,
             order=order,
             approval_status="REJECTED",
             approval_date=timezone.now(),
+            notes=rejection_reason,
         )
 
+    # Send rejection email to customer
+    customer_user = order.account.customer.user
+    try:
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Rejected",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+We regret to inform you that your order (Order ID: {order.order_id}) amounting to \u20B1{order.total_amount:,.2f} has been rejected.
+
+Reason for rejection:
+{rejection_reason}
+
+If you have any questions, please contact your branch for further assistance.
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
+    log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id, "rejection_reason": rejection_reason}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -462,6 +586,7 @@ def um_pending_orders(request):
         customer = order.account.customer
         data.append({
             "order_id": order.order_id,
+            "customer_id": customer.id,
             "customer_name": customer.user.get_full_name() or customer.user.username,
             "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
             "status": order.order_status,
@@ -512,7 +637,7 @@ def um_override_detail(request, override_id):
         "order_date_submitted": order.date_ordered.strftime("%B %d, %Y"),
         "items": items_data,
         "total_amount": str(order.total_amount),
-        "available_credit": str(credit.available_credit),
+        "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
         "reason": override_req.reason,
@@ -567,8 +692,9 @@ def um_approve_override(request, override_id):
         order.order_status = "APPROVED"
         order.save()
 
-        # Move amount from reserved to outstanding balance
+        # Deduct available credit and move to outstanding balance
         credit = order.account
+        credit.available_credit -= order.total_amount
         credit.outstanding_bal += order.total_amount
         credit.save()
 
@@ -580,6 +706,40 @@ def um_approve_override(request, override_id):
             approval_date=timezone.now(),
         )
 
+    credit.refresh_from_db()
+
+    # Send order approval email to customer
+    customer_user = order.account.customer.user
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Approved!",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been approved via management override.
+
+Override reason:
+{override_req.reason}
+
+Your updated credit details:
+- Available Credit: ₱{credit.available_credit:,.2f}
+- Credit Limit: ₱{credit.credit_limit:,.2f}
+- Outstanding Balance: ₱{credit.outstanding_bal:,.2f}
+
+Thank you for your purchase!
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
+    log_audit(user=request.user, action="APPROVE_OVERRIDE", details={"override_id": override_id, "order_id": order.order_id, "approved_by": request.user.username}, request=request)
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -608,11 +768,18 @@ def um_reject_override(request, override_id):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
+    rejection_reason = request.data.get("rejection_reason", "").strip()
+    if len(rejection_reason.split()) < 5:
+        return Response(
+            {"error": "Please provide at least 5 words for the rejection reason."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     from .models import OverrideRequest
     from django.utils import timezone
-    
+
     try:
-        override_req = OverrideRequest.objects.select_related("order__account").get(override_id=override_id)
+        override_req = OverrideRequest.objects.select_related("order__account__customer__user").get(override_id=override_id)
     except OverrideRequest.DoesNotExist:
         return Response({"error": "Override request not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -629,16 +796,47 @@ def um_reject_override(request, override_id):
         override_req.override_date = timezone.now()
         override_req.save()
 
-        # Reject the order and return reserved credit
+        # Reject the order
         order = override_req.order
         order.order_status = "REJECTED"
         order.save()
 
-        # Return the reserved credit
-        credit = order.account
-        credit.available_credit += order.total_amount
-        credit.save()
+        # Record the rejection
+        OrderApproval.objects.create(
+            user=request.user,
+            order=order,
+            approval_status="REJECTED",
+            approval_date=timezone.now(),
+            notes=rejection_reason,
+        )
 
+    # Send order rejection email to customer
+    customer_user = order.account.customer.user
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            subject=f"Your Order {order.order_id} Has Been Rejected",
+            message=f"""
+Hello {customer_user.get_full_name()},
+
+We regret to inform you that your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been rejected.
+
+Reason for rejection:
+{rejection_reason}
+
+If you have any questions, please contact your branch for further assistance.
+
+Best regards,
+Mylora Web Credit System
+            """,
+            from_email="noreply@mylora.com",
+            recipient_list=[customer_user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Email sending failed: {e}")
+
+    log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id, "rejection_reason": rejection_reason, "rejected_by": request.user.username}, request=request)
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -835,6 +1033,7 @@ def cm_adjust_customer_balance(request, customer_id):
         credit.available_credit = new_available
         credit.save()
 
+    log_audit(user=request.user, action="ADJUST_BALANCE", details={"customer_id": customer_id, "amount": str(amount_decimal)}, request=request)
     # Return updated customer data
     app = customer.application
     return Response({
@@ -890,6 +1089,7 @@ def op_pending_orders(request):
             "customer_name": customer.user.get_full_name() or customer.user.username,
             "order_status": order.order_status,
             "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
+            "total_amount": str(order.total_amount),
         })
 
     return Response(data)
@@ -905,7 +1105,8 @@ def op_order_detail(request, order_id):
     try:
         order = Order.objects.select_related(
             "account__customer__user",
-            "account__customer__application"
+            "account__customer__application",
+            "branch"
         ).get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -940,7 +1141,9 @@ def op_order_detail(request, order_id):
         "total_amount": str(order.total_amount),
         "shipping_address": order.shipping_address,
         "delivery_mode": order.delivery_mode,
-        "approval_date": approval.approval_date.strftime("%B %d, %Y") if approval else "",
+        "branch_name": order.branch.name if order.branch else "",
+        "branch_address": order.branch.address if order.branch else "",
+        "approval_date": approval.approval_date.strftime("%B %d, %Y at %I:%M %p") if approval else "",
         "approved_by": approval.user.username if approval else "",
     })
 
@@ -990,7 +1193,7 @@ def op_complete_order(request, order_id):
 
     with transaction.atomic():
         # Create completion record
-        OrderCompletion.objects.create(
+        completion = OrderCompletion.objects.create(
             order=order,
             user=request.user,
             completion_status="COMPLETED",
@@ -1001,10 +1204,13 @@ def op_complete_order(request, order_id):
         order.order_status = "COMPLETED"
         order.save()
 
+    log_audit(user=request.user, action="COMPLETE_ORDER", details={"order_id": order_id}, request=request)
     return Response({
         "success": True,
         "order_id": order.order_id,
         "message": "Order marked as completed successfully",
+        "processed_by": request.user.username,
+        "completion_date": completion.completion_date.strftime("%B %d, %Y at %I:%M %p") if completion.completion_date else "",
     })
 
 
@@ -1034,7 +1240,10 @@ def op_completed_orders(request):
         data.append({
             "order_id": order.order_id,
             "customer_name": customer.user.get_full_name() or customer.user.username,
+            "order_status": "COMPLETED",
+            "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
             "completion_date": completion.completion_date.strftime("%B %d, %Y"),
+            "total_amount": str(order.total_amount),
         })
 
     return Response(data)
@@ -1052,7 +1261,8 @@ def op_order_view(request, order_id):
     try:
         order = Order.objects.select_related(
             "account__customer__user",
-            "account__customer__application"
+            "account__customer__application",
+            "branch"
         ).get(order_id=order_id)
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -1090,10 +1300,75 @@ def op_order_view(request, order_id):
         "total_amount": str(order.total_amount),
         "shipping_address": order.shipping_address,
         "delivery_mode": order.delivery_mode,
-        "approval_date": approval.approval_date.strftime("%B %d, %Y") if approval else "",
+        "branch_name": order.branch.name if order.branch else "",
+        "branch_address": order.branch.address if order.branch else "",
+        "approval_date": approval.approval_date.strftime("%B %d, %Y at %I:%M %p") if approval else "",
         "approved_by": approval.user.username if approval else "",
-        "completion_date": completion.completion_date.strftime("%B %d, %Y"),
+        "completion_date": completion.completion_date.strftime("%B %d, %Y at %I:%M %p"),
         "processed_by": completion.user.username,
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_order_view(request, order_id):
+    """View order details for upper management (any status)"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import OrderCompletion
+
+    try:
+        order = Order.objects.select_related(
+            "account__customer__user",
+            "account__customer__application",
+            "branch"
+        ).get(order_id=order_id)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    customer = order.account.customer
+    app = customer.application
+
+    items_data = [
+        {
+            "name": item.product.name,
+            "quantity": f'{item.quantity:.10g}',
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("product").all()
+    ]
+
+    approval = OrderApproval.objects.filter(order=order, approval_status="APPROVED").first()
+    rejection = OrderApproval.objects.filter(order=order, approval_status="REJECTED").first()
+
+    try:
+        completion = OrderCompletion.objects.select_related("user").get(order=order)
+        processed_by = completion.user.username
+        completion_date = completion.completion_date.strftime("%B %d, %Y at %I:%M %p") if completion.completion_date else ""
+    except OrderCompletion.DoesNotExist:
+        processed_by = ""
+        completion_date = ""
+
+    return Response({
+        "order_id": order.order_id,
+        "customer_name": customer.user.get_full_name() or customer.user.username,
+        "phone": app.phone_number if app else "",
+        "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
+        "items": items_data,
+        "total_amount": str(order.total_amount),
+        "shipping_address": order.shipping_address,
+        "delivery_mode": order.delivery_mode,
+        "branch_name": order.branch.name if order.branch else "",
+        "branch_address": order.branch.address if order.branch else "",
+        "approval_date": approval.approval_date.strftime("%B %d, %Y at %I:%M %p") if approval else "",
+        "approved_by": approval.user.username if approval else "",
+        "completion_date": completion_date,
+        "processed_by": processed_by,
+        "order_status": order.order_status,
+        "rejection_reason": rejection.notes if rejection else "",
+        "rejected_by": rejection.user.username if rejection and rejection.user else "",
+        "rejection_date": rejection.approval_date.strftime("%B %d, %Y at %I:%M %p") if rejection and rejection.approval_date else "",
     })
 
 
@@ -1240,6 +1515,7 @@ def um_update_customer_balance(request, customer_id):
         credit.available_credit += amount
         credit.save()
 
+    log_audit(user=request.user, action="UPDATE_BALANCE", details={"customer_id": customer_id, "amount": str(amount)}, request=request)
     # Return updated customer data
     app = customer.application
     return Response({
@@ -1295,13 +1571,21 @@ def um_delete_customer(request, customer_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    with transaction.atomic():
-        user = customer.user
-        # Delete customer (cascade will handle related records)
-        customer.delete()
-        # Delete user account
-        user.delete()
+    customer_name = customer.user.get_full_name() or customer.user.username
+    try:
+        with transaction.atomic():
+            user = customer.user
+            # Delete customer (cascade will handle related records)
+            customer.delete()
+            # Delete user account
+            user.delete()
+    except Exception:
+        return Response(
+            {"error": "Cannot delete customer with existing orders. Remove their orders first."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
+    log_audit(user=request.user, action="DELETE_CUSTOMER", details={"customer_id": customer_id, "customer_name": customer_name}, request=request)
     return Response({"success": True, "message": "Customer deleted successfully"})
 
 
@@ -1354,6 +1638,7 @@ def um_all_orders(request):
         customer = order.account.customer
         data.append({
             "order_id": order.order_id,
+            "customer_id": customer.id,
             "amount": str(order.total_amount),
             "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
             "ordered_by": customer.user.get_full_name() or customer.user.username,
