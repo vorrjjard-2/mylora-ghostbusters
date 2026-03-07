@@ -1,15 +1,9 @@
 import { API_BASE_URL } from "../../utils/api";
+import { getCookie } from "../../utils/csrf";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
 import "./CreditApproval.css";
-
-
-const getCookie = (name) => {
-  const v = `; ${document.cookie}`;
-  const parts = v.split(`; ${name}=`);
-  return parts.length === 2 ? parts.pop().split(";").shift() : "";
-};
 
 export default function CreditApproval() {
   const { orderId } = useParams();

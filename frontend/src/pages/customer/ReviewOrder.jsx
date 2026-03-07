@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../utils/api";
+import { getCsrfToken } from "../../utils/csrf";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -51,13 +52,6 @@ export default function ReviewOrder() {
   const handleSubmit = async () => {
     setSubmitting(true);
 
-    // Get CSRF token from cookie
-    const getCookie = (name) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-    };
-
     // Build shipping address from delivery details
     let shippingAddress = "For Pickup";
     if (deliveryDetails.deliveryMode === "DELIVERY") {
@@ -76,7 +70,7 @@ export default function ReviewOrder() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
+          "X-CSRFToken": getCsrfToken(),
         },
         credentials: "include",
         body: JSON.stringify({
