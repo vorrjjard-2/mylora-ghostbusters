@@ -188,10 +188,9 @@ def enrollment_detail(request, application_id):
 @permission_classes([IsAuthenticated])
 def approve_enrollment(request, application_id):
     from django.contrib.auth import authenticate
-    from django.core.mail import send_mail
     from django.utils import timezone
     import secrets
-    
+
     # Verify password
     password = request.data.get("password")
     if not password:
@@ -225,27 +224,17 @@ def approve_enrollment(request, application_id):
     activation_link = f"{frontend_url}/activate/{app.activation_token}"
     
     try:
-        send_mail(
+        from utils.email import send_email
+        send_email(
+            to=app.email,
             subject="Your Mylora Credit Account Has Been Approved!",
-            message=f"""
-Hello {app.first_name},
-
-Congratulations! Your credit account application has been approved.
-
-To complete your account setup, please click the link below to create your password:
-
-{activation_link}
-
-This link will expire in 24 hours.
-
-If you did not apply for a credit account, please ignore this email.
-
-Best regards,
-Mylora Web Credit System
-            """,
-            from_email=None,
-            recipient_list=[app.email],
-            fail_silently=False,
+            message=f"Hello {app.first_name},\n\n"
+                    f"Congratulations! Your credit account application has been approved.\n\n"
+                    f"To complete your account setup, please click the link below to create your password:\n\n"
+                    f"{activation_link}\n\n"
+                    f"This link will expire in 24 hours.\n\n"
+                    f"If you did not apply for a credit account, please ignore this email.\n\n"
+                    f"Best regards,\nMylora Web Credit System",
         )
         email_sent = True
         email_error = None
@@ -300,10 +289,11 @@ def reject_enrollment(request, application_id):
     app.save()
 
     # Send rejection email
-    from django.core.mail import send_mail
+    from utils.email import send_email
     applicant_name = f"{app.first_name} {app.last_name}".strip() or "Applicant"
     try:
-        send_mail(
+        send_email(
+            to=app.email,
             subject="Your Credit Account Application Has Been Rejected",
             message=(
                 f"Dear {applicant_name},\n\n"
@@ -312,9 +302,6 @@ def reject_enrollment(request, application_id):
                 f"If you have any questions, please contact our support team.\n\n"
                 f"Regards,\nMylora Web Credit System"
             ),
-            from_email=None,
-            recipient_list=[app.email],
-            fail_silently=False,
         )
         email_sent = True
         email_error = None
