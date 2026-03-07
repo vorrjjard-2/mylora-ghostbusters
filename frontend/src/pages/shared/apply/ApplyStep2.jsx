@@ -142,9 +142,12 @@ export default function ApplyStep2() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Submission failed");
-
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || "Submission failed");
+      }
+
       setApplicationId(data.application_id);
       setShowModal(true);
       localStorage.removeItem("application_step_1");
