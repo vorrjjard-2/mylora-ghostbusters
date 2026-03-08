@@ -1088,10 +1088,14 @@ def op_pending_orders(request):
 
     data = []
     for order in approved_orders:
-        customer = order.account.customer
+        if order.account:
+            customer = order.account.customer
+            name = customer.user.get_full_name() or customer.user.username
+        else:
+            name = order.customer_name or "Deleted Customer"
         data.append({
             "order_id": order.order_id,
-            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "customer_name": name,
             "order_status": order.order_status,
             "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
             "total_amount": str(order.total_amount),
@@ -1122,8 +1126,14 @@ def op_order_detail(request, order_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    customer = order.account.customer
-    app = customer.application
+    if order.account:
+        customer = order.account.customer
+        cust_name = customer.user.get_full_name() or customer.user.username
+        app = customer.application
+        phone = app.phone_number if app else ""
+    else:
+        cust_name = order.customer_name or "Deleted Customer"
+        phone = ""
 
     items_data = [
         {
@@ -1139,8 +1149,8 @@ def op_order_detail(request, order_id):
 
     return Response({
         "order_id": order.order_id,
-        "customer_name": customer.user.get_full_name() or customer.user.username,
-        "phone": app.phone_number if app else "",
+        "customer_name": cust_name,
+        "phone": phone,
         "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
         "items": items_data,
         "total_amount": str(order.total_amount),
@@ -1239,12 +1249,16 @@ def op_completed_orders(request):
 
     data = []
     for order in completed_orders:
-        customer = order.account.customer
+        if order.account:
+            customer = order.account.customer
+            name = customer.user.get_full_name() or customer.user.username
+        else:
+            name = order.customer_name or "Deleted Customer"
         completion = OrderCompletion.objects.get(order=order)
-        
+
         data.append({
             "order_id": order.order_id,
-            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "customer_name": name,
             "order_status": "COMPLETED",
             "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
             "completion_date": completion.completion_date.strftime("%B %d, %Y"),
@@ -1281,8 +1295,14 @@ def op_order_view(request, order_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    customer = order.account.customer
-    app = customer.application
+    if order.account:
+        customer = order.account.customer
+        cust_name = customer.user.get_full_name() or customer.user.username
+        app = customer.application
+        phone = app.phone_number if app else ""
+    else:
+        cust_name = order.customer_name or "Deleted Customer"
+        phone = ""
 
     items_data = [
         {
@@ -1298,8 +1318,8 @@ def op_order_view(request, order_id):
 
     return Response({
         "order_id": order.order_id,
-        "customer_name": customer.user.get_full_name() or customer.user.username,
-        "phone": app.phone_number if app else "",
+        "customer_name": cust_name,
+        "phone": phone,
         "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
         "items": items_data,
         "total_amount": str(order.total_amount),
@@ -1332,8 +1352,14 @@ def um_order_view(request, order_id):
     except Order.DoesNotExist:
         return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    customer = order.account.customer
-    app = customer.application
+    if order.account:
+        customer = order.account.customer
+        cust_name = customer.user.get_full_name() or customer.user.username
+        app = customer.application
+        phone = app.phone_number if app else ""
+    else:
+        cust_name = order.customer_name or "Deleted Customer"
+        phone = ""
 
     items_data = [
         {
@@ -1357,8 +1383,8 @@ def um_order_view(request, order_id):
 
     return Response({
         "order_id": order.order_id,
-        "customer_name": customer.user.get_full_name() or customer.user.username,
-        "phone": app.phone_number if app else "",
+        "customer_name": cust_name,
+        "phone": phone,
         "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
         "items": items_data,
         "total_amount": str(order.total_amount),
@@ -1583,8 +1609,8 @@ def um_delete_customer(request, customer_id):
                 from payments.models import PaymentRequest
                 PaymentRequest.objects.filter(account=credit_account).delete()
 
-                # Delete orders and all related records (approvals, completions, overrides cascade from Order)
-                Order.objects.filter(account=credit_account).delete()
+                # Preserve orders: stamp customer name so orders remain after deletion
+                Order.objects.filter(account=credit_account).update(customer_name=customer_name)
 
                 # Delete notifications
                 from accounts.models import Notification
@@ -1650,13 +1676,19 @@ def um_all_orders(request):
 
     data = []
     for order in orders:
-        customer = order.account.customer
+        if order.account:
+            customer = order.account.customer
+            ordered_by = customer.user.get_full_name() or customer.user.username
+            cust_id = customer.id
+        else:
+            ordered_by = order.customer_name or "Deleted Customer"
+            cust_id = None
         data.append({
             "order_id": order.order_id,
-            "customer_id": customer.id,
+            "customer_id": cust_id,
             "amount": str(order.total_amount),
             "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
-            "ordered_by": customer.user.get_full_name() or customer.user.username,
+            "ordered_by": ordered_by,
             "status": order.order_status,
         })
 

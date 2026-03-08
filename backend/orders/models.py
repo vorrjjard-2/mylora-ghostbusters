@@ -17,9 +17,12 @@ class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
     account = models.ForeignKey(
         'accounts.CreditAccount',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='orders'
     )
+    customer_name = models.CharField(max_length=200, blank=True, null=True)
     branch = models.ForeignKey(
         'accounts.Branch',
         on_delete=models.PROTECT,
@@ -46,7 +49,9 @@ class Order(models.Model):
         ordering = ['-date_ordered']
     
     def __str__(self):
-        return f"Order {self.order_id} - {self.account.customer}"
+        if self.account:
+            return f"Order {self.order_id} - {self.account.customer}"
+        return f"Order {self.order_id} - {self.customer_name or 'Deleted Customer'}"
 
 
 class OrderItem(models.Model):
