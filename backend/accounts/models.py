@@ -91,6 +91,32 @@ class AuditLog(models.Model):
         return f"{self.user} - {self.action} at {self.timestamp}"
 
 
+class Notification(models.Model):
+    """Reminders sent by UM/CM to customers"""
+    notification_id = models.AutoField(primary_key=True)
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='sent_notifications'
+    )
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Notification {self.notification_id} for {self.customer}"
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:

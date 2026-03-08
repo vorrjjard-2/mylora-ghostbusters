@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
+import ReminderModal from "../../components/ReminderModal";
 import "../upper_management/Dashboard.css";
 
 export default function CustomerDatabase() {
   const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
+  const [reminderTarget, setReminderTarget] = useState(null);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
@@ -233,10 +235,30 @@ export default function CustomerDatabase() {
                       ₱ {parseFloat(customer.outstanding_balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                   </div>
+                  <div style={{ display: "flex", alignItems: "flex-end" }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setReminderTarget(customer); }}
+                      style={{
+                        padding: "8px 18px", fontSize: "14px", fontWeight: "600",
+                        border: "none", borderRadius: "8px",
+                        backgroundColor: "#dc3545", color: "white", cursor: "pointer",
+                      }}
+                    >
+                      Remind
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {reminderTarget && (
+            <ReminderModal
+              customerId={reminderTarget.customer_id}
+              customerName={reminderTarget.name}
+              onClose={() => setReminderTarget(null)}
+            />
+          )}
         </main>
       </div>
     </div>

@@ -487,3 +487,113 @@ def um_audit_logs(request):
         })
 
     return Response(data)
+
+
+# ─── Notification endpoints ───────────────────────────────────────────
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def send_reminder(request, customer_id):
+    """UM or CM sends a reminder notification to a customer"""
+    if not _require_role(request, "upper_management") and not _require_role(request, "credit_manager"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    message = request.data.get("message", "").strip()
+    if not message:
+        return Response({"error": "Message is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        customer = Customer.objects.get(id=customer_id)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    from .models import Notification
+    notification = Notification.objects.create(
+        customer=customer,
+        sent_by=request.user,
+        message=message,
+    )
+
+    log_audit(request.user, "REMINDER_SENT", {
+        "customer_id": customer_id,
+        "customer_name": customer.user.get_full_name(),
+        "message": message,
+    }, request)
+
+    return Response({
+        "notification_id": notification.notification_id,
+        "message": "Reminder sent successfully.",
+    }, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def customer_unread_notifications(request):
+    """Get unread notifications for the logged-in customer"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+    except Customer.DoesNotExist:
+        return Response([])
+
+    from .models import Notification
+    unread = Notification.objects.filter(customer=customer, is_read=False).order_by('-created_at')
+
+    data = []
+    for n in unread:
+        data.append({
+            "notification_id": n.notification_id,
+            "message": n.message,
+            "created_at": n.created_at.strftime("%B %d, %Y %I:%M %p"),
+            "sent_by": n.sent_by.get_full_name() if n.sent_by else "System",
+        })
+
+    return Response(data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def acknowledge_notification(request, notification_id):
+    """Customer acknowledges a notification"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    from .models import Notification
+    from django.utils import timezone
+    try:
+        notification = Notification.objects.get(notification_id=notification_id, customer=customer)
+    except Notification.DoesNotExist:
+        return Response({"error": "Notification not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    notification.is_read = True
+    notification.read_at = timezone.now()
+    notification.save()
+
+    return Response({"message": "Notification acknowledged."})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def customer_notification_history(request):
+    """Get all notifications (read and unread) for notification history"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+    except Customer.DoesNotExist:
+        return Response([])
+
+    from .models import Notification
+    notifications = Notification.objects.filter(customer=customer).order_by('-created_at')
+
+    data = []
+    for n in notifications:
+        data.append({
+            "notification_id": n.notification_id,
+            "message": n.message,
+            "created_at": n.created_at.strftime("%B %d, %Y %I:%M %p"),
+            "sent_by": n.sent_by.get_full_name() if n.sent_by else "System",
+            "is_read": n.is_read,
+            "read_at": n.read_at.strftime("%B %d, %Y %I:%M %p") if n.read_at else None,
+        })
+
+    return Response(data)

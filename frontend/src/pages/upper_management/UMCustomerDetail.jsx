@@ -1,10 +1,12 @@
 import { API_BASE_URL } from "../../utils/api";
+import { MEDIA_BASE_URL } from "../../utils/media";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
 import logo from "../../assets/mylora-logo.png";
 import paperIcon from "../../assets/paper.png";
 import clockIcon from "../../assets/clock.png";
+import ReminderModal from "../../components/ReminderModal";
 import "../credit_manager/CustomerDetails.css";
 import "./Dashboard.css";
 
@@ -14,11 +16,30 @@ export default function UMCustomerDetail() {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [filePreview, setFilePreview] = useState(null);
+
+  async function openFilePreview(rawUrl, label) {
+    try {
+      const res = await fetch(rawUrl, { credentials: "include" });
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setFilePreview({ url: blobUrl, label, type: blob.type });
+    } catch (err) {
+      console.error("Failed to load file", err);
+    }
+  }
+
+  function closeFilePreview() {
+    if (filePreview?.url) URL.revokeObjectURL(filePreview.url);
+    setFilePreview(null);
+  }
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeletePasswordModal, setShowDeletePasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/um/customer/${customerId}/`, {
@@ -111,6 +132,13 @@ export default function UMCustomerDetail() {
             <img src={paperIcon} alt="History" className="cd-paper-icon" />
             View Order History
           </button>
+          <button
+            className="cd-adjust-btn"
+            onClick={() => setShowReminderModal(true)}
+            style={{ backgroundColor: "#dc3545", color: "white", border: "none" }}
+          >
+            Send Reminder
+          </button>
         </div>
 
         {/* Credit Balance */}
@@ -200,11 +228,17 @@ export default function UMCustomerDetail() {
         {customer.documents && customer.documents.length > 0 && (
           <div className="cd-section">
             <h3 className="cd-section-title">Supporting Documents</h3>
-            {customer.documents.map((doc, i) => (
-              <div key={i} style={{ padding: "0.75rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#f9f9f9", marginBottom: "0.5rem" }}>
-                📄 {doc.name}
-              </div>
-            ))}
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+              {customer.documents.map((doc, i) => (
+                <button
+                  key={i}
+                  onClick={() => openFilePreview(`${MEDIA_BASE_URL}${doc.url}`, doc.name)}
+                  style={{ padding: "8px 20px", border: "1px solid #262626", borderRadius: "8px", color: "#1f3d1a", fontWeight: "600", fontSize: "14px", background: "white", cursor: "pointer" }}
+                >
+                  {doc.name} ↗
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -212,9 +246,12 @@ export default function UMCustomerDetail() {
         {customer.gov_id && (
           <div className="cd-section">
             <h3 className="cd-section-title">Government Issued ID</h3>
-            <div style={{ padding: "0.75rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#f9f9f9" }}>
-              📄 {customer.gov_id}
-            </div>
+            <button
+              onClick={() => openFilePreview(`${MEDIA_BASE_URL}${customer.gov_id}`, "Government-Issued ID")}
+              style={{ padding: "8px 20px", border: "1px solid #262626", borderRadius: "8px", color: "#1f3d1a", fontWeight: "600", fontSize: "14px", background: "white", cursor: "pointer" }}
+            >
+              View ID ↗
+            </button>
           </div>
         )}
 
@@ -300,6 +337,43 @@ export default function UMCustomerDetail() {
             </button>
           </div>
         </div>
+      )}
+
+      {filePreview && (
+        <div
+          onClick={closeFilePreview}
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ backgroundColor: "white", borderRadius: "15px", width: "80vw", maxWidth: "900px", height: "85vh", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "'Arimo', sans-serif" }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderBottom: "1px solid #e0e0e0" }}>
+              <span style={{ fontWeight: "700", fontSize: "16px" }}>{filePreview.label}</span>
+              <button
+                onClick={closeFilePreview}
+                style={{ background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#555", lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </div>
+            {filePreview.type.startsWith("image/") ? (
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", overflow: "auto" }}>
+                <img src={filePreview.url} alt={filePreview.label} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+              </div>
+            ) : (
+              <embed src={filePreview.url} type="application/pdf" style={{ flex: 1, width: "100%" }} />
+            )}
+          </div>
+        </div>
+      )}
+
+      {showReminderModal && (
+        <ReminderModal
+          customerId={customerId}
+          customerName={customer.name}
+          onClose={() => setShowReminderModal(false)}
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../../utils/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCookie } from "../../utils/csrf";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 
@@ -8,6 +9,15 @@ export default function CustomerDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Notification state
+  const [unreadNotifications, setUnreadNotifications] = useState([]);
+  const [currentNotification, setCurrentNotification] = useState(null);
+  const [ackInput, setAckInput] = useState("");
+  const [ackError, setAckError] = useState("");
+  const [notifHistory, setNotifHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const historyRef = useRef(null);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
@@ -23,14 +33,83 @@ export default function CustomerDashboard() {
         alert("Failed to load dashboard data");
       })
       .finally(() => setLoading(false));
+
+    // Fetch unread notifications
+    fetch(`${API_BASE_URL}/api/customer/notifications/unread/`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((notifs) => {
+        setUnreadNotifications(notifs);
+        if (notifs.length > 0) setCurrentNotification(notifs[0]);
+      })
+      .catch(console.error);
+
+    // Fetch notification history
+    fetch(`${API_BASE_URL}/api/customer/notifications/history/`, { credentials: "include" })
+      .then((r) => r.json())
+      .then(setNotifHistory)
+      .catch(console.error);
   }, []);
+
+  // Close history dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (historyRef.current && !historyRef.current.contains(e.target)) {
+        setShowHistory(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleAcknowledge = async () => {
+    if (ackInput.trim().toLowerCase() !== "i understand") {
+      setAckError('Please type "I understand" to continue.');
+      return;
+    }
+
+    try {
+      await fetch(
+        `${API_BASE_URL}/api/customer/notifications/${currentNotification.notification_id}/acknowledge/`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        }
+      );
+
+      const remaining = unreadNotifications.filter(
+        (n) => n.notification_id !== currentNotification.notification_id
+      );
+      setUnreadNotifications(remaining);
+      setAckInput("");
+      setAckError("");
+
+      if (remaining.length > 0) {
+        setCurrentNotification(remaining[0]);
+      } else {
+        setCurrentNotification(null);
+      }
+
+      // Refresh history
+      fetch(`${API_BASE_URL}/api/customer/notifications/history/`, { credentials: "include" })
+        .then((r) => r.json())
+        .then(setNotifHistory)
+        .catch(console.error);
+    } catch (err) {
+      console.error(err);
+      setAckError("Failed to acknowledge. Please try again.");
+    }
+  };
 
   if (loading) {
     return <div className="cd-container">Loading...</div>;
   }
 
   if (!data) {
-    return <div className="cd-container">Unable to load dashboard</div>; 
+    return <div className="cd-container">Unable to load dashboard</div>;
   }
 
   const creditUtilization = data.credit
@@ -43,6 +122,8 @@ export default function CustomerDashboard() {
     ? parseFloat(data.credit.outstanding_balance) > parseFloat(data.credit.credit_limit)
     : false;
 
+  const unreadCount = unreadNotifications.length;
+
 return (
     <div className="cd-container">
       {/* Header Section */}
@@ -52,6 +133,82 @@ return (
           <span className="cd-system-title">Web Credit System</span>
         </div>
         <div className="cd-header-actions">
+          {/* Notification Bell */}
+          <div ref={historyRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              style={{
+                background: "white",
+                border: "1.3px solid #183112",
+                borderRadius: "10px",
+                height: "41px",
+                width: "50px",
+                cursor: "pointer",
+                position: "relative",
+                fontSize: "20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              🔔
+              {unreadCount > 0 && (
+                <span style={{
+                  position: "absolute", top: "-5px", right: "-5px",
+                  backgroundColor: "#dc3545", color: "white",
+                  borderRadius: "50%", width: "20px", height: "20px",
+                  fontSize: "12px", fontWeight: "700",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {showHistory && (
+              <div style={{
+                position: "absolute", top: "calc(100% + 8px)", right: 0,
+                width: "380px", maxHeight: "400px", overflowY: "auto",
+                backgroundColor: "white", border: "1px solid #262626",
+                borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                zIndex: 1000, fontFamily: "'Arimo', sans-serif",
+              }}>
+                <div style={{
+                  padding: "15px 20px", borderBottom: "1px solid #e0e0e0",
+                  fontWeight: "700", fontSize: "16px",
+                }}>
+                  Notifications
+                </div>
+                {notifHistory.length === 0 ? (
+                  <div style={{ padding: "20px", textAlign: "center", color: "#888", fontSize: "14px" }}>
+                    No notifications yet
+                  </div>
+                ) : (
+                  notifHistory.map((n) => (
+                    <div
+                      key={n.notification_id}
+                      style={{
+                        padding: "12px 20px",
+                        borderBottom: "1px solid #f0f0f0",
+                        backgroundColor: n.is_read ? "white" : "#fff8e1",
+                      }}
+                    >
+                      <div style={{ fontSize: "14px", lineHeight: "1.5", marginBottom: "6px" }}>
+                        {n.message}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#888", display: "flex", justifyContent: "space-between" }}>
+                        <span>{n.created_at}</span>
+                        <span style={{ fontStyle: "italic" }}>
+                          {n.is_read ? "Read" : "Unread"}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
           <button className="cd-profile-btn" onClick={() => navigate("/account")}>
             Profile
           </button>
@@ -135,7 +292,7 @@ return (
               View All Orders →
             </button>
           </div>
-          
+
           {data.recent_orders.length === 0 ? (
             <p className="cd-no-orders">No orders yet</p>
           ) : (
@@ -168,6 +325,83 @@ return (
           )}
         </div>
       </main>
+
+      {/* Notification Acknowledgment Modal */}
+      {currentNotification && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.6)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 2000,
+        }}>
+          <div style={{
+            backgroundColor: "white", borderRadius: "15px",
+            padding: "40px", width: "500px", maxWidth: "90vw",
+            fontFamily: "'Arimo', sans-serif",
+          }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "700", marginTop: 0, marginBottom: "8px", color: "#262626" }}>
+              Important Notice
+            </h2>
+            <p style={{ fontSize: "12px", color: "#888", marginBottom: "20px" }}>
+              {currentNotification.created_at}
+            </p>
+
+            <div style={{
+              backgroundColor: "#FFF8E1", border: "1px solid #FFE082",
+              borderRadius: "10px", padding: "20px",
+              fontSize: "16px", lineHeight: "1.6", marginBottom: "25px",
+            }}>
+              {currentNotification.message}
+            </div>
+
+            <p style={{ fontSize: "14px", color: "#555", marginBottom: "10px" }}>
+              Type <strong>"I understand"</strong> to acknowledge this notice:
+            </p>
+
+            {ackError && (
+              <div style={{
+                backgroundColor: "#F8D7DA", color: "#842029",
+                padding: "8px 12px", borderRadius: "6px",
+                marginBottom: "10px", fontSize: "13px",
+              }}>
+                {ackError}
+              </div>
+            )}
+
+            <input
+              type="text"
+              value={ackInput}
+              onChange={(e) => { setAckInput(e.target.value); setAckError(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleAcknowledge(); }}
+              placeholder='Type "I understand"'
+              style={{
+                width: "100%", padding: "12px", fontSize: "16px",
+                border: "1px solid #262626", borderRadius: "8px",
+                boxSizing: "border-box", marginBottom: "20px",
+              }}
+            />
+
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                onClick={handleAcknowledge}
+                style={{
+                  padding: "10px 28px", fontSize: "16px", fontWeight: "600",
+                  border: "none", borderRadius: "8px",
+                  backgroundColor: "#1E2D1A", color: "white", cursor: "pointer",
+                }}
+              >
+                Acknowledge
+              </button>
+            </div>
+
+            {unreadNotifications.length > 1 && (
+              <p style={{ fontSize: "12px", color: "#888", marginTop: "15px", textAlign: "center" }}>
+                {unreadNotifications.length - 1} more notification{unreadNotifications.length - 1 > 1 ? "s" : ""} remaining
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -183,29 +417,3 @@ function formatStatus(status) {
   };
   return map[status] || status;
 }
-
-function getStatusBadgeStyle(status) {
-  const base = {
-    padding: "0.25rem 0.75rem",
-    borderRadius: "12px",
-    fontSize: "0.875rem",
-    fontWeight: "500",
-  };
-  switch (status) {
-    case "APPROVED":
-      return { ...base, background: "#d4edda", color: "#155724" };
-    case "REJECTED":
-      return { ...base, background: "#f8d7da", color: "#721c24" };
-    case "PENDING":
-      return { ...base, background: "#fff3cd", color: "#856404" };
-    case "PROCESSING":
-      return { ...base, background: "#cce5ff", color: "#004085" };
-    case "COMPLETED":
-      return { ...base, background: "#d1ecf1", color: "#0c5460" };
-    case "CANCELLED":
-      return { ...base, background: "#e2e3e5", color: "#383d41" };
-    default:
-      return { ...base, background: "#f5f5f5", color: "#333" };
-  }
-}
-

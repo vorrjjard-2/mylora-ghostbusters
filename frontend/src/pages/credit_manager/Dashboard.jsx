@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CMSidebar from "../../components/credit_manager/CMSidebar";
 import logo from "../../assets/mylora-logo.png";
+import ReminderModal from "../../components/ReminderModal";
 import "../upper_management/Dashboard.css";
 
 export default function CreditManagerDashboard() {
@@ -35,6 +36,7 @@ export default function CreditManagerDashboard() {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [reminderTarget, setReminderTarget] = useState(null);
 
   // Dashboard home view sorted data
   const [sortedDashOrders, setSortedDashOrders] = useState([]);
@@ -965,10 +967,30 @@ export default function CreditManagerDashboard() {
                           <span style={{ fontWeight: "600" }}>Outstanding Balance:</span> ₱ {fmt(customer.outstanding_balance)}
                         </div>
                       </div>
+                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setReminderTarget(customer); }}
+                          style={{
+                            padding: "8px 18px", fontSize: "14px", fontWeight: "600",
+                            border: "none", borderRadius: "8px",
+                            backgroundColor: "#dc3545", color: "white", cursor: "pointer",
+                          }}
+                        >
+                          Remind
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
+
+              {reminderTarget && (
+                <ReminderModal
+                  customerId={reminderTarget.customer_id}
+                  customerName={reminderTarget.name}
+                  onClose={() => setReminderTarget(null)}
+                />
+              )}
             </>
           )}
         </main>

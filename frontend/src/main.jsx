@@ -41,6 +41,7 @@ import UMCustomerHistory from "./pages/upper_management/UMCustomerHistory";
 import UMUpdateBalance from "./pages/upper_management/UMUpdateBalance";
 import UMOrderView from "./pages/upper_management/UMOrderView";
 import AllOrders from "./pages/upper_management/AllOrders";
+import AllProducts from "./pages/upper_management/AllProducts";
 import EmployeeDatabase from "./pages/upper_management/EmployeeDatabase";
 import EmployeeProfile from "./pages/upper_management/EmployeeProfile";
 import EmployeeEdit from "./pages/upper_management/EmployeeEdit";
@@ -96,6 +97,14 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="upper_management">
                 <AllOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/all-products"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <AllProducts />
               </ProtectedRoute>
             }
           />

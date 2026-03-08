@@ -881,6 +881,11 @@ def cm_customers_list(request):
                 "credit_limit": str(credit.credit_limit),
                 "available_credit": str(credit.available_credit),
                 "outstanding_balance": str(credit.outstanding_bal),
+                "documents": [d for d in [
+                    {"name": "Supporting Document 1", "url": app.doc1_file.url} if app and app.doc1_file else None,
+                    {"name": "Supporting Document 2", "url": app.doc2_file.url} if app and app.doc2_file else None,
+                ] if d],
+                "gov_id": app.gov_id.url if app and app.gov_id else None,
             })
         except Exception as e:
             # Skip customers with errors
@@ -1445,8 +1450,11 @@ def um_customer_detail(request, customer_id):
         "outstanding_balance": str(credit.outstanding_bal),
         "credit_term": str(credit.credit_term) if credit.credit_term else None,
         "credit_type": app.credit_amt_request if app else None,
-        "documents": [],
-        "gov_id": None,
+        "documents": [d for d in [
+            {"name": "Supporting Document 1", "url": app.doc1_file.url} if app and app.doc1_file else None,
+            {"name": "Supporting Document 2", "url": app.doc2_file.url} if app and app.doc2_file else None,
+        ] if d],
+        "gov_id": app.gov_id.url if app and app.gov_id else None,
         "notes": None,
     })
 
@@ -1564,24 +1572,31 @@ def um_delete_customer(request, customer_id):
     except Customer.DoesNotExist:
         return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Check if customer has outstanding balance
-    if customer.credit_account and customer.credit_account.outstanding_bal > 0:
-        return Response(
-            {"error": "Cannot delete customer with outstanding balance"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
     customer_name = customer.user.get_full_name() or customer.user.username
     try:
         with transaction.atomic():
             user = customer.user
-            # Delete customer (cascade will handle related records)
+            credit_account = getattr(customer, 'credit_account', None)
+
+            if credit_account:
+                # Delete payment requests (PROTECT on CreditAccount)
+                from payments.models import PaymentRequest
+                PaymentRequest.objects.filter(account=credit_account).delete()
+
+                # Delete orders and all related records (approvals, completions, overrides cascade from Order)
+                Order.objects.filter(account=credit_account).delete()
+
+                # Delete notifications
+                from accounts.models import Notification
+                Notification.objects.filter(customer=customer).delete()
+
+            # Delete customer (cascades to credit account)
             customer.delete()
             # Delete user account
             user.delete()
-    except Exception:
+    except Exception as e:
         return Response(
-            {"error": "Cannot delete customer with existing orders. Remove their orders first."},
+            {"error": f"Failed to delete customer: {str(e)}"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
