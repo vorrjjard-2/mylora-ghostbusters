@@ -2,7 +2,7 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
-import { getCookie } from "../../utils/csrf";
+import { handleLogout } from "../../utils/logout";
 import "../upper_management/Dashboard.css";
 import "../../components/internal/Sidebar.css";
 
@@ -95,14 +95,7 @@ export default function ProcessorOrderHistory() {
 
   const getSortLabel = () => sortOptions.find((o) => o.value === sortBy)?.label ?? "Date Ordered";
 
-  const handleLogout = async () => {
-    await fetch(`${API_BASE_URL}/api/logout/`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "X-CSRFToken": getCookie("csrftoken") },
-    });
-    navigate("/login");
-  };
+  const onLogout = () => handleLogout(navigate);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -128,7 +121,7 @@ export default function ProcessorOrderHistory() {
           <span className="um-system-title">Web Credit System</span>
         </div>
         <div className="um-header-actions">
-          <button className="um-logout-btn" onClick={handleLogout}>
+          <button className="um-logout-btn" onClick={onLogout}>
             Logout
           </button>
         </div>

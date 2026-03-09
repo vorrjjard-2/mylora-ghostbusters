@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import "../order_processor/ProcessorOrderView.css";
 import "./Dashboard.css";
@@ -140,7 +141,7 @@ export default function UMOrderView() {
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
           <span className="view-system-title">Web Credit System</span>
         </div>
-        <button className="um-logout-btn" onClick={() => navigate("/login")}>
+        <button className="um-logout-btn" onClick={() => handleLogout(navigate)}>
           Logout
         </button>
       </header>

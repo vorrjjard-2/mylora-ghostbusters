@@ -2,6 +2,7 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import fileIcon from "../../assets/file.png";
 import "./PaymentRequest.css";
@@ -162,7 +163,7 @@ return (
         <span className="pr-system-title">Web Credit System</span>
       </div>
       <div className="pr-header-actions">
-        <button className="pr-logout-btn" onClick={() => navigate("/login")}>
+        <button className="pr-logout-btn" onClick={() => handleLogout(navigate)}>
           Logout
         </button>
       </div>

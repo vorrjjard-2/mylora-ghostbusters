@@ -3,6 +3,7 @@ import { MEDIA_BASE_URL } from "../../utils/media";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import paperIcon from "../../assets/paper.png";
 import clockIcon from "../../assets/clock.png";
@@ -108,7 +109,7 @@ export default function UMCustomerDetail() {
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
           <span className="ub-system-title">Web Credit System</span>
         </div>
-        <button className="um-logout-btn" onClick={() => navigate("/login")}>
+        <button className="um-logout-btn" onClick={() => handleLogout(navigate)}>
           Logout
         </button>
       </header>

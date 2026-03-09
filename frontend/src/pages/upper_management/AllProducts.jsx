@@ -2,6 +2,7 @@ import { API_BASE_URL } from "../../utils/api";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import { handleLogout } from "../../utils/logout";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
@@ -171,7 +172,7 @@ export default function AllProducts() {
           <span className="um-system-title">Web Credit System</span>
         </div>
         <div className="um-header-actions">
-          <button className="um-logout-btn" onClick={() => navigate("/login")}>
+          <button className="um-logout-btn" onClick={() => handleLogout(navigate)}>
             Logout
           </button>
         </div>

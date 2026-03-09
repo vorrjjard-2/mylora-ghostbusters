@@ -2,6 +2,7 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 
@@ -212,7 +213,7 @@ return (
           <button className="cd-profile-btn" onClick={() => navigate("/account")}>
             Profile
           </button>
-          <button className="cd-logout-btn" onClick={() => navigate("/login")}>
+          <button className="cd-logout-btn" onClick={() => handleLogout(navigate)}>
             Logout
           </button>
         </div>

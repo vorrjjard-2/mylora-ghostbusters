@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
 import { getCookie } from "../../utils/csrf";
+import { handleLogout } from "../../utils/logout";
 import ConfirmPasswordModal from "../../components/internal/ConfirmPasswordModal";
 import { MEDIA_BASE_URL } from "../../utils/media";
 import "../upper_management/Dashboard.css";
@@ -172,7 +173,7 @@ export default function EnrollmentReview() {
           <span className="um-system-title">Web Credit System</span>
         </div>
         <div className="um-header-actions">
-          <button className="um-logout-btn" onClick={() => navigate("/login")}>Logout</button>
+          <button className="um-logout-btn" onClick={() => handleLogout(navigate)}>Logout</button>
         </div>
       </header>
 

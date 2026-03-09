@@ -2,6 +2,7 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import "./PaymentReview.css";
 
@@ -129,7 +130,7 @@ export default function PaymentReview() {
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
           <span className="payment-system-title">Web Credit System</span>
         </div>
-        <button className="payment-logout-btn" onClick={() => navigate("/login")}>
+        <button className="payment-logout-btn" onClick={() => handleLogout(navigate)}>
           Logout
         </button>
       </header>

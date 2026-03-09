@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import paperIcon from "../../assets/paper.png";
 import clockIcon from "../../assets/clock.png";
+import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import ReminderModal from "../../components/ReminderModal";
 import "./CustomerDetails.css";
@@ -69,7 +70,7 @@ return (
           <img src={logo} alt="Mylora Logo" className="mylora-logo" />
           <span className="ub-system-title">Web Credit System</span>
         </div>
-        <button className="ub-logout-btn" onClick={() => navigate("/login")}>
+        <button className="ub-logout-btn" onClick={() => handleLogout(navigate)}>
           Logout
         </button>
       </header>

@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { handleLogout } from "../../utils/logout";
 
 export default function CreditAdjustment() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function CreditAdjustment() {
           <span style={styles.logoIcon}>🌾</span>
           <span style={styles.logoText}>Web Credit System</span>
         </div>
-        <button style={styles.logoutBtn} onClick={() => navigate("/login")}>
+        <button style={styles.logoutBtn} onClick={() => handleLogout(navigate)}>
           Logout
         </button>
       </div>
