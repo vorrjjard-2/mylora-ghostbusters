@@ -221,12 +221,16 @@ def cm_all_orders(request):
 
     data = []
     for order in orders:
-        customer = order.account.customer
+        if order.account:
+            customer = order.account.customer
+            customer_name = customer.user.get_full_name() or customer.user.username
+        else:
+            customer_name = order.customer_name or "Deleted Customer"
         data.append({
             "order_id": order.order_id,
             "amount": str(order.total_amount),
             "date_ordered": order.date_ordered.strftime("%B %d, %Y"),
-            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "customer_name": customer_name,
             "status": order.order_status,
         })
 
