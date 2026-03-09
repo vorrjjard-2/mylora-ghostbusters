@@ -36,6 +36,17 @@ class PaymentRequest(models.Model):
         default='PENDING'
     )
     rejection_reason = models.TextField(blank=True)
-    
+    payment_type = models.CharField(
+        max_length=30,
+        choices=[
+            ('BANK_DEPOSIT', 'Bank Deposit'),
+            ('PALAWAN', 'Palawan Remittance'),
+            ('BRANCH_CASH', 'Branch Cash Payment'),
+            ('BRANCH_CHECK', 'Branch Check Payment'),
+        ],
+        blank=True,
+        default='',
+    )
+
     def __str__(self):
         return f"Payment {self.payment_id} - ₱{self.amount_paid}"

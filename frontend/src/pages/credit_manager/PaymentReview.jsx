@@ -17,6 +17,7 @@ export default function PaymentReview() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [pendingAction, setPendingAction] = useState(null); // 'approve' or 'reject'
   const [rejectReason, setRejectReason] = useState("");
   const [rejectReasonError, setRejectReasonError] = useState("");
@@ -42,13 +43,14 @@ export default function PaymentReview() {
     setPendingAction(action);
     setShowPasswordModal(true);
     setPassword("");
+    setPasswordError("");
     setRejectReason("");
     setRejectReasonError("");
   };
 
   const handleConfirmAction = async () => {
     if (!password) {
-      alert("Please enter your password");
+      setPasswordError("Please enter your password");
       return;
     }
 
@@ -84,7 +86,8 @@ export default function PaymentReview() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to ${pendingAction} payment`);
+        setPasswordError(errorData.error || `Failed to ${pendingAction} payment`);
+        return;
       }
 
       setShowPasswordModal(false);
@@ -95,7 +98,7 @@ export default function PaymentReview() {
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || `Failed to ${pendingAction} payment`);
+      setPasswordError(err.message || `Failed to ${pendingAction} payment`);
     } finally {
       setProcessing(false);
     }
@@ -203,9 +206,18 @@ export default function PaymentReview() {
         </div>
       </div>
 
-      <div className="payment-form-group">
-        <label className="payment-label">Date of Payment</label>
-        <input className="payment-input" readOnly value={payment.date_paid} />
+      <div className="payment-form-row">
+        <div className="payment-form-group flex-1">
+          <label className="payment-label">Date of Payment</label>
+          <input className="payment-input" readOnly value={payment.date_paid} />
+        </div>
+
+        <div className="payment-form-group flex-1">
+          <label className="payment-label">Payment Type</label>
+          <input className="payment-input" readOnly value={
+            { BANK_DEPOSIT: "Bank Deposit", PALAWAN: "Palawan Remittance", BRANCH_CASH: "Branch Cash Payment", BRANCH_CHECK: "Branch Check Payment" }[payment.payment_type] || "N/A"
+          } />
+        </div>
       </div>
 
       <div className="payment-form-group">
@@ -222,7 +234,7 @@ export default function PaymentReview() {
       {/* Bottom Actions */}
       <div className="payment-button-row">
         <button className="payment-cancel-btn" onClick={() => navigate("/credit-manager/dashboard")}>
-          Cancel
+          {payment.payment_status === "PENDING" ? "Cancel" : "Back"}
         </button>
         {payment.payment_status === "PENDING" && (
           <>
@@ -261,9 +273,12 @@ export default function PaymentReview() {
               type="password"
               className="password-input"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setPasswordError(""); }}
               placeholder="••••••••••"
             />
+            {passwordError && (
+              <p style={{ color: "#b03a2e", fontSize: "0.85rem", marginTop: "4px" }}>{passwordError}</p>
+            )}
             <div className="payment-button-row">
               <button className="payment-cancel-btn" onClick={handleCancelPasswordModal}>Cancel</button>
               <button className="payment-confirm-btn" onClick={handleConfirmAction}>

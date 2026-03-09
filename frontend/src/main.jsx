@@ -30,6 +30,7 @@ import OrderHistory from "./pages/customer/OrderHistory";
 import OrderDetail from "./pages/customer/OrderDetail";
 import PaymentRequest from "./pages/customer/PaymentRequest";
 import PaymentSuccess from "./pages/customer/PaymentSuccess";
+import CreditHistory from "./pages/customer/CreditHistory";
 
 // Upper Management pages
 import UpperDashboard from "./pages/upper_management/Dashboard";
@@ -53,6 +54,7 @@ import CreditDashboard from "./pages/credit_manager/Dashboard";
 import PaymentReview from "./pages/credit_manager/PaymentReview";
 import CreditApproval from "./pages/credit_manager/CreditApproval";
 import CreditApprovalSuccess from "./pages/credit_manager/CreditApprovalSuccess";
+import CreditRejectionSuccess from "./pages/credit_manager/CreditRejectionSuccess";
 import CreditAdjustment from "./pages/credit_manager/CreditAdjustment";
 import UpdateBalance from "./pages/credit_manager/UpdateBalance";
 import CustomerHistory from "./pages/credit_manager/CustomerHistory";
@@ -263,6 +265,14 @@ function Layout() {
             }
           />
           <Route
+            path="/credit-manager/approve/:orderId/rejected"
+            element={
+              <ProtectedRoute requiredRole="credit_manager">
+                <CreditRejectionSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/credit-manager/payment/:paymentId"
             element={
               <ProtectedRoute requiredRole="credit_manager">
@@ -359,6 +369,14 @@ function Layout() {
             element={
               <ProtectedRoute>
                 <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit/history"
+            element={
+              <ProtectedRoute>
+                <CreditHistory />
               </ProtectedRoute>
             }
           />

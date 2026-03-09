@@ -512,6 +512,7 @@ def send_reminder(request, customer_id):
         customer=customer,
         sent_by=request.user,
         message=message,
+        requires_acknowledgment=True,
     )
 
     log_audit(request.user, "REMINDER_SENT", {
@@ -536,7 +537,9 @@ def customer_unread_notifications(request):
         return Response([])
 
     from .models import Notification
-    unread = Notification.objects.filter(customer=customer, is_read=False).order_by('-created_at')
+    unread = Notification.objects.filter(
+        customer=customer, is_read=False, requires_acknowledgment=True
+    ).order_by('-created_at')
 
     data = []
     for n in unread:

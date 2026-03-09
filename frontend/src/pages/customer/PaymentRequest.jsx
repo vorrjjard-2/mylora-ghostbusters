@@ -14,9 +14,9 @@ export default function PaymentRequest() {
   const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState({
-    inv_number: "",
     amount_paid: "",
     date_paid: "",
+    payment_type: "",
     proof_payment: null,
   });
   
@@ -92,12 +92,18 @@ export default function PaymentRequest() {
     
     if (!formData.date_paid) {
       newErrors.date_paid = "Date of payment is required";
+    } else if (new Date(formData.date_paid) > new Date(new Date().toISOString().split("T")[0])) {
+      newErrors.date_paid = "Date of payment cannot be in the future";
     }
     
+    if (!formData.payment_type) {
+      newErrors.payment_type = "Payment type is required";
+    }
+
     if (!formData.proof_payment) {
       newErrors.proof_payment = "Proof of payment is required";
     }
-    
+
     return newErrors;
   };
 
@@ -114,9 +120,9 @@ export default function PaymentRequest() {
     
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("inv_number", formData.inv_number);
       formDataToSend.append("amount_paid", formData.amount_paid);
       formDataToSend.append("date_paid", formData.date_paid);
+      formDataToSend.append("payment_type", formData.payment_type);
       formDataToSend.append("proof_payment", formData.proof_payment);
       
       // Get CSRF token
@@ -217,17 +223,6 @@ return (
       {/* Payment Form */}
       <form onSubmit={handleSubmit} className="pr-payment-form">
         <div className="pr-form-row">
-          <div className="pr-form-group">
-            <label className="pr-label">Invoice Number</label>
-            <input
-              type="text"
-              name="inv_number"
-              value={formData.inv_number}
-              onChange={handleChange}
-              className="pr-input"
-              placeholder="INV1234"
-            />
-          </div>
 
           <div className="pr-form-group">
             <label className="pr-label">Balance Paid</label>
@@ -252,9 +247,27 @@ return (
             name="date_paid"
             value={formData.date_paid}
             onChange={handleChange}
+            max={new Date().toISOString().split("T")[0]}
             className={`pr-input ${errors.date_paid ? 'pr-input-error' : ''}`}
           />
           {errors.date_paid && <span className="pr-error">{errors.date_paid}</span>}
+        </div>
+
+        <div className="pr-form-group full-width">
+          <label className="pr-label">Payment Type</label>
+          <select
+            name="payment_type"
+            value={formData.payment_type}
+            onChange={handleChange}
+            className={`pr-input ${errors.payment_type ? 'pr-input-error' : ''}`}
+          >
+            <option value="">Select payment type</option>
+            <option value="BANK_DEPOSIT">Bank Deposit</option>
+            <option value="PALAWAN">Palawan Remittance</option>
+            <option value="BRANCH_CASH">Branch Cash Payment</option>
+            <option value="BRANCH_CHECK">Branch Check Payment</option>
+          </select>
+          {errors.payment_type && <span className="pr-error">{errors.payment_type}</span>}
         </div>
 
         {/* Section: Upload Proof of Payment */}

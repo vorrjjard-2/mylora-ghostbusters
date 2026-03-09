@@ -70,20 +70,35 @@ export default function CreditApproval() {
       );
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error || "Something went wrong");
+        const errorMsg = err.error || "Something went wrong";
+        // Show error in the appropriate modal instead of alert
+        if (action === "approve") {
+          setPasswordError(errorMsg);
+        } else {
+          setRejectPasswordError(errorMsg);
+        }
         return;
       }
       const data = await res.json();
 
       if (action === "approve") {
+        setShowPasswordModal(false);
         navigate(`/credit-manager/approve/${orderId}/success`, {
           state: { order, ...data },
         });
       } else {
-        navigate("/credit-manager/dashboard");
+        setShowRejectModal(false);
+        navigate(`/credit-manager/approve/${orderId}/rejected`, {
+          state: { order, ...data, rejection_reason: rejectionReason },
+        });
       }
     } catch (e) {
-      alert("Request failed. Please try again.");
+      const errorMsg = "Request failed. Please try again.";
+      if (action === "approve") {
+        setPasswordError(errorMsg);
+      } else {
+        setRejectPasswordError(errorMsg);
+      }
     } finally {
       setActing(false);
     }
@@ -100,7 +115,6 @@ export default function CreditApproval() {
       setPasswordError("Password is required.");
       return;
     }
-    setShowPasswordModal(false);
     await postAction("approve", approvalPassword);
   };
 
@@ -123,7 +137,6 @@ export default function CreditApproval() {
       hasError = true;
     }
     if (hasError) return;
-    setShowRejectModal(false);
     await postAction("reject", rejectPassword, rejectReason.trim());
   };
 
@@ -194,7 +207,22 @@ export default function CreditApproval() {
 
       <main className="approval-content">
 
-      <h1 className="approval-title">ORDER ID {order.order_id}</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <h1 className="approval-title" style={{ margin: 0 }}>ORDER ID {order.order_id}</h1>
+        {order.order_status !== "PENDING" && (
+          <span style={{
+            padding: "10px 24px",
+            borderRadius: "8px",
+            fontSize: "1rem",
+            fontWeight: 700,
+            ...(order.order_status === "APPROVED" ? { backgroundColor: "#D1E7DD", color: "#0F5132" } :
+               order.order_status === "REJECTED" ? { backgroundColor: "#F8D7DA", color: "#842029" } :
+               { backgroundColor: "#CCE5FF", color: "#004085" })
+          }}>
+            {order.order_status}
+          </span>
+        )}
+      </div>
 
       {/* Customer Information */}
       <h2 className="approval-subtitle">Customer Information</h2>
@@ -294,33 +322,48 @@ export default function CreditApproval() {
         </>
       )}
 
-      {/* Action Buttons */}
-      <div className="approval-actions">
-        <button
-          className="reject-btn"
-          disabled={acting}
-          onClick={handleRejectClick}
-        >
-          Reject Order
-        </button>
-        {requiresOverride ? (
+      {/* Action Buttons - only show for PENDING orders */}
+      {order.order_status === "PENDING" && (
+        <div className="approval-actions">
           <button
-            className="override-trigger-btn"
+            className="reject-btn"
             disabled={acting}
-            onClick={handleRequestOverride}
+            onClick={handleRejectClick}
           >
-            Request Override
+            Reject Order
           </button>
-        ) : (
+          {requiresOverride ? (
+            <button
+              className="override-trigger-btn"
+              disabled={acting}
+              onClick={handleRequestOverride}
+            >
+              Request Override
+            </button>
+          ) : (
+            <button
+              className="approve-btn"
+              disabled={acting}
+              onClick={handleApproveClick}
+            >
+              Approve Order
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Back button for decided orders */}
+      {order.order_status !== "PENDING" && (
+        <div style={{ marginTop: "1.5rem", display: "flex", justifyContent: "flex-end" }}>
           <button
             className="approve-btn"
-            disabled={acting}
-            onClick={handleApproveClick}
+            onClick={() => navigate("/credit-manager/dashboard")}
+            style={{ backgroundColor: "#1f3d1a" }}
           >
-            Approve Order
+            Back to Dashboard
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Password Approval Modal */}
       {showPasswordModal && (

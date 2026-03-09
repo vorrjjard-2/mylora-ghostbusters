@@ -122,6 +122,31 @@ box-sizing: border-box;
     margin-bottom: 10px;
 }
 
+.apply1-page-wrapper .form-footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+    gap: 16px;
+}
+
+.apply1-page-wrapper .btn-back {
+    background: white;
+    border: 1px solid #183112;
+    padding: 8px 59px;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    height: 41px;
+    color: #183112;
+    transition: background-color 0.2s;
+}
+
+.apply1-page-wrapper .btn-back:hover {
+    background-color: #f0f0f0;
+}
+
 
 
 

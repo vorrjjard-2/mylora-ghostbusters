@@ -18,12 +18,13 @@ export default function UpdateBalance() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   // Payment form
   const [paymentForm, setPaymentForm] = useState({
-    invoice_number: "",
     balance_paid: "",
     date_of_payment: "",
+    payment_type: "",
     proof_of_payment: null,
   });
   const formatAsCurrency = (value) => {
@@ -64,18 +65,30 @@ export default function UpdateBalance() {
     setPaymentForm((prev) => ({ ...prev, proof_of_payment: e.target.files[0] }));
   };
 
+  const [formError, setFormError] = useState("");
+
   const handleSubmit = () => {
     if (!paymentForm.balance_paid || !paymentForm.date_of_payment) {
-      alert("Please fill in balance paid and date of payment");
+      setFormError("Please fill in balance paid and date of payment");
       return;
     }
 
+    const amount = Number(paymentForm.balance_paid);
+    const outstanding = parseFloat(customer.outstanding_balance);
+    if (amount > outstanding) {
+      setFormError(`Payment amount (₱${amount.toLocaleString("en-PH")}) exceeds outstanding balance (₱${outstanding.toLocaleString("en-PH", { minimumFractionDigits: 2 })})`);
+      return;
+    }
+
+    setFormError("");
     setShowPasswordModal(true);
+    setPassword("");
+    setPasswordError("");
   };
 
   const handleConfirmUpdate = async () => {
     if (!password) {
-      alert("Please enter your password");
+      setPasswordError("Please enter your password");
       return;
     }
 
@@ -85,9 +98,9 @@ export default function UpdateBalance() {
     try {
       const formData = new FormData();
       formData.append("password", password);
-      formData.append("invoice_number", paymentForm.invoice_number);
       formData.append("balance_paid", paymentForm.balance_paid);
       formData.append("date_of_payment", paymentForm.date_of_payment);
+      formData.append("payment_type", paymentForm.payment_type);
       if (paymentForm.proof_of_payment) {
         formData.append("proof_of_payment", paymentForm.proof_of_payment);
       }
@@ -106,17 +119,17 @@ export default function UpdateBalance() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update balance");
+        setPasswordError(errorData.error || "Failed to update balance");
+        return;
       }
 
       setShowPasswordModal(false);
       setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
-      alert(err.message || "Failed to update balance");
+      setPasswordError(err.message || "Failed to update balance");
     } finally {
       setProcessing(false);
-      setPassword("");
     }
   };
 
@@ -177,18 +190,6 @@ return (
       <form className="ub-section" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div className="ub-form-row">
         <div className="ub-form-group">
-          <label className="ub-label">Invoice Number</label>
-          <input
-            type="text"
-            name="invoice_number"
-            value={paymentForm.invoice_number}
-            onChange={handleFormChange}
-            className="ub-input"
-            placeholder="Enter invoice number"
-          />
-        </div>
-
-        <div className="ub-form-group">
           <label className="ub-label">Balance Paid</label>
           <input
             type="text"
@@ -211,8 +212,25 @@ return (
             name="date_of_payment"
             value={paymentForm.date_of_payment}
             onChange={handleFormChange}
+            max={new Date().toISOString().split("T")[0]}
             className="ub-input"
           />
+        </div>
+
+        <div className="ub-form-group">
+          <label className="ub-label">Payment Type</label>
+          <select
+            name="payment_type"
+            value={paymentForm.payment_type}
+            onChange={handleFormChange}
+            className="ub-input"
+          >
+            <option value="">Select payment type</option>
+            <option value="BANK_DEPOSIT">Bank Deposit</option>
+            <option value="PALAWAN">Palawan Remittance</option>
+            <option value="BRANCH_CASH">Branch Cash Payment</option>
+            <option value="BRANCH_CHECK">Branch Check Payment</option>
+          </select>
         </div>
 
       {/*}  <div className="ub-form-group">
@@ -264,6 +282,10 @@ return (
 
 
 
+        {formError && (
+          <p style={{ color: "#b03a2e", fontSize: "0.9rem", marginBottom: "10px" }}>{formError}</p>
+        )}
+
         <div className="ub-button-row">
           <button type="button" className="ub-cancel-btn" onClick={() => navigate(`/credit-manager/customer/${customerId}/details`)}>
             Cancel
@@ -283,10 +305,13 @@ return (
               type="password"
               className="ub-password-input"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setPasswordError(""); }}
               placeholder="••••••••••"
               onKeyDown={(e) => e.key === "Enter" && handleConfirmUpdate()}
             />
+            {passwordError && (
+              <p style={{ color: "#b03a2e", fontSize: "0.85rem", marginTop: "4px" }}>{passwordError}</p>
+            )}
             <div className="ub-modal-button-row">
               <button className="ub-modal-cancel-btn" onClick={() => setShowPasswordModal(false)}>Cancel</button>
               <button className="ub-modal-confirm-btn" onClick={handleConfirmUpdate} disabled={processing}>

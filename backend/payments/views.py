@@ -7,7 +7,7 @@ from datetime import datetime
 from django.db import transaction
 
 from .models import PaymentRequest
-from accounts.models import Customer, log_audit
+from accounts.models import Customer, log_audit, Notification
 
 
 def _require_role(request, role_name):
@@ -22,11 +22,11 @@ def submit_payment(request):
         customer = Customer.objects.get(user=request.user)
         credit_account = customer.credit_account
         
-        # Extract payment data
-        inv_number = request.data.get("inv_number", "")
+        # Extract payment data (inv_number is auto-generated)
         amount_paid = request.data.get("amount_paid")
         date_paid = request.data.get("date_paid")
         proof_payment = request.FILES.get("proof_payment")
+        payment_type = request.data.get("payment_type", "")
         
         # Validate required fields
         if not amount_paid:
@@ -69,20 +69,33 @@ def submit_payment(request):
                 {"error": "Invalid date format. Use YYYY-MM-DD"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Create payment request
+
+        # Disallow future dates
+        from datetime import date as date_type
+        if date_obj > date_type.today():
+            return Response(
+                {"error": "Date of payment cannot be in the future"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create payment request (inv_number auto-generated after save)
         payment = PaymentRequest.objects.create(
             account=credit_account,
-            inv_number=inv_number,
             amount_paid=amount_decimal,
             date_paid=date_obj,
             proof_payment=proof_payment,
+            payment_type=payment_type,
             payment_status="PENDING"
         )
-        
+
+        # Auto-generate invoice number based on payment_id
+        payment.inv_number = f"INV-{payment.payment_id:06d}"
+        payment.save(update_fields=["inv_number"])
+
         return Response({
             "success": True,
             "payment_id": payment.payment_id,
+            "inv_number": payment.inv_number,
             "message": "Payment request submitted successfully"
         }, status=status.HTTP_201_CREATED)
         
@@ -95,6 +108,40 @@ def submit_payment(request):
         return Response(
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def customer_payment_history(request):
+    """Get payment/credit history for the logged-in customer"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+        credit_account = customer.credit_account
+
+        payments = PaymentRequest.objects.filter(
+            account=credit_account
+        ).order_by("-timestamp")
+
+        data = []
+        for p in payments:
+            data.append({
+                "payment_id": p.payment_id,
+                "inv_number": p.inv_number or "",
+                "amount_paid": str(p.amount_paid),
+                "date_paid": p.date_paid.strftime("%B %d, %Y"),
+                "date_submitted": p.timestamp.strftime("%B %d, %Y"),
+                "payment_status": p.payment_status,
+                "payment_type": p.payment_type or "",
+                "approved_by": p.approved_by.get_full_name() or p.approved_by.username if p.approved_by else None,
+                "rejection_reason": p.rejection_reason or "",
+            })
+
+        return Response(data)
+    except Customer.DoesNotExist:
+        return Response(
+            {"error": "Customer profile not found"},
+            status=status.HTTP_404_NOT_FOUND
         )
 
 
@@ -186,6 +233,7 @@ def cm_payment_detail(request, payment_id):
         "available_credit": str(credit.available_credit),
         "credit_limit": str(credit.credit_limit),
         "payment_status": payment.payment_status,
+        "payment_type": payment.payment_type or "",
     })
 
 
@@ -268,6 +316,13 @@ def cm_approve_payment(request, payment_id):
         credit.available_credit = new_available
         credit.save()
 
+    # Create notification for customer
+    Notification.objects.create(
+        customer=payment.account.customer,
+        sent_by=request.user,
+        message=f"Your payment request (Payment ID: {payment.payment_id}) for ₱{payment.amount_paid:,.2f} has been verified and your credit balance has been updated.",
+    )
+
     log_audit(user=request.user, action="APPROVE_PAYMENT", details={"payment_id": payment_id, "amount": str(payment.amount_paid)}, request=request)
     return Response({
         "success": True,
@@ -330,9 +385,74 @@ def cm_reject_payment(request, payment_id):
             fail_silently=True,
         )
 
+    # Create notification for customer
+    customer = payment.account.customer
+    Notification.objects.create(
+        customer=customer,
+        sent_by=request.user,
+        message=f"Your payment request (Payment ID: {payment.payment_id}) for ₱{payment.amount_paid:,.2f} has been rejected. Reason: {rejection_reason}",
+    )
+
     log_audit(user=request.user, action="REJECT_PAYMENT", details={"payment_id": payment_id, "rejection_reason": rejection_reason}, request=request)
     return Response({
         "success": True,
         "payment_id": payment.payment_id,
         "message": "Payment rejected",
     })
+
+
+# ─── Upper Management Payment Endpoints ──────────────────────────────────────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_pending_payments(request):
+    """Pending payment requests for Upper Management dashboard."""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    pending = (
+        PaymentRequest.objects.filter(payment_status="PENDING")
+        .select_related("account__customer__user")
+        .order_by("-date_paid")
+    )
+
+    data = []
+    for p in pending:
+        customer = p.account.customer
+        data.append({
+            "payment_id": p.payment_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "amount_paid": str(p.amount_paid),
+            "date_paid": p.date_paid.strftime("%B %d, %Y"),
+        })
+
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_all_payments(request):
+    """All payment requests for Upper Management."""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    payments = (
+        PaymentRequest.objects.select_related(
+            "account__customer__user",
+            "approved_by",
+        ).order_by("-date_paid")
+    )
+
+    data = []
+    for p in payments:
+        customer = p.account.customer
+        data.append({
+            "payment_id": p.payment_id,
+            "customer_name": customer.user.get_full_name() or customer.user.username,
+            "amount_paid": str(p.amount_paid),
+            "date_paid": p.date_paid.strftime("%B %d, %Y"),
+            "status": p.payment_status,
+            "confirmed_by": p.approved_by.get_full_name() or p.approved_by.username if p.approved_by else None,
+        })
+
+    return Response(data)

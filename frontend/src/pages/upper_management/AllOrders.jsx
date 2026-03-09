@@ -145,8 +145,26 @@ export default function AllOrders() {
         return "#D1E7DD";
       case "CANCELLED":
         return "#F8D7DA";
+      case "REJECTED":
+        return "#F8D7DA";
       default:
         return "#E9ECEF";
+    }
+  };
+
+  const getStatusTextColor = (status) => {
+    switch(status) {
+      case "REJECTED":
+      case "CANCELLED":
+        return "#842029";
+      case "APPROVED":
+      case "COMPLETED":
+        return "#0F5132";
+      case "PENDING":
+      case "PROCESSING":
+        return "#856404";
+      default:
+        return "#333";
     }
   };
 
@@ -162,6 +180,8 @@ export default function AllOrders() {
         return "Order Completed";
       case "CANCELLED":
         return "Credit Rejected";
+      case "REJECTED":
+        return "Rejected";
       default:
         return status;
     }
@@ -335,6 +355,7 @@ export default function AllOrders() {
                     <td style={{ padding: "15px 20px" }}>
                       <span style={{
                         backgroundColor: getStatusColor(order.status),
+                        color: getStatusTextColor(order.status),
                         padding: "6px 12px",
                         borderRadius: "6px",
                         fontSize: "14px",

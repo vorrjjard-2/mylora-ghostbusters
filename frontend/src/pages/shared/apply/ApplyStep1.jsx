@@ -48,9 +48,12 @@ return (
         />
       </div>
       {error && <p className="error-text">{error}</p>}
-      <button type="submit" className="btn-continue">
-        Continue
-      </button>
+      <div className="form-footer">
+        <button type="button" className="btn-back" onClick={() => navigate("/login")}>Back</button>
+        <button type="submit" className="btn-continue">
+          Continue
+        </button>
+      </div>
     </form>
   </div>
 </div>

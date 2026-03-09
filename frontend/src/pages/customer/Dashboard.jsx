@@ -123,7 +123,7 @@ export default function CustomerDashboard() {
     ? parseFloat(data.credit.outstanding_balance) > parseFloat(data.credit.credit_limit)
     : false;
 
-  const unreadCount = unreadNotifications.length;
+  const unreadCount = notifHistory.filter((n) => !n.is_read).length;
 
 return (
     <div className="cd-container">
@@ -244,6 +244,13 @@ return (
             <span className="cd-action-icon">📋</span>
             <div className="cd-action-text">
               <span>View Order History</span>
+            </div>
+          </button>
+
+          <button className="cd-action-card" onClick={() => navigate("/credit/history")}>
+            <span className="cd-action-icon">💳</span>
+            <div className="cd-action-text">
+              <span>Credit History</span>
             </div>
           </button>
         </div>

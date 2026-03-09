@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 from datetime import datetime
 
 from .models import Order, OrderItem, OrderApproval
-from accounts.models import Customer, CreditAccount, log_audit
+from accounts.models import Customer, CreditAccount, log_audit, Notification
 from products.models import Product
 from payments.models import PaymentRequest
 
@@ -407,6 +407,13 @@ Mylora Web Credit System
     except Exception as e:
         print(f"Email sending failed: {e}")
 
+    # Create notification for customer
+    Notification.objects.create(
+        customer=order.account.customer,
+        sent_by=request.user,
+        message=f"Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been approved.",
+    )
+
     log_audit(user=request.user, action="APPROVE_ORDER", details={"order_id": order_id}, request=request)
     return Response({
         "success": True,
@@ -532,6 +539,13 @@ Mylora Web Credit System
         )
     except Exception as e:
         print(f"Email sending failed: {e}")
+
+    # Create notification for customer
+    Notification.objects.create(
+        customer=order.account.customer,
+        sent_by=request.user,
+        message=f"Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been rejected. Reason: {rejection_reason}",
+    )
 
     log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id, "rejection_reason": rejection_reason}, request=request)
     return Response({
@@ -743,6 +757,13 @@ Mylora Web Credit System
     except Exception as e:
         print(f"Email sending failed: {e}")
 
+    # Create notification for customer
+    Notification.objects.create(
+        customer=order.account.customer,
+        sent_by=request.user,
+        message=f"Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been approved via management override.",
+    )
+
     log_audit(user=request.user, action="APPROVE_OVERRIDE", details={"override_id": override_id, "order_id": order.order_id, "approved_by": request.user.username}, request=request)
     return Response({
         "success": True,
@@ -839,6 +860,13 @@ Mylora Web Credit System
         )
     except Exception as e:
         print(f"Email sending failed: {e}")
+
+    # Create notification for customer
+    Notification.objects.create(
+        customer=order.account.customer,
+        sent_by=request.user,
+        message=f"Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been rejected. Reason: {rejection_reason}",
+    )
 
     log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id, "rejection_reason": rejection_reason, "rejected_by": request.user.username}, request=request)
     return Response({
@@ -965,8 +993,8 @@ def cm_adjust_customer_balance(request, customer_id):
     # Get adjustment details
     balance_paid = request.data.get("balance_paid")
     date_of_payment = request.data.get("date_of_payment")
-    invoice_number = request.data.get("invoice_number", "")
     proof_of_payment = request.FILES.get("proof_of_payment")
+    payment_type = request.data.get("payment_type", "")
 
     # Validate required fields
     if not balance_paid:
@@ -1004,6 +1032,14 @@ def cm_adjust_customer_balance(request, customer_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # Disallow future dates
+    from datetime import date as date_type
+    if date_obj > date_type.today():
+        return Response(
+            {"error": "Date of payment cannot be in the future"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     # Get credit account and validate
     credit = customer.credit_account
     outstanding = Decimal(str(credit.outstanding_bal))
@@ -1029,13 +1065,16 @@ def cm_adjust_customer_balance(request, customer_id):
         # Create a payment request record for audit trail
         payment = PaymentRequest.objects.create(
             account=customer.credit_account,
-            inv_number=invoice_number,
             amount_paid=amount_decimal,
             date_paid=date_obj,
             proof_payment=proof_of_payment,
+            payment_type=payment_type,
             payment_status="VERIFIED",
             approved_by=request.user,
         )
+        # Auto-generate invoice number
+        payment.inv_number = f"INV-{payment.payment_id:06d}"
+        payment.save(update_fields=["inv_number"])
 
         # Update credit account with new calculated values
         credit.outstanding_bal = new_outstanding
