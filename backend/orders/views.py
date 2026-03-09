@@ -1620,6 +1620,10 @@ def um_delete_customer(request, customer_id):
                 from accounts.models import Notification
                 Notification.objects.filter(customer=customer).delete()
 
+            # Delete the enrollment record so the email/phone can be reused
+            if customer.application:
+                customer.application.delete()
+
             # Delete customer (cascades to credit account)
             customer.delete()
             # Delete user account

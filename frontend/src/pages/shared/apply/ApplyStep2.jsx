@@ -456,7 +456,7 @@ export default function ApplyStep2() {
         {error && <p className="error-text" style={{color: '#911818', marginLeft: '-40px', marginTop: '20px'}}>{error}</p>}
 
         <div className="form-footer">
-          <button type="button" className="btn-back">Back</button>
+          <button type="button" className="btn-back" onClick={() => navigate("/apply/step-1")}>Back</button>
           <button type="submit" className="btn-next" disabled={submitting}>
             {submitting ? "Submitting..." : "Next"}
           </button>
