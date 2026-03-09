@@ -20,7 +20,6 @@ export default function Dashboard() {
   const [enrollments, setEnrollments] = useState([]);
   const [overrideRequests, setOverrideRequests] = useState([]);
   const [pendingOrders, setPendingOrders] = useState([]);
-  const [pendingPayments, setPendingPayments] = useState([]);
   const [activeTab, setActiveTab] = useState("enrollments");
 
   // Sorting states
@@ -32,7 +31,6 @@ export default function Dashboard() {
   const [sortedEnrollments, setSortedEnrollments] = useState([]);
   const [sortedOverrides, setSortedOverrides] = useState([]);
   const [sortedOrders, setSortedOrders] = useState([]);
-  const [sortedPayments, setSortedPayments] = useState([]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/enrollments/pending/`, {
@@ -75,20 +73,6 @@ export default function Dashboard() {
       .then(data => setPendingOrders(data))
       .catch(err => {
         console.error("Failed to load pending orders", err);
-      });
-
-    fetch(`${API_BASE_URL}/api/um/pending-payments/`, {
-      credentials: "include"
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`Failed to load pending payments: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => setPendingPayments(data))
-      .catch(err => {
-        console.error("Failed to load pending payments", err);
       });
   }, []);
 
@@ -140,22 +124,7 @@ export default function Dashboard() {
       });
       setSortedOrders(sorted);
     }
-
-    if (activeTab === "payments") {
-      const sorted = [...pendingPayments].sort((a, b) => {
-        let comparison = 0;
-        if (sortBy === "customer") {
-          comparison = (a.customer_name || "").localeCompare(b.customer_name || "");
-        } else if (sortBy === "amount") {
-          comparison = parseFloat(a.amount_paid) - parseFloat(b.amount_paid);
-        } else if (sortBy === "date") {
-          comparison = new Date(a.date_paid) - new Date(b.date_paid);
-        }
-        return sortDirection === "asc" ? comparison : -comparison;
-      });
-      setSortedPayments(sorted);
-    }
-  }, [activeTab, enrollments, overrideRequests, pendingOrders, pendingPayments, sortBy, sortDirection]);
+  }, [activeTab, enrollments, overrideRequests, pendingOrders, sortBy, sortDirection]);
 
   const handleSortChange = (newSortBy) => {
     if (newSortBy === sortBy) {
@@ -181,10 +150,6 @@ export default function Dashboard() {
       if (sortBy === "customer") return "Customer Name";
       if (sortBy === "amount") return "Amount";
       if (sortBy === "status") return "Status";
-    } else if (activeTab === "payments") {
-      if (sortBy === "date") return "Date of Payment";
-      if (sortBy === "customer") return "Customer Name";
-      if (sortBy === "amount") return "Amount";
     }
     return "Date";
   };
@@ -208,12 +173,6 @@ export default function Dashboard() {
         { value: "customer", label: "Customer Name" },
         { value: "amount", label: "Amount" },
         { value: "status", label: "Status" },
-      ];
-    } else if (activeTab === "payments") {
-      return [
-        { value: "date", label: "Date of Payment" },
-        { value: "customer", label: "Customer Name" },
-        { value: "amount", label: "Amount" },
       ];
     }
     return [];
@@ -338,10 +297,6 @@ export default function Dashboard() {
                 <span className="um-stat-label">Order Processing</span>
                 <span className="um-stat-number">{pendingOrders.length}</span>
               </div>
-              <div className="um-stat-card">
-                <span className="um-stat-label">Payment Requests</span>
-                <span className="um-stat-number">{pendingPayments.length}</span>
-              </div>
             </div>
 
             {/* SECTION 4: TABS */}
@@ -363,12 +318,6 @@ export default function Dashboard() {
                 onClick={() => setActiveTab("orders")}
               >
                 Order Processing
-              </button>
-              <button
-                className={`um-tab ${activeTab === "payments" ? "active-tab" : ""}`}
-                onClick={() => setActiveTab("payments")}
-              >
-                Payment Requests
               </button>
             </div>
 
@@ -438,23 +387,6 @@ export default function Dashboard() {
                 </>
               )}
 
-              {activeTab === "payments" && (
-                <>
-                  {sortedPayments.length === 0 && <p style={{ color: "#888", padding: "1rem" }}>No pending payment requests.</p>}
-                  {sortedPayments.map((payment) => (
-                    <div
-                      key={payment.payment_id}
-                      className="um-request-item"
-                    >
-                      <div className="um-request-info">
-                        <div className="um-request-id">PAYMENT ID {payment.payment_id}</div>
-                        <div className="um-request-sub">Customer: {payment.customer_name} | Amount: ₱{parseFloat(payment.amount_paid).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</div>
-                      </div>
-                      <div className="um-request-date">Date of Payment: {payment.date_paid}</div>
-                    </div>
-                  ))}
-                </>
-              )}
             </div>
           </main>
       </div>
