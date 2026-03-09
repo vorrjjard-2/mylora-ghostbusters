@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "../../../utils/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getCookie, setCsrfToken } from "../../../utils/csrf";
 import "./Login.css";
@@ -12,6 +12,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch a fresh CSRF token when the login page loads
+    fetch(`${API_BASE_URL}/api/me/`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.csrfToken) setCsrfToken(data.csrfToken);
+      })
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
