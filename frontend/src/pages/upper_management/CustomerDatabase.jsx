@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import ReminderModal from "../../components/ReminderModal";
 import "../upper_management/Dashboard.css";
@@ -15,6 +17,8 @@ export default function CustomerDatabase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
   const [loading, setLoading] = useState(true);
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredCustomers, 5, [searchTerm, sortConfig]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/um/customers/`, {
@@ -188,7 +192,7 @@ export default function CustomerDatabase() {
                 No customers found
               </div>
             )}
-            {filteredCustomers.map((customer) => (
+            {paginatedData.map((customer) => (
               <div
                 key={customer.customer_id}
                 style={{
@@ -252,6 +256,7 @@ export default function CustomerDatabase() {
               </div>
             ))}
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
 
           {reminderTarget && (
             <ReminderModal

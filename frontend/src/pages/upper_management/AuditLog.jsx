@@ -17,6 +17,8 @@ export default function AuditLog() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredLogs, 10, [searchTerm, sortConfig]);
+
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/um/audit-logs/`, {
       credentials: "include",
@@ -222,7 +224,7 @@ export default function AuditLog() {
                     </td>
                   </tr>
                 )}
-                {filteredLogs.map((log) => (
+                {paginatedData.map((log) => (
                   <React.Fragment key={log.log_id}>
                     <tr
                       style={{
@@ -281,6 +283,7 @@ export default function AuditLog() {
               </tbody>
             </table>
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
         </main>
       </div>
     </div>

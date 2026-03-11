@@ -25,6 +25,8 @@ export default function AllProducts() {
   const [formError, setFormError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredProducts, 10, [searchTerm, sortConfig]);
+
   useEffect(() => {
     fetchProducts();
     fetchBranches();
@@ -279,7 +281,7 @@ export default function AllProducts() {
                     </td>
                   </tr>
                 )}
-                {filteredProducts.map((product) => (
+                {paginatedData.map((product) => (
                   <tr
                     key={product.product_id}
                     onClick={() => openEditModal(product)}
@@ -299,6 +301,7 @@ export default function AllProducts() {
               </tbody>
             </table>
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
         </main>
       </div>
 

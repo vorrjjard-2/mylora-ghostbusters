@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 
@@ -12,6 +14,8 @@ export default function AllOrders() {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "date_submitted", direction: "desc" });
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredOrders, 10, [searchTerm, sortConfig]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/um/all-orders/`, {
@@ -329,7 +333,7 @@ export default function AllOrders() {
                     </td>
                   </tr>
                 )}
-                {filteredOrders.map((order) => (
+                {paginatedData.map((order) => (
                   <tr
                     key={order.order_id}
                     onClick={() => navigate(`/upper-management/customer/${order.customer_id}/order/${order.order_id}`, { state: { from: "/upper-management/all-orders" } })}
@@ -369,6 +373,7 @@ export default function AllOrders() {
               </tbody>
             </table>
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
         </main>
       </div>
     </div>

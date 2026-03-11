@@ -15,6 +15,8 @@ export default function UMPaymentRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "date_paid", direction: "desc" });
 
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredPayments, 10, [searchTerm, sortConfig]);
+
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/um/all-payments/`, {
       credentials: "include"
@@ -213,7 +215,7 @@ export default function UMPaymentRequests() {
                     </td>
                   </tr>
                 )}
-                {filteredPayments.map((p) => (
+                {paginatedData.map((p) => (
                   <tr
                     key={p.payment_id}
                     style={{ borderBottom: "1px solid #E9ECEF" }}
@@ -252,6 +254,7 @@ export default function UMPaymentRequests() {
               </tbody>
             </table>
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
         </main>
       </div>
     </div>

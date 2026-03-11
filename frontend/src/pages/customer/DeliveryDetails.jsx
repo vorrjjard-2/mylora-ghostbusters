@@ -12,59 +12,13 @@ export default function DeliveryDetails() {
   const navigate = useNavigate();
   const [deliveryMode, setDeliveryMode] = useState("DELIVERY");
 
-  // Profile address for autofill
-  const [profileData, setProfileData] = useState(null);
-  const [useRegistered, setUseRegistered] = useState(false);
-
-  // Address fields
+  // Address fields (always from registered profile)
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [provinceName, setProvinceName] = useState("");
   const [city, setCity] = useState("");
   const [barangay, setBarangay] = useState("");
   const [zipCode, setZipCode] = useState("");
-
-  // PSGC cascade (only used when useRegistered is false)
-  const [province, setProvince] = useState("");
-  const [cityCode, setCityCode] = useState("");
-  const [provinces, setProvinces] = useState([]);
-  const [citiesMunicipalities, setCitiesMunicipalities] = useState([]);
-  const [barangays, setBarangays] = useState([]);
-
-  useEffect(() => {
-    fetch("https://psgc.gitlab.io/api/provinces/")
-      .then(r => r.json())
-      .then(data => setProvinces(data.sort((a, b) => a.name.localeCompare(b.name))))
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    if (!province) {
-      setCitiesMunicipalities([]);
-      setCityCode("");
-      setCity("");
-      setProvinceName("");
-      setBarangays([]);
-      setBarangay("");
-      return;
-    }
-    fetch(`https://psgc.gitlab.io/api/provinces/${province}/cities-municipalities/`)
-      .then(r => r.json())
-      .then(data => setCitiesMunicipalities(data.sort((a, b) => a.name.localeCompare(b.name))))
-      .catch(console.error);
-  }, [province]);
-
-  useEffect(() => {
-    if (!cityCode) {
-      setBarangays([]);
-      setBarangay("");
-      return;
-    }
-    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${cityCode}/barangays/`)
-      .then(r => r.json())
-      .then(data => setBarangays(data.sort((a, b) => a.name.localeCompare(b.name))))
-      .catch(console.error);
-  }, [cityCode]);
 
   useEffect(() => {
     const items = localStorage.getItem("order_items");
@@ -75,46 +29,22 @@ export default function DeliveryDetails() {
 
     fetch(`${API_BASE_URL}/api/customer/profile/`, { credentials: "include" })
       .then(r => r.json())
-      .then(data => setProfileData(data))
+      .then(data => {
+        setAddress1(data.address1 || "");
+        setAddress2(data.address2 || "");
+        setProvinceName(data.province || "");
+        setCity(data.city || "");
+        setBarangay(data.barangay || "");
+        setZipCode(data.zipcode || "");
+      })
       .catch(console.error);
 
     const savedDelivery = localStorage.getItem("delivery_details");
     if (savedDelivery) {
       const details = JSON.parse(savedDelivery);
       setDeliveryMode(details.deliveryMode || "DELIVERY");
-      setAddress1(details.address1 || "");
-      setAddress2(details.address2 || "");
-      setProvinceName(details.province || "");
-      setCity(details.city || "");
-      setBarangay(details.barangay || "");
-      setZipCode(details.zipCode || "");
     }
   }, [navigate]);
-
-  const handleUseRegistered = (checked) => {
-    setUseRegistered(checked);
-    if (checked && profileData) {
-      setAddress1(profileData.address1 || "");
-      setAddress2(profileData.address2 || "");
-      setProvinceName(profileData.province || "");
-      setCity(profileData.city || "");
-      setBarangay(profileData.barangay || "");
-      setZipCode(profileData.zipcode || "");
-      setProvince("");
-      setCityCode("");
-      setCitiesMunicipalities([]);
-      setBarangays([]);
-    } else {
-      setAddress1("");
-      setAddress2("");
-      setProvinceName("");
-      setCity("");
-      setBarangay("");
-      setZipCode("");
-      setProvince("");
-      setCityCode("");
-    }
-  };
 
   const handleNext = () => {
     if (deliveryMode === "DELIVERY") {
@@ -188,17 +118,6 @@ return (
         {/* Delivery Address Fields */}
         {deliveryMode === "DELIVERY" && (
           <div className="delivery-form">
-            {/* Autofill checkbox */}
-            <label className="delivery-autofill-label">
-              <input
-                type="checkbox"
-                checked={useRegistered}
-                onChange={e => handleUseRegistered(e.target.checked)}
-                className="delivery-autofill-checkbox"
-              />
-              Use my registered address
-            </label>
-
             <div className="delivery-form-group">
               <label className="delivery-label">
                 Address 1<span className="delivery-required">*</span>
@@ -206,10 +125,8 @@ return (
               <input
                 type="text"
                 value={address1}
-                onChange={e => setAddress1(e.target.value)}
-                placeholder="UNIT 123, ABC STREET"
-                className={`delivery-input${useRegistered ? " delivery-input-readonly" : ""}`}
-                readOnly={useRegistered}
+                readOnly
+                className="delivery-input delivery-input-readonly"
               />
             </div>
 
@@ -218,10 +135,8 @@ return (
               <input
                 type="text"
                 value={address2}
-                onChange={e => setAddress2(e.target.value)}
-                placeholder="LANDMARK STATUE"
-                className={`delivery-input${useRegistered ? " delivery-input-readonly" : ""}`}
-                readOnly={useRegistered}
+                readOnly
+                className="delivery-input delivery-input-readonly"
               />
             </div>
 
@@ -230,85 +145,36 @@ return (
                 <label className="delivery-label">
                   Province<span className="delivery-required">*</span>
                 </label>
-                {useRegistered ? (
-                  <input
-                    type="text"
-                    value={provinceName}
-                    readOnly
-                    className="delivery-input delivery-input-readonly"
-                  />
-                ) : (
-                  <select
-                    value={province}
-                    onChange={e => {
-                      const selected = provinces.find(p => p.code === e.target.value);
-                      setProvince(e.target.value);
-                      setProvinceName(selected ? selected.name : "");
-                    }}
-                    className="delivery-input"
-                  >
-                    <option value="">Select province</option>
-                    {provinces.map(p => (
-                      <option key={p.code} value={p.code}>{p.name}</option>
-                    ))}
-                  </select>
-                )}
+                <input
+                  type="text"
+                  value={provinceName}
+                  readOnly
+                  className="delivery-input delivery-input-readonly"
+                />
               </div>
 
               <div className="delivery-form-group">
                 <label className="delivery-label">
                   City / Municipality<span className="delivery-required">*</span>
                 </label>
-                {useRegistered ? (
-                  <input
-                    type="text"
-                    value={city}
-                    readOnly
-                    className="delivery-input delivery-input-readonly"
-                  />
-                ) : (
-                  <select
-                    value={cityCode}
-                    onChange={e => {
-                      const selected = citiesMunicipalities.find(c => c.code === e.target.value);
-                      setCityCode(e.target.value);
-                      setCity(selected ? selected.name : "");
-                    }}
-                    disabled={!province}
-                    className="delivery-input"
-                  >
-                    <option value="">Select city / municipality</option>
-                    {citiesMunicipalities.map(c => (
-                      <option key={c.code} value={c.code}>{c.name}</option>
-                    ))}
-                  </select>
-                )}
+                <input
+                  type="text"
+                  value={city}
+                  readOnly
+                  className="delivery-input delivery-input-readonly"
+                />
               </div>
 
               <div className="delivery-form-group">
                 <label className="delivery-label">
                   Barangay<span className="delivery-required">*</span>
                 </label>
-                {useRegistered ? (
-                  <input
-                    type="text"
-                    value={barangay}
-                    readOnly
-                    className="delivery-input delivery-input-readonly"
-                  />
-                ) : (
-                  <select
-                    value={barangay}
-                    onChange={e => setBarangay(e.target.value)}
-                    disabled={!cityCode}
-                    className="delivery-input"
-                  >
-                    <option value="">Select barangay</option>
-                    {barangays.map(b => (
-                      <option key={b.code} value={b.name}>{b.name}</option>
-                    ))}
-                  </select>
-                )}
+                <input
+                  type="text"
+                  value={barangay}
+                  readOnly
+                  className="delivery-input delivery-input-readonly"
+                />
               </div>
             </div>
 
@@ -318,14 +184,9 @@ return (
               </label>
               <input
                 type="text"
-                placeholder="9876"
                 value={zipCode}
-                onChange={e => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  if (value.length <= 4) setZipCode(value);
-                }}
-                className={`delivery-input${useRegistered ? " delivery-input-readonly" : ""}`}
-                readOnly={useRegistered}
+                readOnly
+                className="delivery-input delivery-input-readonly"
               />
             </div>
           </div>

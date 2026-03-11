@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import "../upper_management/Dashboard.css";
 
@@ -13,6 +15,8 @@ export default function EmployeeDatabase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
   const [loading, setLoading] = useState(true);
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredEmployees, 5, [searchTerm, sortConfig]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/um/employees/`, {
@@ -204,7 +208,7 @@ export default function EmployeeDatabase() {
                 No employees found
               </div>
             )}
-            {filteredEmployees.map((employee) => (
+            {paginatedData.map((employee) => (
               <div
                 key={employee.user_id}
                 style={{
@@ -233,6 +237,7 @@ export default function EmployeeDatabase() {
               </div>
             ))}
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
         </main>
       </div>
     </div>
