@@ -10,6 +10,8 @@ export default function CreateOrder() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 5;
   const [selectedItems, setSelectedItems] = useState(() => {
     const saved = localStorage.getItem("order_items");
     return saved ? JSON.parse(saved) : [];
@@ -34,6 +36,12 @@ export default function CreateOrder() {
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
   );
 
   const handleAddProduct = (product) => {
@@ -139,7 +147,7 @@ export default function CreateOrder() {
                 type="text"
                 placeholder="Search products..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 className="order-search-input"
               />
 
@@ -147,7 +155,7 @@ export default function CreateOrder() {
                 {filteredProducts.length === 0 ? (
                   <p>No products found</p>
                 ) : (
-                  filteredProducts.map((product) => (
+                  paginatedProducts.map((product) => (
                     <div key={product.product_id} className="order-product-card">
                       <div>
                         <div className="order-product-name">{product.name}</div>
@@ -155,7 +163,7 @@ export default function CreateOrder() {
                           ₱{parseFloat(product.unit_price).toLocaleString("en-PH", {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2
-                            })}/{product.unit}                        
+                            })}/{product.unit}
                           </div>
                       </div>
                       <button
@@ -168,6 +176,28 @@ export default function CreateOrder() {
                   ))
                 )}
               </div>
+
+              {totalPages > 1 && (
+                <div className="order-pagination">
+                  <button
+                    className="order-page-btn"
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <span className="order-page-info">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="order-page-btn"
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="order-right-panel">

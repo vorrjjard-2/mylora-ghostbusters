@@ -255,8 +255,12 @@ return (
           </button>
         </div>
 
-        {/* Credit Balance Section */}
-        <div className="cd-section">
+        {/* Credit Term + Balance Section */}
+        <fieldset className="cd-credit-fieldset">
+          <legend className="cd-credit-legend">
+            Credit Term: {data.credit.credit_term ? `${data.credit.credit_term} days` : "N/A"}
+          </legend>
+
           <h2 className="cd-section-title">Your Credit Balance</h2>
           <div className="cd-credit-info">
             <div className="cd-credit-row">
@@ -282,15 +286,14 @@ return (
               }}
             />
           </div>
-        </div>
 
-        {/* Outstanding Balance */}
-        <div className="cd-balance-section">
-          <h2 className="cd-section-title">Outstanding Balance</h2>
-          <div className="cd-balance-amount">
-            ₱ {parseFloat(data.credit.outstanding_balance).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+          <div className="cd-balance-section">
+            <h2 className="cd-section-title">Outstanding Balance</h2>
+            <div className="cd-balance-amount">
+              ₱ {parseFloat(data.credit.outstanding_balance).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+            </div>
           </div>
-        </div>
+        </fieldset>
 
         {/* Recent Orders */}
         <div className="cd-section">

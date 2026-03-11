@@ -118,6 +118,7 @@ def customer_dashboard(request):
                 'available_credit': str(available_credit),
                 'credit_limit': str(credit_account.credit_limit),
                 'outstanding_balance': str(credit_account.outstanding_bal),
+                'credit_term': credit_account.credit_term,
                 'branch': {
                     'name': credit_account.branch.name,
                     'address': credit_account.branch.address,
