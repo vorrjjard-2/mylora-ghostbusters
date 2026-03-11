@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import "./CustomerHistory.css";
 
@@ -33,6 +35,8 @@ export default function CustomerHistory() {
       })
       .finally(() => setLoading(false));
   }, [customerId, navigate]);
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(history, 10, []);
 
   if (loading) {
     return <div className="ch-container">Loading...</div>;
@@ -102,7 +106,7 @@ return (
                 </tr>
               </thead>
               <tbody>
-                {history.map((payment) => (
+                {paginatedData.map((payment) => (
                   <tr key={payment.payment_id}>
                     <td className="ch-td">{payment.date_paid}</td>
                     <td className="ch-td">{payment.inv_number || "—"}</td>
@@ -121,6 +125,7 @@ return (
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
       </div>
       </main>
     </div>

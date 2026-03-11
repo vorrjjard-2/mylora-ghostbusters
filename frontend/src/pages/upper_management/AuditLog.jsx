@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 

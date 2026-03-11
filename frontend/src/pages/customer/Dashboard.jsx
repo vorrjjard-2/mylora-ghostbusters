@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 
@@ -124,6 +126,7 @@ export default function CustomerDashboard() {
     : false;
 
   const unreadCount = notifHistory.filter((n) => !n.is_read).length;
+  const notifPag = usePagination(notifHistory, 5, []);
 
 return (
     <div className="cd-container">
@@ -185,7 +188,7 @@ return (
                     No notifications yet
                   </div>
                 ) : (
-                  notifHistory.map((n) => (
+                  notifPag.paginatedData.map((n) => (
                     <div
                       key={n.notification_id}
                       style={{
@@ -206,6 +209,7 @@ return (
                     </div>
                   ))
                 )}
+                <Pagination currentPage={notifPag.currentPage} totalPages={notifPag.totalPages} onPageChange={notifPag.goToPage} />
               </div>
             )}
           </div>

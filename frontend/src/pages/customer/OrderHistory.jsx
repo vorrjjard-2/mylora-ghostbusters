@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import searchIcon from "../../assets/search.png";
 import logo from "../../assets/mylora-logo.png";
 import "./OrderHistory.css";
@@ -87,6 +89,8 @@ export default function OrderHistory() {
 
     return list;
   }, [orders, search, sortDir, activeStatuses]);
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filtered, 10, [search, sortDir, activeStatuses]);
 
   /* ── render ── */
   if (loading) return <div className="history-container">Loading...</div>;
@@ -195,7 +199,7 @@ export default function OrderHistory() {
                 <td colSpan={4} className="history-empty-cell">No orders match your filters.</td>
               </tr>
             ) : (
-              filtered.map((order) => (
+              paginatedData.map((order) => (
                 <tr
                   key={order.order_id}
                   className="history-row"
@@ -220,6 +224,7 @@ export default function OrderHistory() {
           </tbody>
         </table>
       </div>
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
       </main>
     </div>
   );

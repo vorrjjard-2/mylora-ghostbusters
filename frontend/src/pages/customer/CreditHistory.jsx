@@ -2,6 +2,8 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 
@@ -25,6 +27,8 @@ export default function CreditHistory() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(payments, 10, []);
 
   if (loading) return <div className="cd-container">Loading...</div>;
 
@@ -125,7 +129,7 @@ export default function CreditHistory() {
                 </tr>
               </thead>
               <tbody>
-                {payments.map((p) => {
+                {paginatedData.map((p) => {
                   const badge = statusStyles[p.payment_status] || { backgroundColor: "#e0e0e0", color: "#333" };
                   return (
                     <tr key={p.payment_id} className="cd-table-row">
@@ -152,6 +156,7 @@ export default function CreditHistory() {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
 
         <div style={{ marginTop: "20px" }}>
           <button

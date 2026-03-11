@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CMSidebar from "../../components/credit_manager/CMSidebar";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import ReminderModal from "../../components/ReminderModal";
 import "../upper_management/Dashboard.css";
@@ -184,6 +186,15 @@ export default function CreditManagerDashboard() {
       setSortedDashPayments(sorted);
     }
   }, [activeTab, dashTab, creditData, allOrders, payments, allPayments, customers, sortBy, sortDirection, searchTerm]);
+
+  // Pagination hooks for each list
+  const dashOrdersPag = usePagination(sortedDashOrders, 10, [sortBy, sortDirection, dashTab]);
+  const dashPaymentsPag = usePagination(sortedDashPayments, 10, [sortBy, sortDirection, dashTab]);
+  const creditPendingPag = usePagination(filteredOrders, 10, [sortBy, sortDirection, activeTab]);
+  const creditAllPag = usePagination(filteredOrders, 10, [searchTerm, sortBy, sortDirection, activeTab]);
+  const paymentPendingPag = usePagination(filteredPayments, 10, [sortBy, sortDirection, activeTab]);
+  const paymentAllPag = usePagination(filteredPayments, 10, [sortBy, sortDirection, activeTab]);
+  const adjustmentPag = usePagination(filteredCustomers, 5, [searchTerm, sortBy, sortDirection, activeTab]);
 
   const handleSortChange = (newSortBy) => {
     if (newSortBy === sortBy) {
@@ -449,7 +460,7 @@ export default function CreditManagerDashboard() {
                     {sortedDashOrders.length === 0 && (
                       <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
                     )}
-                    {sortedDashOrders.map((order) => (
+                    {dashOrdersPag.paginatedData.map((order) => (
                       <div
                         key={order.order_id}
                         className="um-request-item"
@@ -463,6 +474,7 @@ export default function CreditManagerDashboard() {
                         <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
                       </div>
                     ))}
+                    <Pagination currentPage={dashOrdersPag.currentPage} totalPages={dashOrdersPag.totalPages} onPageChange={dashOrdersPag.goToPage} />
                   </div>
                 )}
 
@@ -471,7 +483,7 @@ export default function CreditManagerDashboard() {
                     {sortedDashPayments.length === 0 && (
                       <p style={{ color: "#888", padding: "1rem" }}>No pending payments.</p>
                     )}
-                    {sortedDashPayments.map((p) => (
+                    {dashPaymentsPag.paginatedData.map((p) => (
                       <div
                         key={p.payment_id}
                         className="um-request-item"
@@ -485,6 +497,7 @@ export default function CreditManagerDashboard() {
                         <div className="um-request-date">Date Paid: {p.date_paid}</div>
                       </div>
                     ))}
+                    <Pagination currentPage={dashPaymentsPag.currentPage} totalPages={dashPaymentsPag.totalPages} onPageChange={dashPaymentsPag.goToPage} />
                   </div>
                 )}
               </div>
@@ -554,7 +567,7 @@ export default function CreditManagerDashboard() {
                 {filteredOrders.length === 0 && (
                   <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
                 )}
-                {filteredOrders.map((order) => (
+                {creditPendingPag.paginatedData.map((order) => (
                   <div
                     key={order.order_id}
                     className="um-request-item"
@@ -568,6 +581,7 @@ export default function CreditManagerDashboard() {
                     <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
                   </div>
                 ))}
+                <Pagination currentPage={creditPendingPag.currentPage} totalPages={creditPendingPag.totalPages} onPageChange={creditPendingPag.goToPage} />
               </div>
             </>
           )}
@@ -655,7 +669,7 @@ export default function CreditManagerDashboard() {
                         <td colSpan="5" style={{ padding: "20px", textAlign: "center", color: "#888" }}>No orders found.</td>
                       </tr>
                     )}
-                    {filteredOrders.map((order, idx) => {
+                    {creditAllPag.paginatedData.map((order, idx) => {
                       const statusStyles = {
                         PENDING:   { backgroundColor: "#FFF3CD", color: "#856404" },
                         APPROVED:  { backgroundColor: "#D1E7DD", color: "#0F5132" },
@@ -668,7 +682,7 @@ export default function CreditManagerDashboard() {
                           key={order.order_id}
                           onClick={() => navigate(`/credit-manager/approve/${order.order_id}`)}
                           style={{
-                            borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
+                            borderBottom: idx < creditAllPag.paginatedData.length - 1 ? "1px solid #e0e0e0" : "none",
                             cursor: "pointer"
                           }}
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
@@ -695,6 +709,7 @@ export default function CreditManagerDashboard() {
                   </tbody>
                 </table>
               </div>
+              <Pagination currentPage={creditAllPag.currentPage} totalPages={creditAllPag.totalPages} onPageChange={creditAllPag.goToPage} />
             </>
           )}
 
@@ -761,7 +776,7 @@ export default function CreditManagerDashboard() {
                 {filteredPayments.length === 0 && (
                   <p style={{ color: "#888", padding: "1rem" }}>No pending payments.</p>
                 )}
-                {filteredPayments.map((p) => (
+                {paymentPendingPag.paginatedData.map((p) => (
                   <div
                     key={p.payment_id}
                     className="um-request-item"
@@ -775,6 +790,7 @@ export default function CreditManagerDashboard() {
                     <div className="um-request-date">Date Paid: {p.date_paid}</div>
                   </div>
                 ))}
+                <Pagination currentPage={paymentPendingPag.currentPage} totalPages={paymentPendingPag.totalPages} onPageChange={paymentPendingPag.goToPage} />
               </div>
             </>
           )}
@@ -860,7 +876,7 @@ export default function CreditManagerDashboard() {
                         <td colSpan="5" style={{ padding: "20px", textAlign: "center", color: "#888" }}>No payments found.</td>
                       </tr>
                     )}
-                    {filteredPayments.map((p, idx) => {
+                    {paymentAllPag.paginatedData.map((p, idx) => {
                       const statusStyles = {
                         PENDING:  { backgroundColor: "#FFF3CD", color: "#856404" },
                         VERIFIED: { backgroundColor: "#D1E7DD", color: "#0F5132" },
@@ -872,7 +888,7 @@ export default function CreditManagerDashboard() {
                           key={p.payment_id}
                           onClick={() => navigate(`/credit-manager/payment/${p.payment_id}`)}
                           style={{
-                            borderBottom: idx < filteredPayments.length - 1 ? "1px solid #e0e0e0" : "none",
+                            borderBottom: idx < paymentAllPag.paginatedData.length - 1 ? "1px solid #e0e0e0" : "none",
                             cursor: "pointer"
                           }}
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
@@ -895,6 +911,7 @@ export default function CreditManagerDashboard() {
                   </tbody>
                 </table>
               </div>
+              <Pagination currentPage={paymentAllPag.currentPage} totalPages={paymentAllPag.totalPages} onPageChange={paymentAllPag.goToPage} />
             </>
           )}
 
@@ -933,7 +950,7 @@ export default function CreditManagerDashboard() {
                 {filteredCustomers.length === 0 && (
                   <p style={{ color: "#888", padding: "1rem" }}>No customers found.</p>
                 )}
-                {filteredCustomers.map((customer) => (
+                {adjustmentPag.paginatedData.map((customer) => (
                   <div
                     key={customer.customer_id}
                     onClick={() => navigate(`/credit-manager/customer/${customer.customer_id}/details`)}
@@ -983,6 +1000,7 @@ export default function CreditManagerDashboard() {
                     </div>
                   </div>
                 ))}
+                <Pagination currentPage={adjustmentPag.currentPage} totalPages={adjustmentPag.totalPages} onPageChange={adjustmentPag.goToPage} />
               </div>
 
               {reminderTarget && (

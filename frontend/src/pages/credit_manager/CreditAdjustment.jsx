@@ -2,6 +2,8 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 
 export default function CreditAdjustment() {
   const navigate = useNavigate();
@@ -28,6 +30,8 @@ export default function CreditAdjustment() {
   const filteredCustomers = customers.filter((c) =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredCustomers, 5, [searchTerm]);
 
   if (loading) return <div style={styles.container}>Loading...</div>;
 
@@ -96,7 +100,7 @@ export default function CreditAdjustment() {
             <div style={styles.empty}>No customers found</div>
           ) : (
             <div style={styles.customerList}>
-              {filteredCustomers.map((customer) => (
+              {paginatedData.map((customer) => (
                 <div
                   key={customer.customer_id}
                   style={styles.customerCard}
@@ -141,6 +145,7 @@ export default function CreditAdjustment() {
               ))}
             </div>
           )}
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
         </main>
       </div>
     </div>

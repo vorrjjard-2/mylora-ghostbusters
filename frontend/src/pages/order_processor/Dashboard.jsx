@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import { handleLogout } from "../../utils/logout";
 import "../upper_management/Dashboard.css";
@@ -74,6 +76,8 @@ export default function OrderProcessorDashboard() {
     if (sortBy === "status") return "Status";
     if (sortBy === "order_id") return "Order ID";
   };
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredOrders, 10, [sortBy, sortDirection]);
 
   const onLogout = () => handleLogout(navigate);
 
@@ -219,7 +223,7 @@ export default function OrderProcessorDashboard() {
             <p style={{ color: "#888", padding: "1rem" }}>No pending orders.</p>
           ) : (
             <div className="um-list-container">
-              {filteredOrders.map((order) => (
+              {paginatedData.map((order) => (
                 <div
                   key={order.order_id}
                   className="um-request-item"
@@ -233,6 +237,7 @@ export default function OrderProcessorDashboard() {
                   <div className="um-request-date">Date Ordered: {order.date_ordered}</div>
                 </div>
               ))}
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
             </div>
           )}
         </main>

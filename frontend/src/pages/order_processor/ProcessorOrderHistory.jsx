@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import { handleLogout } from "../../utils/logout";
 import "../upper_management/Dashboard.css";
@@ -103,6 +105,8 @@ export default function ProcessorOrderHistory() {
     setSortBy("date");
     setSortDirection("desc");
   };
+
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredOrders, 10, [searchTerm, activeTab, sortBy, sortDirection]);
 
   const handleOrderClick = (order) => {
     if (order.order_status === "COMPLETED") {
@@ -295,14 +299,14 @@ export default function ProcessorOrderHistory() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredOrders.map((order, idx) => {
+                  {paginatedData.map((order, idx) => {
                     const badge = STATUS_STYLES[order.order_status] || { backgroundColor: "#e0e0e0", color: "#333" };
                     return (
                       <tr
                         key={order.order_id}
                         onClick={() => handleOrderClick(order)}
                         style={{
-                          borderBottom: idx < filteredOrders.length - 1 ? "1px solid #e0e0e0" : "none",
+                          borderBottom: idx < paginatedData.length - 1 ? "1px solid #e0e0e0" : "none",
                           cursor: "pointer",
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
@@ -330,6 +334,7 @@ export default function ProcessorOrderHistory() {
               </table>
             </div>
           )}
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
         </main>
       </div>
     </div>

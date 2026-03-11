@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import usePagination from "../../hooks/usePagination";
+import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import "./CreateOrder.css";
 
@@ -10,8 +12,6 @@ export default function CreateOrder() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 5;
   const [selectedItems, setSelectedItems] = useState(() => {
     const saved = localStorage.getItem("order_items");
     return saved ? JSON.parse(saved) : [];
@@ -38,11 +38,7 @@ export default function CreateOrder() {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage
-  );
+  const { currentPage, totalPages, paginatedData: paginatedProducts, goToPage } = usePagination(filteredProducts, 5, [searchTerm]);
 
   const handleAddProduct = (product) => {
     const existing = selectedItems.find((item) => item.product_id === product.product_id);
@@ -147,7 +143,7 @@ export default function CreateOrder() {
                 type="text"
                 placeholder="Search products..."
                 value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="order-search-input"
               />
 
@@ -177,27 +173,7 @@ export default function CreateOrder() {
                 )}
               </div>
 
-              {totalPages > 1 && (
-                <div className="order-pagination">
-                  <button
-                    className="order-page-btn"
-                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </button>
-                  <span className="order-page-info">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    className="order-page-btn"
-                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
             </div>
 
             <div className="order-right-panel">
