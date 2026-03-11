@@ -168,6 +168,12 @@ def customer_profile(request):
             'barangay': app.barangay if app else "",
             'city': app.city if app else "",
             'zipcode': app.zipcode if app else "",
+            'billing_address1': app.billing_address1 if app else "",
+            'billing_address2': app.billing_address2 if app else "",
+            'billing_province': app.billing_province if app else "",
+            'billing_barangay': app.billing_barangay if app else "",
+            'billing_city': app.billing_city if app else "",
+            'billing_zipcode': app.billing_zipcode if app else "",
         })
         
     except Customer.DoesNotExist:
@@ -223,12 +229,20 @@ def update_address(request):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Update address fields
+        # Update delivery address fields
         app.address1 = request.data.get("address1", app.address1)
         app.address2 = request.data.get("address2", app.address2)
         app.barangay = request.data.get("barangay", app.barangay)
         app.city = request.data.get("city", app.city)
         app.zipcode = request.data.get("zipcode", app.zipcode)
+
+        # Update billing address fields
+        app.billing_address1 = request.data.get("billing_address1", app.billing_address1)
+        app.billing_address2 = request.data.get("billing_address2", app.billing_address2)
+        app.billing_barangay = request.data.get("billing_barangay", app.billing_barangay)
+        app.billing_city = request.data.get("billing_city", app.billing_city)
+        app.billing_province = request.data.get("billing_province", app.billing_province)
+        app.billing_zipcode = request.data.get("billing_zipcode", app.billing_zipcode)
         app.save()
         
         return Response({"success": True, "message": "Address updated successfully"})

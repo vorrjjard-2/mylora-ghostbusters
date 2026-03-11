@@ -88,6 +88,13 @@ def create_application(request):
             zipcode=step2["zipCode"],
             branch_id=step2["branch"],
 
+            billing_address1=step2.get("billingAddress1", ""),
+            billing_address2=step2.get("billingAddress2", ""),
+            billing_province=step2.get("billingProvince", ""),
+            billing_barangay=step2.get("billingBarangay", ""),
+            billing_city=step2.get("billingCity", ""),
+            billing_zipcode=step2.get("billingZipCode", ""),
+
             credit_amt_request=step2["creditAmount"],
             credit_term_request=step2["creditTerm"],
 
@@ -176,6 +183,12 @@ def enrollment_detail(request, application_id):
         "barangay": app.barangay,
         "city": app.city,
         "zipcode": app.zipcode,
+        "billing_address1": app.billing_address1,
+        "billing_address2": app.billing_address2,
+        "billing_province": app.billing_province,
+        "billing_barangay": app.billing_barangay,
+        "billing_city": app.billing_city,
+        "billing_zipcode": app.billing_zipcode,
         "credit_amt_request": app.credit_amt_request,
         "credit_term_request": app.credit_term_request,
         "doc1_file": app.doc1_file.url if app.doc1_file else None,

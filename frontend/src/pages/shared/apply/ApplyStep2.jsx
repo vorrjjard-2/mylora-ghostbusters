@@ -22,6 +22,19 @@ export default function ApplyStep2() {
   const [zipCode, setZipCode] = useState("");
   const [branch, setBranch] = useState("");
 
+  // Billing address
+  const [sameAsDelivery, setSameAsDelivery] = useState(false);
+  const [billingAddress1, setBillingAddress1] = useState("");
+  const [billingAddress2, setBillingAddress2] = useState("");
+  const [billingProvince, setBillingProvince] = useState("");
+  const [billingProvinceName, setBillingProvinceName] = useState("");
+  const [billingCityCode, setBillingCityCode] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+  const [billingBarangay, setBillingBarangay] = useState("");
+  const [billingZipCode, setBillingZipCode] = useState("");
+  const [billingCities, setBillingCities] = useState([]);
+  const [billingBarangaysList, setBillingBarangaysList] = useState([]);
+
   const [provinces, setProvinces] = useState([]);
   const [citiesMunicipalities, setCitiesMunicipalities] = useState([]);
   const [barangays, setBarangays] = useState([]);
@@ -68,6 +81,58 @@ export default function ApplyStep2() {
       .then(data => setBarangays(data.sort((a, b) => a.name.localeCompare(b.name))))
       .catch(console.error);
   }, [cityCode]);
+
+  // Billing PSGC cascade
+  useEffect(() => {
+    if (!billingProvince) {
+      setBillingCities([]);
+      setBillingCityCode("");
+      setBillingCity("");
+      setBillingProvinceName("");
+      setBillingBarangaysList([]);
+      setBillingBarangay("");
+      return;
+    }
+    fetch(`https://psgc.gitlab.io/api/provinces/${billingProvince}/cities-municipalities/`)
+      .then(r => r.json())
+      .then(data => setBillingCities(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, [billingProvince]);
+
+  useEffect(() => {
+    if (!billingCityCode) {
+      setBillingBarangaysList([]);
+      setBillingBarangay("");
+      return;
+    }
+    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${billingCityCode}/barangays/`)
+      .then(r => r.json())
+      .then(data => setBillingBarangaysList(data.sort((a, b) => a.name.localeCompare(b.name))))
+      .catch(console.error);
+  }, [billingCityCode]);
+
+  const handleSameAsDelivery = (checked) => {
+    setSameAsDelivery(checked);
+    if (checked) {
+      setBillingAddress1(address1);
+      setBillingAddress2(address2);
+      setBillingProvinceName(provinceName);
+      setBillingCity(city);
+      setBillingBarangay(barangay);
+      setBillingZipCode(zipCode);
+      setBillingProvince("");
+      setBillingCityCode("");
+      setBillingCities([]);
+      setBillingBarangaysList([]);
+    } else {
+      setBillingAddress1("");
+      setBillingAddress2("");
+      setBillingProvinceName("");
+      setBillingCity("");
+      setBillingBarangay("");
+      setBillingZipCode("");
+    }
+  };
 
   const [creditAmount, setCreditAmount] = useState("");
   const [creditTerm, setCreditTerm] = useState("");
@@ -130,6 +195,12 @@ export default function ApplyStep2() {
           branch,
           creditAmount,
           creditTerm,
+          billingAddress1: sameAsDelivery ? address1 : billingAddress1,
+          billingAddress2: sameAsDelivery ? address2 : billingAddress2,
+          billingProvince: sameAsDelivery ? provinceName : billingProvinceName,
+          billingBarangay: sameAsDelivery ? barangay : billingBarangay,
+          billingCity: sameAsDelivery ? city : billingCity,
+          billingZipCode: sameAsDelivery ? zipCode : billingZipCode,
         })
       );
 
@@ -351,9 +422,122 @@ export default function ApplyStep2() {
            </div>
          </section>
 
-         {/* Section 3 */}
+         {/* Section 03 - Billing Address */}
          <section className="form-section">
-           <h2 className="section-title">03 Credit Line Application</h2>
+           <h2 className="section-title">03 Billing Address</h2>
+           <label className="delivery-autofill-label" style={{ marginBottom: "15px", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+             <input
+               type="checkbox"
+               checked={sameAsDelivery}
+               onChange={e => handleSameAsDelivery(e.target.checked)}
+             />
+             Same as delivery address
+           </label>
+
+           <div className="input-group full-width">
+             <label>Address 1<span className="required">*</span></label>
+             <input
+               type="text"
+               placeholder="UNIT NO., BLDG NAME, STREET"
+               value={sameAsDelivery ? address1 : billingAddress1}
+               onChange={e => setBillingAddress1(e.target.value.toUpperCase())}
+               readOnly={sameAsDelivery}
+               style={sameAsDelivery ? { backgroundColor: "#f0f0f0" } : {}}
+               required
+             />
+           </div>
+           <div className="input-group full-width">
+             <label>Address 2</label>
+             <input
+               type="text"
+               placeholder="LANDMARK STATUE"
+               value={sameAsDelivery ? address2 : billingAddress2}
+               onChange={e => setBillingAddress2(e.target.value.toUpperCase())}
+               readOnly={sameAsDelivery}
+               style={sameAsDelivery ? { backgroundColor: "#f0f0f0" } : {}}
+             />
+           </div>
+           <div className="input-grid three-col">
+             <div className="input-group">
+               <label>Barangay<span className="required">*</span></label>
+               {sameAsDelivery ? (
+                 <input type="text" value={barangay} readOnly style={{ backgroundColor: "#f0f0f0" }} />
+               ) : (
+                 <select
+                   value={billingBarangay}
+                   onChange={e => setBillingBarangay(e.target.value)}
+                   disabled={!billingCityCode}
+                   required
+                 >
+                   <option value="">Select barangay</option>
+                   {billingBarangaysList.map(b => (
+                     <option key={b.code} value={b.name}>{b.name}</option>
+                   ))}
+                 </select>
+               )}
+             </div>
+             <div className="input-group">
+               <label>City<span className="required">*</span></label>
+               {sameAsDelivery ? (
+                 <input type="text" value={city} readOnly style={{ backgroundColor: "#f0f0f0" }} />
+               ) : (
+                 <select
+                   value={billingCityCode}
+                   onChange={e => {
+                     const selected = billingCities.find(c => c.code === e.target.value);
+                     setBillingCityCode(e.target.value);
+                     setBillingCity(selected ? selected.name : "");
+                   }}
+                   disabled={!billingProvince}
+                   required
+                 >
+                   <option value="">Select city / municipality</option>
+                   {billingCities.map(c => (
+                     <option key={c.code} value={c.code}>{c.name}</option>
+                   ))}
+                 </select>
+               )}
+             </div>
+             <div className="input-group">
+               <label>Zip Code<span className="required">*</span></label>
+               <input
+                 type="text"
+                 placeholder="XXXX"
+                 value={sameAsDelivery ? zipCode : billingZipCode}
+                 onChange={e => {
+                   const value = e.target.value.replace(/\D/g, "");
+                   if (value.length <= 4) setBillingZipCode(value);
+                 }}
+                 readOnly={sameAsDelivery}
+                 style={sameAsDelivery ? { backgroundColor: "#f0f0f0" } : {}}
+                 required
+               />
+             </div>
+           </div>
+           {!sameAsDelivery && (
+             <div className="input-group">
+               <label>Province<span className="required">*</span></label>
+               <select
+                 value={billingProvince}
+                 onChange={e => {
+                   const selected = provinces.find(p => p.code === e.target.value);
+                   setBillingProvince(e.target.value);
+                   setBillingProvinceName(selected ? selected.name : "");
+                 }}
+                 required
+               >
+                 <option value="">Select province</option>
+                 {provinces.map(p => (
+                   <option key={p.code} value={p.code}>{p.name}</option>
+                 ))}
+               </select>
+             </div>
+           )}
+         </section>
+
+         {/* Section 04 */}
+         <section className="form-section">
+           <h2 className="section-title">04 Credit Line Application</h2>
             <div className="input-group full-width">
                 <label>How much credit are you applying for?</label>
                 <input 
@@ -379,9 +563,9 @@ export default function ApplyStep2() {
            </div>
          </section>
 
-        {/* Section 04 */}
+        {/* Section 05 */}
         <section className="form-section">
-          <h2 className="section-title">04 Upload Supporting Documents</h2>
+          <h2 className="section-title">05 Upload Supporting Documents</h2>
           <div className="section-header-text">
             <p>The following supporting documents are required:</p>
             <ul className="required-docs-list">
@@ -425,9 +609,9 @@ export default function ApplyStep2() {
           )}
         </section>
 
-        {/* Section 05 */}
+        {/* Section 06 */}
         <section className="form-section">
-          <h2 className="section-title">05 Upload a Government-Issued ID</h2>
+          <h2 className="section-title">06 Upload a Government-Issued ID</h2>
           <p className="id-hint-text">Please make sure that uploaded image is clear.<span className="required">*</span></p>
           {govId ? (
             <div className="file-list-container">

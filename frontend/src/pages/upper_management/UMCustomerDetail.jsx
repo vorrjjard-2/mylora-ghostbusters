@@ -124,7 +124,7 @@ export default function UMCustomerDetail() {
             onClick={() => navigate(`/upper-management/customer/${customerId}/update-balance`)}
           >
             <img src={clockIcon} alt="Update" className="cd-clock-icon" />
-            Update Credit Balance
+            Payments
           </button>
           <button
             className="cd-adjust-btn"
@@ -178,9 +178,9 @@ export default function UMCustomerDetail() {
           </div>
         </div>
 
-        {/* Address Details */}
+        {/* Delivery Address */}
         <div className="cd-section">
-          <h2 className="cd-section-title">Address Details</h2>
+          <h2 className="cd-section-title">Delivery Address</h2>
           <div className="cd-form-group">
             <label className="cd-label">Address 1</label>
             <input type="text" value={customer.address1 || "N/A"} readOnly className="cd-input-read-only" />
@@ -201,6 +201,33 @@ export default function UMCustomerDetail() {
             <div className="cd-form-group">
               <label className="cd-label">Zip Code</label>
               <input type="text" value={customer.zipcode || "N/A"} readOnly className="cd-input-read-only" />
+            </div>
+          </div>
+        </div>
+
+        {/* Billing Address */}
+        <div className="cd-section">
+          <h2 className="cd-section-title">Billing Address</h2>
+          <div className="cd-form-group">
+            <label className="cd-label">Address 1</label>
+            <input type="text" value={customer.billing_address1 || "N/A"} readOnly className="cd-input-read-only" />
+          </div>
+          <div className="cd-form-group">
+            <label className="cd-label">Address 2</label>
+            <input type="text" value={customer.billing_address2 || "N/A"} readOnly className="cd-input-read-only" />
+          </div>
+          <div className="cd-form-row-triple">
+            <div className="cd-form-group">
+              <label className="cd-label">Barangay</label>
+              <input type="text" value={customer.billing_barangay || "N/A"} readOnly className="cd-input-read-only" />
+            </div>
+            <div className="cd-form-group">
+              <label className="cd-label">City</label>
+              <input type="text" value={customer.billing_city || "N/A"} readOnly className="cd-input-read-only" />
+            </div>
+            <div className="cd-form-group">
+              <label className="cd-label">Zip Code</label>
+              <input type="text" value={customer.billing_zipcode || "N/A"} readOnly className="cd-input-read-only" />
             </div>
           </div>
         </div>

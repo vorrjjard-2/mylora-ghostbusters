@@ -213,9 +213,9 @@ return (
         </div>
       </div>
 
-      {/* Address Details Section - Read Only */}
+      {/* Delivery Address Section - Read Only */}
       <div className="profile-section">
-        <h2 className="profile-section-title">Address Details</h2>
+        <h2 className="profile-section-title">Delivery Address</h2>
 
         <div className="profile-form-group">
           <label className="profile-label">Address 1</label>
@@ -271,6 +271,70 @@ return (
           <input
             type="text"
             value={customerData.zipcode || ""}
+            readOnly
+            className="profile-input-readonly"
+          />
+        </div>
+      </div>
+
+      {/* Billing Address Section - Read Only */}
+      <div className="profile-section">
+        <h2 className="profile-section-title">Billing Address</h2>
+
+        <div className="profile-form-group">
+          <label className="profile-label">Address 1</label>
+          <input
+            type="text"
+            value={customerData.billing_address1 || ""}
+            readOnly
+            className="profile-input-readonly"
+          />
+        </div>
+
+        <div className="profile-form-group">
+          <label className="profile-label">Address 2</label>
+          <input
+            type="text"
+            value={customerData.billing_address2 || ""}
+            readOnly
+            className="profile-input-readonly"
+          />
+        </div>
+
+        <div className="profile-form-row">
+          <div className="profile-form-group">
+            <label className="profile-label">Province</label>
+            <input
+              type="text"
+              value={customerData.billing_province || ""}
+              readOnly
+              className="profile-input-readonly"
+            />
+          </div>
+          <div className="profile-form-group">
+            <label className="profile-label">City / Municipality</label>
+            <input
+              type="text"
+              value={customerData.billing_city || ""}
+              readOnly
+              className="profile-input-readonly"
+            />
+          </div>
+          <div className="profile-form-group">
+            <label className="profile-label">Barangay</label>
+            <input
+              type="text"
+              value={customerData.billing_barangay || ""}
+              readOnly
+              className="profile-input-readonly"
+            />
+          </div>
+        </div>
+        <div className="profile-form-group">
+          <label className="profile-label">Zip Code</label>
+          <input
+            type="text"
+            value={customerData.billing_zipcode || ""}
             readOnly
             className="profile-input-readonly"
           />

@@ -64,6 +64,8 @@ export default function CustomerDashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const notifPag = usePagination(notifHistory, 5, []);
+
   const handleAcknowledge = async () => {
     if (ackInput.trim().toLowerCase() !== "i understand") {
       setAckError('Please type "I understand" to continue.');
@@ -126,7 +128,6 @@ export default function CustomerDashboard() {
     : false;
 
   const unreadCount = notifHistory.filter((n) => !n.is_read).length;
-  const notifPag = usePagination(notifHistory, 5, []);
 
 return (
     <div className="cd-container">

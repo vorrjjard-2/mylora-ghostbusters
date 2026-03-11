@@ -23,13 +23,22 @@ class CreditEnrollment(models.Model):
     phone_number = models.CharField(max_length=50, db_index=True)
     email = models.EmailField(db_index=True)
 
-    # Address
+    # Delivery Address
     address1 = models.CharField(max_length=255)
     address2 = models.CharField(max_length=255, blank=True)
     province = models.CharField(max_length=100, blank=True)
     barangay = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     zipcode = models.CharField(max_length=20)
+
+    # Billing Address
+    billing_address1 = models.CharField(max_length=255, blank=True, default="")
+    billing_address2 = models.CharField(max_length=255, blank=True, default="")
+    billing_province = models.CharField(max_length=100, blank=True, default="")
+    billing_barangay = models.CharField(max_length=100, blank=True, default="")
+    billing_city = models.CharField(max_length=100, blank=True, default="")
+    billing_zipcode = models.CharField(max_length=20, blank=True, default="")
+
     branch = models.ForeignKey(
         'accounts.Branch',
         on_delete=models.PROTECT,
