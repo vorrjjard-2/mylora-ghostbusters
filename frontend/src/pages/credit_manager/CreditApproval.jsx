@@ -26,8 +26,6 @@ export default function CreditApproval() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectPassword, setRejectPassword] = useState("");
   const [rejectPasswordError, setRejectPasswordError] = useState("");
-  const [rejectReason, setRejectReason] = useState("");
-  const [rejectReasonError, setRejectReasonError] = useState("");
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/cm/order/${orderId}/`, { credentials: "include" })
@@ -89,7 +87,7 @@ export default function CreditApproval() {
       } else {
         setShowRejectModal(false);
         navigate(`/credit-manager/approve/${orderId}/rejected`, {
-          state: { order, ...data, rejection_reason: rejectionReason },
+          state: { order, ...data },
         });
       }
     } catch (e) {
@@ -121,23 +119,15 @@ export default function CreditApproval() {
   const handleRejectClick = () => {
     setRejectPassword("");
     setRejectPasswordError("");
-    setRejectReason("");
-    setRejectReasonError("");
     setShowRejectModal(true);
   };
 
   const handleRejectPasswordSubmit = async () => {
-    let hasError = false;
-    if (rejectReason.trim().split(/\s+/).length < 5) {
-      setRejectReasonError("Please provide at least 5 words for the rejection reason.");
-      hasError = true;
-    }
     if (!rejectPassword.trim()) {
       setRejectPasswordError("Password is required.");
-      hasError = true;
+      return;
     }
-    if (hasError) return;
-    await postAction("reject", rejectPassword, rejectReason.trim());
+    await postAction("reject", rejectPassword);
   };
 
   const handleRequestOverride = () => {
@@ -307,20 +297,23 @@ export default function CreditApproval() {
         </table>
       </div>
 
-      {/* Rejection Reason (for already-rejected orders) */}
-      {order.order_status === "REJECTED" && order.rejection_reason && (
-        <>
-          <h2 className="approval-subtitle">Reason for Rejection</h2>
-          <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029", marginBottom: "1.5rem" }}>
-            {order.rejection_reason}
-          </div>
-          {order.rejected_by && (
-            <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "1.5rem" }}>
-              Rejected by: {order.rejected_by} {order.rejection_date ? `on ${order.rejection_date}` : ""}
-            </p>
-          )}
-        </>
-      )}
+      {/* Credit Term & Payment Due */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        border: "1px solid #ccc",
+        borderRadius: "6px",
+        padding: "0.75rem 1.25rem",
+        marginTop: "0.75rem",
+        fontWeight: 700,
+        fontSize: "0.9rem",
+      }}>
+        <span>CREDIT TERM: {order.credit_term} DAYS</span>
+        {order.payment_due_date && (
+          <span>PAYMENT DUE: {order.payment_due_date.toUpperCase()}</span>
+        )}
+      </div>
+
 
       {/* Action Buttons - only show for PENDING orders */}
       {order.order_status === "PENDING" && (
@@ -497,39 +490,15 @@ export default function CreditApproval() {
             <h3 style={{
               fontSize: "1.25rem",
               fontWeight: 600,
-              marginBottom: "1.5rem",
+              marginBottom: "0.5rem",
               textAlign: "center",
               color: "#1E2D1A",
             }}>
-              Please enter your password to reject ORDER {order.order_id}.
+              Are you sure you want to reject ORDER {order.order_id}?
             </h3>
-            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
-              Reason for Rejection
-            </label>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => { setRejectReason(e.target.value); setRejectReasonError(""); }}
-              placeholder="Enter reason for rejection..."
-              autoFocus
-              rows={3}
-              style={{
-                width: "100%",
-                padding: "0.75rem",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-                fontSize: "1rem",
-                boxSizing: "border-box",
-                fontFamily: "'Arimo', sans-serif",
-                resize: "vertical",
-                marginBottom: rejectReasonError ? "0.5rem" : "1rem",
-              }}
-            />
-            {rejectReasonError && (
-              <p style={{ color: "#b03a2e", fontSize: "13px", marginBottom: "1rem" }}>{rejectReasonError}</p>
-            )}
-            <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "#333", marginBottom: "0.25rem", display: "block" }}>
-              Password
-            </label>
+            <p style={{ textAlign: "center", color: "#666", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
+              Please enter your password to confirm.
+            </p>
             <input
               type="password"
               value={rejectPassword}

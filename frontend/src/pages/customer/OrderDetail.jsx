@@ -113,20 +113,23 @@ return (
       </table>
     </div>
 
-    {/* rejection reason */}
-    {order.order_status === "REJECTED" && order.rejection_reason && (
-      <>
-        <hr className="order-detail-divider" />
-        <h2 className="order-detail-subtitle">Reason for Rejection</h2>
-        <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029" }}>
-          {order.rejection_reason}
-        </div>
-        {order.rejected_by && (
-          <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
-            Rejected by: {order.rejected_by} {order.rejection_date ? `on ${order.rejection_date}` : ""}
-          </p>
+    {/* Credit Term & Payment Due */}
+    {order.credit_term && (
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        border: "1px solid #ccc",
+        borderRadius: "6px",
+        padding: "0.75rem 1.25rem",
+        marginTop: "1.25rem",
+        fontWeight: 700,
+        fontSize: "0.9rem",
+      }}>
+        <span>CREDIT TERM: {order.credit_term} DAYS</span>
+        {order.payment_due_date && (
+          <span>PAYMENT DUE: {order.payment_due_date.toUpperCase()}</span>
         )}
-      </>
+      </div>
     )}
 
     {/* back button */}

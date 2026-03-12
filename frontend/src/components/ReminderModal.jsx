@@ -1,26 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API_BASE_URL } from "../utils/api";
 import { getCookie } from "../utils/csrf";
 
-const DEFAULT_MESSAGES = [
-  "This is a reminder that your credit balance is overdue. Please settle your outstanding balance at your earliest convenience.",
-  "Your credit term is approaching its due date. Please make a payment to avoid service interruption.",
-  "Your account has an outstanding balance that requires immediate attention. Please contact us or make a payment.",
-  "Friendly reminder: Your payment is past due. Please update your credit balance to continue using our services.",
-];
-
 export default function ReminderModal({ customerId, customerName, onClose }) {
-  const [selectedDefault, setSelectedDefault] = useState(null);
-  const [customMessage, setCustomMessage] = useState("");
-  const [useCustom, setUseCustom] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/um/reminder-messages/`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setMessages(data))
+      .catch(() => setError("Failed to load reminder messages"))
+      .finally(() => setLoadingMessages(false));
+  }, []);
 
   const handleSend = async () => {
-    const message = useCustom ? customMessage.trim() : (selectedDefault !== null ? DEFAULT_MESSAGES[selectedDefault] : "");
-    if (!message) {
-      setError("Please select or write a message.");
+    const selected = messages.find((m) => m.slot === selectedSlot);
+    if (!selected) {
+      setError("Please select a message.");
       return;
     }
 
@@ -35,7 +36,7 @@ export default function ReminderModal({ customerId, customerName, onClose }) {
           "Content-Type": "application/json",
           "X-CSRFToken": getCookie("csrftoken"),
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message: selected.message }),
       });
 
       if (!res.ok) {
@@ -85,73 +86,34 @@ export default function ReminderModal({ customerId, customerName, onClose }) {
           </div>
         )}
 
-        {/* Toggle between default and custom */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button
-            onClick={() => { setUseCustom(false); setError(""); }}
-            style={{
-              flex: 1, padding: "10px", fontSize: "14px", fontWeight: "600",
-              border: !useCustom ? "2px solid #1E2D1A" : "1px solid #ccc",
-              borderRadius: "8px", backgroundColor: !useCustom ? "#f0f4ef" : "white",
-              cursor: "pointer", color: "#262626"
-            }}
-          >
-            Default Messages
-          </button>
-          <button
-            onClick={() => { setUseCustom(true); setSelectedDefault(null); setError(""); }}
-            style={{
-              flex: 1, padding: "10px", fontSize: "14px", fontWeight: "600",
-              border: useCustom ? "2px solid #1E2D1A" : "1px solid #ccc",
-              borderRadius: "8px", backgroundColor: useCustom ? "#f0f4ef" : "white",
-              cursor: "pointer", color: "#262626"
-            }}
-          >
-            Custom Message
-          </button>
-        </div>
-
-        {!useCustom ? (
+        {loadingMessages ? (
+          <div style={{ padding: "20px", textAlign: "center", color: "#888" }}>Loading messages...</div>
+        ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
-            {DEFAULT_MESSAGES.map((msg, i) => (
+            {messages.map((m) => (
               <div
-                key={i}
-                onClick={() => { setSelectedDefault(i); setError(""); }}
+                key={m.slot}
+                onClick={() => { setSelectedSlot(m.slot); setError(""); }}
                 style={{
                   padding: "12px 16px",
-                  border: selectedDefault === i ? "2px solid #1E2D1A" : "1px solid #ccc",
+                  border: selectedSlot === m.slot ? "2px solid #1E2D1A" : "1px solid #ccc",
                   borderRadius: "10px",
                   cursor: "pointer",
-                  backgroundColor: selectedDefault === i ? "#f0f4ef" : "white",
+                  backgroundColor: selectedSlot === m.slot ? "#f0f4ef" : "white",
                   fontSize: "14px",
                   lineHeight: "1.5",
                   transition: "border-color 0.2s",
                 }}
               >
-                {msg}
+                {m.message}
               </div>
             ))}
-          </div>
-        ) : (
-          <div style={{ marginBottom: "20px" }}>
-            <textarea
-              value={customMessage}
-              onChange={(e) => { setCustomMessage(e.target.value); setError(""); }}
-              placeholder="Type your custom reminder message..."
-              rows={5}
-              style={{
-                width: "100%", padding: "12px", fontSize: "14px",
-                border: "1px solid #262626", borderRadius: "8px",
-                resize: "vertical", boxSizing: "border-box",
-                fontFamily: "'Arimo', sans-serif", lineHeight: "1.5",
-              }}
-            />
           </div>
         )}
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
           <button onClick={onClose} style={cancelBtn} disabled={sending}>Cancel</button>
-          <button onClick={handleSend} style={primaryBtn} disabled={sending}>
+          <button onClick={handleSend} style={primaryBtn} disabled={sending || loadingMessages}>
             {sending ? "Sending..." : "Send Reminder"}
           </button>
         </div>

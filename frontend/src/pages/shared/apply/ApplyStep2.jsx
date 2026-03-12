@@ -411,25 +411,17 @@ export default function ApplyStep2() {
                required
              />
            </div>
-           <div className="input-group">
-             <label>Default Store Branch<span className="required">*</span></label>
-             <select value={branch} onChange={e => setBranch(e.target.value)} required>
-               <option value="">Select your preferred branch</option>
-               {branches.map(b => (
-                 <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
-               ))}
-             </select>
-           </div>
          </section>
 
          {/* Section 03 - Billing Address */}
          <section className="form-section">
            <h2 className="section-title">03 Billing Address</h2>
-           <label className="delivery-autofill-label" style={{ marginBottom: "15px", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+           <label className="delivery-autofill-label" style={{ marginBottom: "15px", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", marginLeft: "-40px" }}>
              <input
                type="checkbox"
                checked={sameAsDelivery}
                onChange={e => handleSameAsDelivery(e.target.checked)}
+               style={{ width: "auto" }}
              />
              Same as delivery address
            </label>
@@ -459,25 +451,28 @@ export default function ApplyStep2() {
            </div>
            <div className="input-grid three-col">
              <div className="input-group">
-               <label>Barangay<span className="required">*</span></label>
+               <label>Province<span className="required">*</span></label>
                {sameAsDelivery ? (
-                 <input type="text" value={barangay} readOnly style={{ backgroundColor: "#f0f0f0" }} />
+                 <input type="text" value={provinceName} readOnly style={{ backgroundColor: "#f0f0f0" }} />
                ) : (
                  <select
-                   value={billingBarangay}
-                   onChange={e => setBillingBarangay(e.target.value)}
-                   disabled={!billingCityCode}
+                   value={billingProvince}
+                   onChange={e => {
+                     const selected = provinces.find(p => p.code === e.target.value);
+                     setBillingProvince(e.target.value);
+                     setBillingProvinceName(selected ? selected.name : "");
+                   }}
                    required
                  >
-                   <option value="">Select barangay</option>
-                   {billingBarangaysList.map(b => (
-                     <option key={b.code} value={b.name}>{b.name}</option>
+                   <option value="">Select province</option>
+                   {provinces.map(p => (
+                     <option key={p.code} value={p.code}>{p.name}</option>
                    ))}
                  </select>
                )}
              </div>
              <div className="input-group">
-               <label>City<span className="required">*</span></label>
+               <label>City / Municipality<span className="required">*</span></label>
                {sameAsDelivery ? (
                  <input type="text" value={city} readOnly style={{ backgroundColor: "#f0f0f0" }} />
                ) : (
@@ -499,47 +494,46 @@ export default function ApplyStep2() {
                )}
              </div>
              <div className="input-group">
-               <label>Zip Code<span className="required">*</span></label>
-               <input
-                 type="text"
-                 placeholder="XXXX"
-                 value={sameAsDelivery ? zipCode : billingZipCode}
-                 onChange={e => {
-                   const value = e.target.value.replace(/\D/g, "");
-                   if (value.length <= 4) setBillingZipCode(value);
-                 }}
-                 readOnly={sameAsDelivery}
-                 style={sameAsDelivery ? { backgroundColor: "#f0f0f0" } : {}}
-                 required
-               />
+               <label>Barangay<span className="required">*</span></label>
+               {sameAsDelivery ? (
+                 <input type="text" value={barangay} readOnly style={{ backgroundColor: "#f0f0f0" }} />
+               ) : (
+                 <select
+                   value={billingBarangay}
+                   onChange={e => setBillingBarangay(e.target.value)}
+                   disabled={!billingCityCode}
+                   required
+                 >
+                   <option value="">Select barangay</option>
+                   {billingBarangaysList.map(b => (
+                     <option key={b.code} value={b.name}>{b.name}</option>
+                   ))}
+                 </select>
+               )}
              </div>
            </div>
-           {!sameAsDelivery && (
-             <div className="input-group">
-               <label>Province<span className="required">*</span></label>
-               <select
-                 value={billingProvince}
-                 onChange={e => {
-                   const selected = provinces.find(p => p.code === e.target.value);
-                   setBillingProvince(e.target.value);
-                   setBillingProvinceName(selected ? selected.name : "");
-                 }}
-                 required
-               >
-                 <option value="">Select province</option>
-                 {provinces.map(p => (
-                   <option key={p.code} value={p.code}>{p.name}</option>
-                 ))}
-               </select>
-             </div>
-           )}
+           <div className="input-group">
+             <label>Zip Code<span className="required">*</span></label>
+             <input
+               type="text"
+               placeholder="XXXX"
+               value={sameAsDelivery ? zipCode : billingZipCode}
+               onChange={e => {
+                 const value = e.target.value.replace(/\D/g, "");
+                 if (value.length <= 4) setBillingZipCode(value);
+               }}
+               readOnly={sameAsDelivery}
+               style={sameAsDelivery ? { backgroundColor: "#f0f0f0" } : {}}
+               required
+             />
+           </div>
          </section>
 
          {/* Section 04 */}
          <section className="form-section">
            <h2 className="section-title">04 Credit Line Application</h2>
             <div className="input-group full-width">
-                <label>How much credit are you applying for?</label>
+                <label>How much credit are you applying for?<span className="required">*</span></label>
                 <input 
                   type="text" 
                   placeholder="₱0" 
@@ -553,12 +547,21 @@ export default function ApplyStep2() {
                 />
               </div>
            <div className="input-group">
-             <label>What is your preferred credit term?</label>
+             <label>What is your preferred credit term?<span className="required">*</span></label>
              <select onChange={e => setCreditTerm(e.target.value)}>
                <option value="">Select your preferred terms</option>
                <option value="30">30 Days</option>
                <option value="60">60 Days</option>
                <option value="90">90 Days</option>
+             </select>
+           </div>
+           <div className="input-group">
+             <label>What is your preferred branch for pickup / ordering?<span className="required">*</span></label>
+             <select value={branch} onChange={e => setBranch(e.target.value)} required>
+               <option value="">Select your preferred branch</option>
+               {branches.map(b => (
+                 <option key={b.branch_id} value={b.branch_id}>{b.name}</option>
+               ))}
              </select>
            </div>
          </section>

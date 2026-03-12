@@ -7,36 +7,9 @@ import searchIcon from "../../assets/search.png";
 import logo from "../../assets/mylora-logo.png";
 import "./OrderHistory.css";
 
+import { getOrderStatusLabel, orderStatusBadgeStyle } from "../../utils/orderStatus";
+
 const ALL_STATUSES = ["PENDING", "APPROVED", "PROCESSING", "COMPLETED", "CANCELLED", "REJECTED"];
-
-const STATUS_LABEL = {
-  PENDING: "Pending Approval",
-  APPROVED: "Approved",
-  PROCESSING: "Processing",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
-  REJECTED: "Rejected",
-};
-
-function getStatusBadgeStyle(status) {
-  const base = {
-    display: "inline-block",
-    padding: "5px 5px",
-    width: "180px",
-    borderRadius: "5px",
-    fontSize: "0.875rem",
-    fontWeight: "600",
-  };
-  switch (status) {
-    case "APPROVED":    return { ...base, background: "#DCEBC7"};
-    case "REJECTED":    return { ...base, background: "#EBCAC7",};
-    case "PENDING":     return { ...base, background: "#F5D7BF",};
-    case "PROCESSING":  return { ...base, background: "#cce5ff",};
-    case "COMPLETED":   return { ...base, background: "#d1ecf1",};
-    case "CANCELLED":   return { ...base, background: "#e2e3e5",};
-    default:            return { ...base, background: "#f5f5f5",};
-  }
-}
 
 export default function OrderHistory() {
   const navigate = useNavigate();
@@ -214,8 +187,8 @@ export default function OrderHistory() {
                   </td>
                   <td className="history-td">{order.date_ordered}</td>
                   <td className="history-td">
-                    <span style={getStatusBadgeStyle(order.order_status)}>
-                      {STATUS_LABEL[order.order_status]}
+                    <span style={orderStatusBadgeStyle(order.order_status)}>
+                      {getOrderStatusLabel(order.order_status)}
                     </span>
                   </td>
                 </tr>

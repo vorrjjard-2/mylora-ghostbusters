@@ -92,8 +92,14 @@ export default function PaymentRequest() {
     
     if (!formData.date_paid) {
       newErrors.date_paid = "Date of payment is required";
-    } else if (new Date(formData.date_paid) > new Date(new Date().toISOString().split("T")[0])) {
-      newErrors.date_paid = "Date of payment cannot be in the future";
+    } else {
+      const creditTerm = creditInfo?.credit_term ?? 0;
+      const today = new Date(new Date().toISOString().split("T")[0]);
+      const maxDate = new Date(today);
+      maxDate.setDate(maxDate.getDate() + creditTerm + 1);
+      if (new Date(formData.date_paid) > maxDate) {
+        newErrors.date_paid = `Date of payment cannot exceed today + ${creditTerm} days (your credit term)`;
+      }
     }
     
     if (!formData.payment_type) {
@@ -247,7 +253,12 @@ return (
             name="date_paid"
             value={formData.date_paid}
             onChange={handleChange}
-            max={new Date().toISOString().split("T")[0]}
+            max={(() => {
+              const creditTerm = creditInfo?.credit_term ?? 0;
+              const maxDate = new Date();
+              maxDate.setDate(maxDate.getDate() + creditTerm + 1);
+              return maxDate.toISOString().split("T")[0];
+            })()}
             className={`pr-input ${errors.date_paid ? 'pr-input-error' : ''}`}
           />
           {errors.date_paid && <span className="pr-error">{errors.date_paid}</span>}

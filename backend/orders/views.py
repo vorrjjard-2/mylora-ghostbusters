@@ -143,6 +143,8 @@ def order_detail(request, order_id):
             'order_status': order.order_status,
             'total_amount': str(order.total_amount),
             'items': items_data,
+            'credit_term': credit_account.credit_term if credit_account else None,
+            'payment_due_date': order.payment_due_date.strftime('%B %d, %Y') if order.payment_due_date else None,
             'rejection_reason': rejection_reason,
             'rejected_by': rejected_by,
             'rejection_date': rejection_date,
@@ -329,6 +331,8 @@ def cm_order_detail(request, order_id):
         "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
+        "credit_term": credit.credit_term,
+        "payment_due_date": order.payment_due_date.strftime("%B %d, %Y") if order.payment_due_date else None,
         "rejection_reason": rejection_reason,
         "rejected_by": rejected_by,
         "rejection_date": rejection_date,
@@ -361,12 +365,14 @@ def cm_approve_order(request, order_id):
 
     from django.utils import timezone
     from django.core.mail import send_mail
+    from datetime import timedelta
 
     with transaction.atomic():
         order.order_status = "APPROVED"
+        credit = order.account
+        order.payment_due_date = (timezone.now() + timedelta(days=credit.credit_term)).date()
         order.save()
 
-        credit = order.account
         credit.available_credit -= order.total_amount
         credit.outstanding_bal += order.total_amount
         credit.save()
@@ -389,6 +395,7 @@ def cm_approve_order(request, order_id):
 Hello {customer_user.get_full_name()},
 
 Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been approved.
+Payment is due by {order.payment_due_date.strftime('%B %d, %Y')}.
 
 Your updated credit details:
 - Available Credit: ₱{credit.available_credit:,.2f}
@@ -422,6 +429,8 @@ Mylora Web Credit System
         "available_credit": str(credit.credit_limit - credit.outstanding_bal),
         "credit_limit": str(credit.credit_limit),
         "outstanding_balance": str(credit.outstanding_bal),
+        "credit_term": credit.credit_term,
+        "payment_due_date": order.payment_due_date.strftime("%B %d, %Y") if order.payment_due_date else None,
     })
 
 
@@ -686,7 +695,8 @@ def um_approve_override(request, override_id):
 
     from .models import OverrideRequest
     from django.utils import timezone
-    
+    from datetime import timedelta
+
     try:
         override_req = OverrideRequest.objects.select_related("order__account").get(override_id=override_id)
     except OverrideRequest.DoesNotExist:
@@ -707,7 +717,9 @@ def um_approve_override(request, override_id):
 
         # Approve the order directly
         order = override_req.order
+        credit = order.account
         order.order_status = "APPROVED"
+        order.payment_due_date = (timezone.now() + timedelta(days=credit.credit_term)).date()
         order.save()
 
         # Deduct available credit and move to outstanding balance
@@ -1380,6 +1392,8 @@ def op_order_view(request, order_id):
         "approved_by": approval.user.username if approval else "",
         "completion_date": completion.completion_date.strftime("%B %d, %Y at %I:%M %p"),
         "processed_by": completion.user.username,
+        "credit_term": order.account.credit_term if order.account else None,
+        "payment_due_date": order.payment_due_date.strftime("%B %d, %Y") if order.payment_due_date else None,
     })
 
 
@@ -1406,9 +1420,11 @@ def um_order_view(request, order_id):
         cust_name = customer.user.get_full_name() or customer.user.username
         app = customer.application
         phone = app.phone_number if app else ""
+        customer_is_active = customer.user.is_active
     else:
         cust_name = order.customer_name or "Deleted Customer"
         phone = ""
+        customer_is_active = False
 
     items_data = [
         {
@@ -1433,6 +1449,7 @@ def um_order_view(request, order_id):
     return Response({
         "order_id": order.order_id,
         "customer_name": cust_name,
+        "customer_is_active": customer_is_active,
         "phone": phone,
         "date_submitted": order.date_ordered.strftime("%B %d, %Y"),
         "items": items_data,
@@ -1446,6 +1463,8 @@ def um_order_view(request, order_id):
         "completion_date": completion_date,
         "processed_by": processed_by,
         "order_status": order.order_status,
+        "credit_term": order.account.credit_term if order.account else None,
+        "payment_due_date": order.payment_due_date.strftime("%B %d, %Y") if order.payment_due_date else None,
         "rejection_reason": rejection.notes if rejection else "",
         "rejected_by": rejection.user.username if rejection and rejection.user else "",
         "rejection_date": rejection.approval_date.strftime("%B %d, %Y at %I:%M %p") if rejection and rejection.approval_date else "",
@@ -1465,7 +1484,7 @@ def um_customers_list(request):
     
     customers = Customer.objects.select_related(
         "credit_account", "application"
-    ).all()
+    ).filter(user__is_active=True)
 
     data = []
     for customer in customers:
@@ -1631,8 +1650,8 @@ def um_update_customer_balance(request, customer_id):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def um_delete_customer(request, customer_id):
-    """Delete a customer account"""
+def um_deactivate_customer(request, customer_id):
+    """Deactivate a customer account (sets user.is_active = False, preserves all data)"""
     if not _require_role(request, "upper_management"):
         return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
@@ -1640,53 +1659,23 @@ def um_delete_customer(request, customer_id):
     password = request.data.get("password")
     if not password:
         return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     if not request.user.check_password(password):
         return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
 
     from accounts.models import Customer
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-    
+
     try:
-        customer = Customer.objects.select_related("user", "credit_account").get(id=customer_id)
+        customer = Customer.objects.select_related("user").get(id=customer_id)
     except Customer.DoesNotExist:
         return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
 
     customer_name = customer.user.get_full_name() or customer.user.username
-    try:
-        with transaction.atomic():
-            user = customer.user
-            credit_account = getattr(customer, 'credit_account', None)
+    customer.user.is_active = False
+    customer.user.save(update_fields=["is_active"])
 
-            if credit_account:
-                # Delete payment requests (PROTECT on CreditAccount)
-                from payments.models import PaymentRequest
-                PaymentRequest.objects.filter(account=credit_account).delete()
-
-                # Preserve orders: stamp customer name so orders remain after deletion
-                Order.objects.filter(account=credit_account).update(customer_name=customer_name)
-
-                # Delete notifications
-                from accounts.models import Notification
-                Notification.objects.filter(customer=customer).delete()
-
-            # Delete the enrollment record so the email/phone can be reused
-            if customer.application:
-                customer.application.delete()
-
-            # Delete customer (cascades to credit account)
-            customer.delete()
-            # Delete user account
-            user.delete()
-    except Exception as e:
-        return Response(
-            {"error": f"Failed to delete customer: {str(e)}"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    log_audit(user=request.user, action="DELETE_CUSTOMER", details={"customer_id": customer_id, "customer_name": customer_name}, request=request)
-    return Response({"success": True, "message": "Customer deleted successfully"})
+    log_audit(user=request.user, action="DEACTIVATE_CUSTOMER", details={"customer_id": customer_id, "customer_name": customer_name}, request=request)
+    return Response({"success": True, "message": "Customer account deactivated successfully"})
 
 
 @api_view(["GET"])

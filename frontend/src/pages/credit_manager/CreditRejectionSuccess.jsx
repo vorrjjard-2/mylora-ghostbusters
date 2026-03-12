@@ -9,7 +9,6 @@ export default function CreditRejectionSuccess() {
 
   const state = location.state || {};
   const order = state.order || {};
-  const rejectionReason = state.rejection_reason || "";
 
   const fmt = (n) =>
     parseFloat(n || 0).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -36,20 +35,6 @@ export default function CreditRejectionSuccess() {
         </p>
 
         <hr className="success-divider" />
-
-        {/* Rejection Reason */}
-        <h2 className="success-sub-heading">Reason for Rejection</h2>
-        <div style={{
-          padding: "1rem",
-          border: "1px solid #e0e0e0",
-          borderRadius: "6px",
-          background: "#fdf2f2",
-          lineHeight: "1.6",
-          color: "#842029",
-          marginBottom: "1.5rem",
-        }}>
-          {rejectionReason || "No reason provided"}
-        </div>
 
         {/* order form */}
         <h2 className="success-sub-heading">Order Form</h2>

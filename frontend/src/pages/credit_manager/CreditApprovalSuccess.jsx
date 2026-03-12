@@ -95,6 +95,23 @@ return (
         </table>
       </div>
 
+      {/* Credit Term & Payment Due */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        border: "1px solid #ccc",
+        borderRadius: "6px",
+        padding: "0.75rem 1.25rem",
+        marginTop: "0.75rem",
+        fontWeight: 700,
+        fontSize: "0.9rem",
+      }}>
+        <span>CREDIT TERM: {credit.credit_term || order.credit_term} DAYS</span>
+        {(credit.payment_due_date || order.payment_due_date) && (
+          <span>PAYMENT DUE: {(credit.payment_due_date || order.payment_due_date).toUpperCase()}</span>
+        )}
+      </div>
+
       {/* Back Button */}
       <div className="success-actions">
         <button

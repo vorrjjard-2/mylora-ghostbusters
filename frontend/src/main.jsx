@@ -49,6 +49,7 @@ import EmployeeProfile from "./pages/upper_management/EmployeeProfile";
 import EmployeeEdit from "./pages/upper_management/EmployeeEdit";
 import EmployeeCreate from "./pages/upper_management/EmployeeCreate";
 import AuditLog from "./pages/upper_management/AuditLog";
+import SetMessages from "./pages/upper_management/SetMessages";
 
 // Credit Manager pages
 import CreditDashboard from "./pages/credit_manager/Dashboard";
@@ -212,6 +213,14 @@ function Layout() {
             element={
               <ProtectedRoute requiredRole="upper_management">
                 <AuditLog />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/set-messages"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <SetMessages />
               </ProtectedRoute>
             }
           />

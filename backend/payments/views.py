@@ -70,11 +70,13 @@ def submit_payment(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Disallow future dates
-        from datetime import date as date_type
-        if date_obj > date_type.today():
+        # Disallow dates beyond today + credit_term days
+        from datetime import date as date_type, timedelta
+        credit_term = credit_account.credit_term or 0
+        max_date = date_type.today() + timedelta(days=credit_term + 1)
+        if date_obj > max_date:
             return Response(
-                {"error": "Date of payment cannot be in the future"},
+                {"error": f"Date of payment cannot exceed today + {credit_term} days (your credit term)"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

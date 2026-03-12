@@ -35,8 +35,8 @@ export default function UMCustomerDetail() {
     setFilePreview(null);
   }
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showDeletePasswordModal, setShowDeletePasswordModal] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [showDeactivatePasswordModal, setShowDeactivatePasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [password, setPassword] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -59,7 +59,7 @@ export default function UMCustomerDetail() {
       .finally(() => setLoading(false));
   }, [customerId, navigate]);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDeactivate = async () => {
     if (!password) {
       alert("Please enter your password");
       return;
@@ -70,7 +70,7 @@ export default function UMCustomerDetail() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/um/customer/${customerId}/delete/`,
+        `${API_BASE_URL}/api/um/customer/${customerId}/deactivate/`,
         {
           method: "POST",
           credentials: "include",
@@ -81,10 +81,10 @@ export default function UMCustomerDetail() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete account");
+        throw new Error(errorData.error || "Failed to deactivate account");
       }
 
-      setShowDeletePasswordModal(false);
+      setShowDeactivatePasswordModal(false);
       setShowSuccessModal(true);
     } catch (err) {
       console.error(err);
@@ -297,9 +297,9 @@ export default function UMCustomerDetail() {
         <div className="cd-button-row-footer" style={{ justifyContent: "space-between" }}>
           <button
             style={{ padding: "8px 30px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "10px", fontWeight: 600, fontSize: "18px", cursor: "pointer" }}
-            onClick={() => setShowDeleteModal(true)}
+            onClick={() => setShowDeactivateModal(true)}
           >
-            Delete Account
+            Deactivate Account
           </button>
           <button className="cd-back-btn" onClick={() => navigate("/upper-management/customers")}>
             Back
@@ -307,43 +307,43 @@ export default function UMCustomerDetail() {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {/* Deactivate Confirmation Modal */}
+      {showDeactivateModal && (
         <div style={modal.overlay}>
           <div style={modal.box}>
-            <h3 style={modal.title}>Delete Account</h3>
+            <h3 style={modal.title}>Deactivate Account</h3>
             <p style={{ fontSize: "1rem", color: "#666", marginBottom: "1.5rem", lineHeight: "1.6" }}>
-              Are you sure you want to delete this customer account? This action cannot be undone.
+              Are you sure you want to deactivate this customer account? The customer will no longer be able to log in, but their orders and history will be preserved.
             </p>
             <div style={modal.btnRow}>
-              <button style={modal.cancelBtn} onClick={() => setShowDeleteModal(false)}>Cancel</button>
-              <button style={modal.deleteBtn} onClick={() => { setShowDeleteModal(false); setShowDeletePasswordModal(true); }}>
-                Delete Account
+              <button style={modal.cancelBtn} onClick={() => setShowDeactivateModal(false)}>Cancel</button>
+              <button style={modal.deleteBtn} onClick={() => { setShowDeactivateModal(false); setShowDeactivatePasswordModal(true); }}>
+                Deactivate Account
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete Password Modal */}
-      {showDeletePasswordModal && (
+      {/* Deactivate Password Modal */}
+      {showDeactivatePasswordModal && (
         <div style={modal.overlay}>
           <div style={modal.box}>
-            <h3 style={modal.title}>Please enter user password to proceed.</h3>
+            <h3 style={modal.title}>Please enter your password to proceed.</h3>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
               style={modal.passwordInput}
-              onKeyDown={(e) => { if (e.key === "Enter") handleConfirmDelete(); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleConfirmDeactivate(); }}
             />
             <div style={modal.btnRow}>
-              <button style={modal.cancelBtn} onClick={() => { setShowDeletePasswordModal(false); setPassword(""); }} disabled={processing}>
+              <button style={modal.cancelBtn} onClick={() => { setShowDeactivatePasswordModal(false); setPassword(""); }} disabled={processing}>
                 Cancel
               </button>
-              <button style={modal.deleteBtn} onClick={handleConfirmDelete} disabled={processing}>
-                {processing ? "Deleting..." : "Delete Account"}
+              <button style={modal.deleteBtn} onClick={handleConfirmDeactivate} disabled={processing}>
+                {processing ? "Deactivating..." : "Deactivate Account"}
               </button>
             </div>
           </div>
@@ -353,9 +353,9 @@ export default function UMCustomerDetail() {
       {showSuccessModal && (
         <div style={modal.overlay}>
           <div style={{ ...modal.box, textAlign: "center" }}>
-            <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem" }}>Account Deleted</h3>
+            <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem" }}>Account Deactivated</h3>
             <p style={{ fontSize: "1rem", color: "#666", marginBottom: "2rem" }}>
-              {customer.name}'s account has been successfully deleted.
+              {customer.name}'s account has been successfully deactivated.
             </p>
             <button
               onClick={() => navigate("/upper-management/customers")}

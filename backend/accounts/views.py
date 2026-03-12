@@ -615,3 +615,60 @@ def customer_notification_history(request):
         })
 
     return Response(data)
+
+
+# ─── Reminder Messages endpoints ──────────────────────────────────────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_reminder_messages(request):
+    """Get all 4 default reminder messages (any authenticated internal user)"""
+    from .models import ReminderMessage
+    messages = ReminderMessage.objects.all()
+    existing = {m.slot: m.message for m in messages}
+    defaults = {
+        1: "This is a reminder that your credit balance is overdue. Please settle your outstanding balance at your earliest convenience.",
+        2: "Your credit term is approaching its due date. Please make a payment to avoid service interruption.",
+        3: "Your account has an outstanding balance that requires immediate attention. Please contact us or make a payment.",
+        4: "Friendly reminder: Your payment is past due. Please update your credit balance to continue using our services.",
+    }
+    data = []
+    for slot in range(1, 5):
+        data.append({
+            "slot": slot,
+            "message": existing.get(slot, defaults[slot]),
+        })
+    return Response(data)
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_reminder_messages(request):
+    """UM updates the 4 default reminder messages"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import ReminderMessage
+    messages_data = request.data.get("messages", [])
+    if len(messages_data) != 4:
+        return Response({"error": "Exactly 4 messages required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    for item in messages_data:
+        slot = item.get("slot")
+        message = item.get("message", "").strip()
+        if not slot or slot not in [1, 2, 3, 4]:
+            return Response({"error": f"Invalid slot: {slot}"}, status=status.HTTP_400_BAD_REQUEST)
+        if not message:
+            return Response({"error": f"Message for slot {slot} cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+    for item in messages_data:
+        ReminderMessage.objects.update_or_create(
+            slot=item["slot"],
+            defaults={
+                "message": item["message"].strip(),
+                "updated_by": request.user,
+            }
+        )
+
+    log_audit(request.user, "REMINDER_MESSAGES_UPDATED", {}, request)
+    return Response({"message": "Reminder messages updated successfully."})

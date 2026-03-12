@@ -6,6 +6,7 @@ import { handleLogout } from "../../utils/logout";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
+import { getOrderStatusLabel, orderStatusBadgeStyle } from "../../utils/orderStatus";
 import "./Dashboard.css";
 
 export default function CustomerDashboard() {
@@ -240,8 +241,7 @@ return (
           <button className="cd-action-card" onClick={() => navigate("/credit/update")}>
             <span className="cd-action-icon">⟳</span>
             <div className="cd-action-text">
-              <span>Update Credit</span>
-              <span>Balance</span>
+              <span>Payments</span>
             </div>
           </button>
 
@@ -329,8 +329,8 @@ return (
                       <td className="cd-td">₱ {parseFloat(order.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
                       <td className="cd-td">{order.date_ordered}</td>
                       <td className="cd-td">
-                        <span className={`cd-status-badge status-${order.status.toLowerCase()}`}>
-                          {formatStatus(order.status)}
+                        <span style={orderStatusBadgeStyle(order.status)}>
+                          {getOrderStatusLabel(order.status)}
                         </span>
                       </td>
                     </tr>
@@ -422,14 +422,3 @@ return (
   );
 }
 
-function formatStatus(status) {
-  const map = {
-    PENDING: "Pending Approval",
-    APPROVED: "Approved",
-    PROCESSING: "Processing",
-    COMPLETED: "Completed",
-    CANCELLED: "Cancelled",
-    REJECTED: "Rejected",
-  };
-  return map[status] || status;
-}

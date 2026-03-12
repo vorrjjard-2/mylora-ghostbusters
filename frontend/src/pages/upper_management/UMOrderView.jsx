@@ -118,14 +118,7 @@ export default function UMOrderView() {
   <p class="section-label">Processed and Closed by Order Processor</p>
   <p><strong>Username:</strong> ${order.processed_by || "—"}</p>
   <p><strong>Date &amp; Time:</strong> ${order.completion_date || "—"}</p>
-  ${order.order_status === "REJECTED" && order.rejection_reason ? `
-  <hr/>
-  <p class="section-label">Reason for Rejection</p>
-  <div style="padding:12px 16px;border:1px solid #e0e0e0;border-radius:6px;background:#fdf2f2;color:#842029;line-height:1.6;font-size:14px;">
-    ${order.rejection_reason}
-  </div>
-  <p style="font-size:12px;color:#666;margin-top:6px;">Rejected by: ${order.rejected_by || "—"} ${order.rejection_date ? "on " + order.rejection_date : ""}</p>
-  ` : ""}
+
 </body>
 </html>`;
     iframe.srcdoc = content;
@@ -156,6 +149,11 @@ export default function UMOrderView() {
         <p className="order-detail-customer">
           <span className="meta-label">Customer: </span>
           <span className="meta-value">{order.customer_name}</span>
+          {!order.customer_is_active && (
+            <span style={{ marginLeft: "8px", fontSize: "0.72rem", fontWeight: 600, color: "#dc3545", border: "1px solid #dc3545", borderRadius: "4px", padding: "1px 6px", verticalAlign: "middle", letterSpacing: "0.03em" }}>
+              DEACTIVATED
+            </span>
+          )}
         </p>
         <p className="order-detail-phone">
           <span className="meta-label">Phone: </span>
@@ -221,14 +219,6 @@ export default function UMOrderView() {
           </p>
         )}
 
-        {order.order_status === "REJECTED" && order.rejection_reason && (
-          <>
-            <h3 className="view-section-title">Reason for Rejection</h3>
-            <div style={{ padding: "1rem", border: "1px solid #e0e0e0", borderRadius: "6px", background: "#fdf2f2", lineHeight: "1.6", color: "#842029" }}>
-              {order.rejection_reason}
-            </div>
-          </>
-        )}
 
         {order.rejected_by && (
           <p className="view-rejection-note">
@@ -236,6 +226,25 @@ export default function UMOrderView() {
             <br />
             Date &amp; Time: {order.rejection_date}
           </p>
+        )}
+
+        {/* Credit Term & Payment Due */}
+        {order.credit_term && (
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            border: "1px solid #ccc",
+            borderRadius: "6px",
+            padding: "0.75rem 1.25rem",
+            marginTop: "1.25rem",
+            fontWeight: 700,
+            fontSize: "0.9rem",
+          }}>
+            <span>CREDIT TERM: {order.credit_term} DAYS</span>
+            {order.payment_due_date && (
+              <span>PAYMENT DUE: {order.payment_due_date.toUpperCase()}</span>
+            )}
+          </div>
         )}
 
         <div className="view-actions">

@@ -118,6 +118,26 @@ class Notification(models.Model):
         return f"Notification {self.notification_id} for {self.customer}"
 
 
+class ReminderMessage(models.Model):
+    """Default reminder messages configurable by Upper Management"""
+    message_id = models.AutoField(primary_key=True)
+    slot = models.IntegerField(unique=True, choices=[(i, f"Message {i}") for i in range(1, 5)])
+    message = models.TextField()
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='updated_reminder_messages'
+    )
+
+    class Meta:
+        ordering = ['slot']
+
+    def __str__(self):
+        return f"Reminder Message {self.slot}"
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:

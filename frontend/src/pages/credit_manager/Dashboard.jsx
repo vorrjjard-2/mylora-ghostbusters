@@ -7,6 +7,7 @@ import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
 import ReminderModal from "../../components/ReminderModal";
+import { getOrderStatusLabel, orderStatusBadgeStyle } from "../../utils/orderStatus";
 import "../upper_management/Dashboard.css";
 
 export default function CreditManagerDashboard() {
@@ -670,13 +671,6 @@ export default function CreditManagerDashboard() {
                       </tr>
                     )}
                     {creditAllPag.paginatedData.map((order, idx) => {
-                      const statusStyles = {
-                        PENDING:   { backgroundColor: "#FFF3CD", color: "#856404" },
-                        APPROVED:  { backgroundColor: "#D1E7DD", color: "#0F5132" },
-                        REJECTED:  { backgroundColor: "#F8D7DA", color: "#842029" },
-                        COMPLETED: { backgroundColor: "#CCE5FF", color: "#004085" },
-                      };
-                      const badge = statusStyles[order.status] || { backgroundColor: "#e0e0e0", color: "#333" };
                       return (
                         <tr
                           key={order.order_id}
@@ -693,14 +687,8 @@ export default function CreditManagerDashboard() {
                           <td style={{ padding: "15px", fontSize: "14px" }}>{order.date_ordered}</td>
                           <td style={{ padding: "15px", fontSize: "14px" }}>{order.customer_name}</td>
                           <td style={{ padding: "15px", fontSize: "14px" }}>
-                            <span style={{
-                              padding: "4px 12px",
-                              borderRadius: "12px",
-                              fontSize: "12px",
-                              fontWeight: "600",
-                              ...badge
-                            }}>
-                              {order.status}
+                            <span style={orderStatusBadgeStyle(order.status)}>
+                              {getOrderStatusLabel(order.status)}
                             </span>
                           </td>
                         </tr>

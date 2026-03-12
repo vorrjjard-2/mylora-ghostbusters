@@ -6,6 +6,7 @@ import { handleLogout } from "../../utils/logout";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
+import { getOrderStatusLabel, orderStatusBadgeStyle } from "../../utils/orderStatus";
 import "./Dashboard.css";
 
 export default function AllOrders() {
@@ -135,60 +136,6 @@ export default function AllOrders() {
     });
 
     setFilteredOrders(sorted);
-  };
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case "PENDING":
-        return "#FFF3CD";
-      case "APPROVED":
-        return "#D1E7DD";
-      case "PROCESSING":
-        return "#FFF3CD";
-      case "COMPLETED":
-        return "#D1E7DD";
-      case "CANCELLED":
-        return "#F8D7DA";
-      case "REJECTED":
-        return "#F8D7DA";
-      default:
-        return "#E9ECEF";
-    }
-  };
-
-  const getStatusTextColor = (status) => {
-    switch(status) {
-      case "REJECTED":
-      case "CANCELLED":
-        return "#842029";
-      case "APPROVED":
-      case "COMPLETED":
-        return "#0F5132";
-      case "PENDING":
-      case "PROCESSING":
-        return "#856404";
-      default:
-        return "#333";
-    }
-  };
-
-  const getStatusLabel = (status) => {
-    switch(status) {
-      case "PENDING":
-        return "Pending Processing";
-      case "APPROVED":
-        return "Credit Approved";
-      case "PROCESSING":
-        return "Processing";
-      case "COMPLETED":
-        return "Order Completed";
-      case "CANCELLED":
-        return "Credit Rejected";
-      case "REJECTED":
-        return "Rejected";
-      default:
-        return status;
-    }
   };
 
   return (
@@ -357,15 +304,8 @@ export default function AllOrders() {
                       {order.ordered_by}
                     </td>
                     <td style={{ padding: "15px 20px" }}>
-                      <span style={{
-                        backgroundColor: getStatusColor(order.status),
-                        color: getStatusTextColor(order.status),
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        fontSize: "14px",
-                        fontWeight: "600"
-                      }}>
-                        {getStatusLabel(order.status)}
+                      <span style={orderStatusBadgeStyle(order.status)}>
+                        {getOrderStatusLabel(order.status)}
                       </span>
                     </td>
                   </tr>

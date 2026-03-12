@@ -216,6 +216,25 @@ export default function ProcessorOrderView() {
         Date &amp; Time: {order.completion_date}
       </p>
 
+      {/* Credit Term & Payment Due */}
+      {order.credit_term && (
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          border: "1px solid #ccc",
+          borderRadius: "6px",
+          padding: "0.75rem 1.25rem",
+          marginTop: "1.25rem",
+          fontWeight: 700,
+          fontSize: "0.9rem",
+        }}>
+          <span>CREDIT TERM: {order.credit_term} DAYS</span>
+          {order.payment_due_date && (
+            <span>PAYMENT DUE: {order.payment_due_date.toUpperCase()}</span>
+          )}
+        </div>
+      )}
+
       {/* Actions */}
       <div className="view-actions">
         <button

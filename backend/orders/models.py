@@ -44,6 +44,7 @@ class Order(models.Model):
         choices=ORDER_STATUS_CHOICES,
         default='PENDING'
     )
+    payment_due_date = models.DateField(null=True, blank=True)
     
     class Meta:
         ordering = ['-date_ordered']
