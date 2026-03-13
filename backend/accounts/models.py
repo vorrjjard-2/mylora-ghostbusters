@@ -138,6 +138,25 @@ class ReminderMessage(models.Model):
         return f"Reminder Message {self.slot}"
 
 
+class CreditIncreaseRequest(models.Model):
+    request_id = models.AutoField(primary_key=True)
+    account = models.ForeignKey('CreditAccount', on_delete=models.CASCADE, related_name='credit_increase_requests')
+    requested_limit = models.DecimalField(max_digits=12, decimal_places=2)
+    justification = models.TextField()
+    status = models.CharField(max_length=20, choices=[
+        ('PENDING', 'Pending'), ('APPROVED', 'Approved'), ('REJECTED', 'Rejected')
+    ], default='PENDING')
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_credit_increases')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"CreditIncreaseRequest {self.request_id} - {self.status}"
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:

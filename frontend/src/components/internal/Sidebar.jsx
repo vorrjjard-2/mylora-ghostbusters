@@ -10,6 +10,7 @@ export default function Sidebar() {
         <MenuItem to="/upper-management/dashboard" active={location.pathname === "/upper-management/dashboard"}>Dashboard</MenuItem>
         <MenuItem to="/upper-management/all-orders" active={location.pathname === "/upper-management/all-orders"}>All Orders</MenuItem>
         <MenuItem to="/upper-management/payment-requests" active={location.pathname === "/upper-management/payment-requests"}>Payment Requests</MenuItem>
+        <MenuItem to="/upper-management/credit-changes" active={location.pathname === "/upper-management/credit-changes"}>Credit Changes</MenuItem>
         <MenuItem to="/upper-management/all-products" active={location.pathname === "/upper-management/all-products"}>All Products</MenuItem>
         <MenuItem to="/upper-management/customers" active={location.pathname.includes("/upper-management/customer")}>Customer Database</MenuItem>
         <MenuItem to="/upper-management/employees" active={location.pathname.includes("/upper-management/employee")}>Employee Database</MenuItem>

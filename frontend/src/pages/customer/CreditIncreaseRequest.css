@@ -1,0 +1,176 @@
+.cir-container {
+    background-color: #FCFCFC;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    font-family: 'Arimo', sans-serif;
+}
+
+.cir-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 31px 78px;
+    margin-top: -18px;
+    margin-left: -37px;
+    background-color: #FCFCFC;
+    margin-bottom: 10px;
+}
+
+.cir-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cir-logo-img {
+    height: 45px;
+}
+
+.cir-system-title {
+    color: #395A31;
+    font-weight: 700;
+    font-size: 32px;
+    font-family: 'Arimo', sans-serif;
+    letter-spacing: -0.64px;
+    line-height: 38.4px;
+}
+
+.cir-logout-btn {
+    background: white;
+    border: 1.3px solid #183112;
+    color: #183112;
+    padding: 6px 30px;
+    height: 41px;
+    width: 186px;
+    margin-right: -40px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.cir-content {
+    max-width: 90%;
+    margin: -20px auto;
+    padding: 0px 40px;
+}
+
+.cir-page-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #000000;
+}
+
+.cir-credit-section {
+    margin-bottom: 30px;
+}
+
+.cir-section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.cir-current-limit {
+    font-size: 20px;
+    font-weight: 600;
+    color: #183112;
+    margin-bottom: 20px;
+}
+
+.cir-form {
+    margin-top: 20px;
+}
+
+.cir-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+}
+
+.cir-label {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.cir-input {
+    height: 45px;
+    padding: 0 15px;
+    border: 1px solid #CCCCCC;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #FDFDFD;
+}
+
+.cir-input.cir-input-error {
+    border-color: #b03a2e;
+}
+
+.cir-textarea {
+    padding: 12px 15px;
+    border: 1px solid #CCCCCC;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #FDFDFD;
+    font-family: 'Arimo', sans-serif;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.cir-textarea.cir-input-error {
+    border-color: #b03a2e;
+}
+
+.cir-error {
+    color: #b03a2e;
+    font-size: 13px;
+    margin-top: 4px;
+    display: block;
+}
+
+.cir-inline-error {
+    background-color: #F8D7DA;
+    color: #842029;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.cir-form-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.cir-btn-back {
+    background: white;
+    border: 1px solid #183112;
+    color: #183112;
+    padding: 12px 60px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.cir-btn-submit {
+    background: #183112;
+    border: none;
+    color: white;
+    padding: 12px 60px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.cir-btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

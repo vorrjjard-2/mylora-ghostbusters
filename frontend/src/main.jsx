@@ -50,6 +50,9 @@ import EmployeeEdit from "./pages/upper_management/EmployeeEdit";
 import EmployeeCreate from "./pages/upper_management/EmployeeCreate";
 import AuditLog from "./pages/upper_management/AuditLog";
 import SetMessages from "./pages/upper_management/SetMessages";
+import CreditChanges from "./pages/upper_management/CreditChanges";
+import CreditIncreaseReview from "./pages/upper_management/CreditIncreaseReview";
+import CreditIncreaseRequest from "./pages/customer/CreditIncreaseRequest";
 
 // Credit Manager pages
 import CreditDashboard from "./pages/credit_manager/Dashboard";
@@ -224,6 +227,22 @@ function Layout() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/upper-management/credit-changes"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <CreditChanges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upper-management/credit-increase/:requestId"
+            element={
+              <ProtectedRoute requiredRole="upper_management">
+                <CreditIncreaseReview />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Credit Manager routes */}
           <Route
@@ -395,6 +414,14 @@ function Layout() {
             element={
               <ProtectedRoute>
                 <CreditHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit/increase"
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <CreditIncreaseRequest />
               </ProtectedRoute>
             }
           />

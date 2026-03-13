@@ -672,3 +672,206 @@ def update_reminder_messages(request):
 
     log_audit(request.user, "REMINDER_MESSAGES_UPDATED", {}, request)
     return Response({"message": "Reminder messages updated successfully."})
+
+
+# ─── Credit Increase Request endpoints ────────────────────────────────
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def customer_submit_credit_increase(request):
+    """Customer submits a credit limit increase request"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+        credit_account = customer.credit_account
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer profile not found."}, status=status.HTTP_404_NOT_FOUND)
+    except CreditAccount.DoesNotExist:
+        return Response({"error": "Credit account not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    from .models import CreditIncreaseRequest
+    # Block if pending request exists
+    if CreditIncreaseRequest.objects.filter(account=credit_account, status='PENDING').exists():
+        return Response({"error": "You already have a pending credit increase request."}, status=status.HTTP_400_BAD_REQUEST)
+
+    requested_limit = request.data.get("requested_limit")
+    justification = request.data.get("justification", "").strip()
+
+    if not requested_limit:
+        return Response({"error": "Requested limit is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        requested_limit = float(requested_limit)
+    except (ValueError, TypeError):
+        return Response({"error": "Invalid requested limit."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if requested_limit <= float(credit_account.credit_limit):
+        return Response({"error": "Requested limit must be greater than your current credit limit."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not justification:
+        return Response({"error": "Justification is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    req = CreditIncreaseRequest.objects.create(
+        account=credit_account,
+        requested_limit=requested_limit,
+        justification=justification,
+    )
+
+    return Response({"success": True, "request_id": req.request_id}, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_credit_increase_detail(request, request_id):
+    """UM views a single credit increase request"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import CreditIncreaseRequest
+    try:
+        r = CreditIncreaseRequest.objects.select_related(
+            'account__customer__user', 'reviewed_by'
+        ).get(request_id=request_id)
+    except CreditIncreaseRequest.DoesNotExist:
+        return Response({"error": "Request not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    customer_user = r.account.customer.user
+    return Response({
+        "request_id": r.request_id,
+        "customer_name": customer_user.get_full_name() or customer_user.username,
+        "current_limit": str(r.account.credit_limit),
+        "requested_limit": str(r.requested_limit),
+        "justification": r.justification,
+        "status": r.status,
+        "created_at": r.created_at.strftime("%B %d, %Y %I:%M %p"),
+        "reviewed_by": r.reviewed_by.get_full_name() if r.reviewed_by else None,
+        "reviewed_at": r.reviewed_at.strftime("%B %d, %Y %I:%M %p") if r.reviewed_at else None,
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def um_credit_increase_list(request):
+    """UM views all credit increase requests"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    from .models import CreditIncreaseRequest
+    requests_qs = CreditIncreaseRequest.objects.select_related(
+        'account__customer__user', 'reviewed_by'
+    ).order_by('-created_at')
+
+    data = []
+    for r in requests_qs:
+        customer_user = r.account.customer.user
+        data.append({
+            "request_id": r.request_id,
+            "customer_name": customer_user.get_full_name() or customer_user.username,
+            "current_limit": str(r.account.credit_limit),
+            "requested_limit": str(r.requested_limit),
+            "justification": r.justification,
+            "status": r.status,
+            "created_at": r.created_at.strftime("%B %d, %Y %I:%M %p"),
+            "reviewed_by": r.reviewed_by.get_full_name() if r.reviewed_by else None,
+            "reviewed_at": r.reviewed_at.strftime("%B %d, %Y %I:%M %p") if r.reviewed_at else None,
+        })
+
+    return Response(data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_approve_credit_increase(request, request_id):
+    """UM approves a credit increase request"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    password = request.data.get("password")
+    if not password or not request.user.check_password(password):
+        return Response({"error": "Invalid password."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    from .models import CreditIncreaseRequest, Notification
+    from django.utils import timezone
+    try:
+        credit_request = CreditIncreaseRequest.objects.select_related('account__customer__user').get(request_id=request_id)
+    except CreditIncreaseRequest.DoesNotExist:
+        return Response({"error": "Request not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if credit_request.status != 'PENDING':
+        return Response({"error": "Request is not pending."}, status=status.HTTP_400_BAD_REQUEST)
+
+    old_limit = credit_request.account.credit_limit
+    new_limit = credit_request.requested_limit
+
+    # Update status
+    credit_request.status = 'APPROVED'
+    credit_request.reviewed_by = request.user
+    credit_request.reviewed_at = timezone.now()
+    credit_request.save()
+
+    # Update credit account
+    account = credit_request.account
+    limit_increase = new_limit - old_limit
+    account.credit_limit = new_limit
+    account.available_credit = min(account.available_credit + limit_increase, new_limit)
+    account.save()
+
+    # Notify customer
+    customer = account.customer
+    Notification.objects.create(
+        customer=customer,
+        sent_by=request.user,
+        message=f"Your credit limit increase request has been approved. Your new credit limit is ₱{float(new_limit):,.2f}.",
+        requires_acknowledgment=True,
+    )
+
+    log_audit(request.user, "CREDIT_INCREASE_APPROVED", {
+        "request_id": request_id,
+        "customer_name": customer.user.get_full_name(),
+        "old_limit": str(old_limit),
+        "new_limit": str(new_limit),
+    }, request)
+
+    return Response({"success": True})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def um_reject_credit_increase(request, request_id):
+    """UM rejects a credit increase request"""
+    if not _require_role(request, "upper_management"):
+        return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    password = request.data.get("password")
+    if not password or not request.user.check_password(password):
+        return Response({"error": "Invalid password."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    from .models import CreditIncreaseRequest, Notification
+    from django.utils import timezone
+    try:
+        credit_request = CreditIncreaseRequest.objects.select_related('account__customer__user').get(request_id=request_id)
+    except CreditIncreaseRequest.DoesNotExist:
+        return Response({"error": "Request not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if credit_request.status != 'PENDING':
+        return Response({"error": "Request is not pending."}, status=status.HTTP_400_BAD_REQUEST)
+
+    credit_request.status = 'REJECTED'
+    credit_request.reviewed_by = request.user
+    credit_request.reviewed_at = timezone.now()
+    credit_request.save()
+
+    customer = credit_request.account.customer
+    Notification.objects.create(
+        customer=customer,
+        sent_by=request.user,
+        message="Your credit limit increase request has been reviewed and was not approved at this time.",
+        requires_acknowledgment=True,
+    )
+
+    log_audit(request.user, "CREDIT_INCREASE_REJECTED", {
+        "request_id": request_id,
+        "customer_name": customer.user.get_full_name(),
+        "requested_limit": str(credit_request.requested_limit),
+    }, request)
+
+    return Response({"success": True})

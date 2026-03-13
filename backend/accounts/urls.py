@@ -21,6 +21,11 @@ from .views import (
     customer_notification_history,
     get_reminder_messages,
     update_reminder_messages,
+    customer_submit_credit_increase,
+    um_credit_increase_list,
+    um_credit_increase_detail,
+    um_approve_credit_increase,
+    um_reject_credit_increase,
 )
 
 urlpatterns = [
@@ -51,4 +56,11 @@ urlpatterns = [
     # Reminder messages
     path("api/um/reminder-messages/", get_reminder_messages),
     path("api/um/reminder-messages/update/", update_reminder_messages),
+
+    # Credit Increase Requests
+    path("api/customer/credit-increase/", customer_submit_credit_increase),
+    path("api/um/credit-increases/", um_credit_increase_list),
+    path("api/um/credit-increase/<int:request_id>/", um_credit_increase_detail),
+    path("api/um/credit-increase/<int:request_id>/approve/", um_approve_credit_increase),
+    path("api/um/credit-increase/<int:request_id>/reject/", um_reject_credit_increase),
 ]

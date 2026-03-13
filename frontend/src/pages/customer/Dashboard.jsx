@@ -17,8 +17,6 @@ export default function CustomerDashboard() {
   // Notification state
   const [unreadNotifications, setUnreadNotifications] = useState([]);
   const [currentNotification, setCurrentNotification] = useState(null);
-  const [ackInput, setAckInput] = useState("");
-  const [ackError, setAckError] = useState("");
   const [notifHistory, setNotifHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const historyRef = useRef(null);
@@ -68,11 +66,6 @@ export default function CustomerDashboard() {
   const notifPag = usePagination(notifHistory, 5, []);
 
   const handleAcknowledge = async () => {
-    if (ackInput.trim().toLowerCase() !== "i understand") {
-      setAckError('Please type "I understand" to continue.');
-      return;
-    }
-
     try {
       await fetch(
         `${API_BASE_URL}/api/customer/notifications/${currentNotification.notification_id}/acknowledge/`,
@@ -90,8 +83,6 @@ export default function CustomerDashboard() {
         (n) => n.notification_id !== currentNotification.notification_id
       );
       setUnreadNotifications(remaining);
-      setAckInput("");
-      setAckError("");
 
       if (remaining.length > 0) {
         setCurrentNotification(remaining[0]);
@@ -106,7 +97,6 @@ export default function CustomerDashboard() {
         .catch(console.error);
     } catch (err) {
       console.error(err);
-      setAckError("Failed to acknowledge. Please try again.");
     }
   };
 
@@ -258,6 +248,14 @@ return (
               <span>Credit History</span>
             </div>
           </button>
+
+          <button className="cd-action-card" onClick={() => navigate("/credit/increase")}>
+            <span className="cd-action-icon">↑</span>
+            <div className="cd-action-text">
+              <span>Request Credit</span>
+              <span>Increase</span>
+            </div>
+          </button>
         </div>
 
         {/* Credit Term + Balance Section */}
@@ -369,33 +367,6 @@ return (
             }}>
               {currentNotification.message}
             </div>
-
-            <p style={{ fontSize: "14px", color: "#555", marginBottom: "10px" }}>
-              Type <strong>"I understand"</strong> to acknowledge this notice:
-            </p>
-
-            {ackError && (
-              <div style={{
-                backgroundColor: "#F8D7DA", color: "#842029",
-                padding: "8px 12px", borderRadius: "6px",
-                marginBottom: "10px", fontSize: "13px",
-              }}>
-                {ackError}
-              </div>
-            )}
-
-            <input
-              type="text"
-              value={ackInput}
-              onChange={(e) => { setAckInput(e.target.value); setAckError(""); }}
-              onKeyDown={(e) => { if (e.key === "Enter") handleAcknowledge(); }}
-              placeholder='Type "I understand"'
-              style={{
-                width: "100%", padding: "12px", fontSize: "16px",
-                border: "1px solid #262626", borderRadius: "8px",
-                boxSizing: "border-box", marginBottom: "20px",
-              }}
-            />
 
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button
