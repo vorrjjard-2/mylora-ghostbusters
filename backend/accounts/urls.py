@@ -19,6 +19,7 @@ from .views import (
     customer_unread_notifications,
     acknowledge_notification,
     customer_notification_history,
+    mark_notifications_read,
     get_reminder_messages,
     update_reminder_messages,
     customer_submit_credit_increase,
@@ -52,6 +53,7 @@ urlpatterns = [
     path("api/customer/notifications/unread/", customer_unread_notifications),
     path("api/customer/notifications/<int:notification_id>/acknowledge/", acknowledge_notification),
     path("api/customer/notifications/history/", customer_notification_history),
+    path("api/customer/notifications/mark-read/", mark_notifications_read),
 
     # Reminder messages
     path("api/um/reminder-messages/", get_reminder_messages),

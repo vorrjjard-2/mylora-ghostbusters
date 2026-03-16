@@ -80,7 +80,9 @@
     margin-bottom: 0.5px;
     padding: 1.5rem;
     border-radius: 8px;
-    width: 1125px;
+    width: 100%;
+    max-width: 1125px;
+    box-sizing: border-box;
 }
 
 .review-section-title {
@@ -103,7 +105,9 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
-    width: 1210px;
+    width: 100%;
+    max-width: 1210px;
+    box-sizing: border-box;
 }
 
 .review-field-label {
@@ -115,13 +119,14 @@
 }
 
 .review-readonly-box {
-    background-color: #F8F8F8; 
-    border: 1px solid #183112;  
+    background-color: #F8F8F8;
+    border: 1px solid #183112;
     border-radius: 10px;
     padding: 14px;
     font-size: 16px;
     font-weight: 500;
-    width: 1210px;
+    width: 100%;
+    max-width: 1210px;
     box-sizing: border-box;
     min-height: 48px;
     display: flex;
@@ -310,8 +315,8 @@
 }
 
 .review-submit-btn {
-    width: auto; 
-    padding: 10px 100px; 
+    width: auto;
+    padding: 10px 100px;
     margin-right: -60px;
     background: #183112;
     color: white;
@@ -323,5 +328,176 @@
     cursor: pointer;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     transition: transform 0.1s, background-color 0.2s;
+}
+
+.review-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .review-section, .review-warning-box, .review-actions {
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+
+    .review-section {
+        max-width: 100%;
+    }
+
+    .review-field-group {
+        max-width: 100%;
+    }
+
+    .review-readonly-box {
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    .review-section-title {
+        margin-left: 0;
+    }
+
+    .review-field-label {
+        margin-left: 0;
+    }
+
+    .review-table-wrapper {
+        margin-left: 0;
+    }
+
+    .review-back-link {
+        margin-left: 0;
+    }
+
+    .review-submit-btn {
+        margin-right: 0;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .review-main-header {
+        padding: 15px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .review-system-title {
+        font-size: 22px;
+    }
+
+    .review-cancel-btn {
+        width: auto;
+        padding: 6px 20px;
+        font-size: 16px;
+    }
+
+    .review-page-title-section {
+        margin-left: 16px;
+        margin-top: -20px;
+    }
+
+    .review-page-title-section h1 {
+        font-size: clamp(28px, 5vw, 64px);
+    }
+
+    .review-section, .review-warning-box, .review-actions {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+
+    .review-section {
+        padding: 1rem;
+        max-width: 100%;
+    }
+
+    .review-section-title {
+        font-size: 22px;
+        margin-left: 0;
+    }
+
+    .review-field-group {
+        max-width: 100%;
+    }
+
+    .review-field-label {
+        font-size: 16px;
+        margin-left: 0;
+    }
+
+    .review-readonly-box {
+        max-width: 100%;
+        margin-left: 0;
+        font-size: 14px;
+    }
+
+    .review-table-wrapper {
+        margin-left: 0;
+    }
+
+    .review-th, .review-td {
+        font-size: 14px;
+        padding: 10px 6px;
+    }
+
+    .review-actions {
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 40px;
+    }
+
+    .review-back-link {
+        margin-left: 0;
+        order: 2;
+        text-align: center;
+    }
+
+    .review-submit-btn {
+        padding: 12px 40px;
+        margin-right: 0;
+        width: 100%;
+        text-align: center;
+        order: 1;
+    }
+
+    .review-table {
+        min-width: 380px;
+    }
+
+    .review-modal {
+        padding: 24px 20px;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .review-page-title-section h1 {
+        font-size: 28px;
+    }
+
+    .review-section-title {
+        font-size: 18px;
+    }
+
+    .review-field-label {
+        font-size: 14px;
+    }
+
+    .review-readonly-box {
+        font-size: 13px;
+        padding: 10px;
+    }
+
+    .review-th, .review-td {
+        font-size: 12px;
+        padding: 8px 4px;
+    }
+
+    .review-submit-btn {
+        font-size: 16px;
+        padding: 12px 20px;
+    }
 }
 

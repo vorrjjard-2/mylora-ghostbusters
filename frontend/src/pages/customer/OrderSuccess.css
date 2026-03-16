@@ -105,3 +105,64 @@
     font-weight: 600;
     font-family: 'Arimo', sans-serif;
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+    .success-main-header {
+        padding: 15px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .success-system-title {
+        font-size: 22px;
+    }
+
+    .success-content {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .success-card {
+        padding: 0 8px;
+    }
+
+    .success-title {
+        font-size: clamp(28px, 5vw, 64px);
+    }
+
+    .success-message {
+        font-size: 20px;
+    }
+
+    .success-actions {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 30px;
+    }
+
+    .success-dashboard-btn, .success-orders-btn {
+        width: 100%;
+        text-align: center;
+        min-height: 44px;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .success-title {
+        font-size: 28px;
+    }
+
+    .success-message {
+        font-size: 16px;
+    }
+
+    .success-description {
+        font-size: 15px;
+    }
+
+    .success-system-title {
+        font-size: 18px;
+    }
+}

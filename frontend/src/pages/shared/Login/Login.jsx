@@ -67,6 +67,10 @@ export default function Login() {
         setCsrfToken(me.csrfToken);
       }
 
+      // Clear any stale ordering cache from previous sessions
+      localStorage.removeItem("order_items");
+      localStorage.removeItem("delivery_details");
+
       if (me.roles.includes("upper_management")) {
         navigate("/internal/dashboard");
       } else if (me.roles.includes("credit_manager")) {

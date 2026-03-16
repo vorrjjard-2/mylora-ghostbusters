@@ -58,7 +58,8 @@
   gap: 1rem;
   margin-top: -10px;
   margin-bottom: 2rem;
-  width: 800px;
+  width: 100%;
+  max-width: 800px;
   margin-left: 40px;
 }
 
@@ -114,7 +115,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
-    width: 1300px;
+    width: 100%;
+    max-width: 1300px;
 }
 
 .delivery-label {
@@ -138,11 +140,13 @@
 
 .delivery-pickup-message {
   padding: 1.5rem;
-  width: 1300px;
+  width: 100%;
+  max-width: 1300px;
   background: #FCFCFC;
   border-radius: 8px;
   color: #666;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .delivery-autofill-label {
@@ -171,6 +175,7 @@
 
 .delivery-next-btn {
     width: 431px;
+    max-width: 100%;
     padding: 10px 59px;
     background: #1f3d1a;
     color: white;
@@ -179,8 +184,87 @@
     font-size: 20px;
     font-weight: 600;
     cursor: pointer;
-    display: block;   
-    margin-left: auto; 
-    margin-right: 40px;   
+    display: block;
+    margin-left: auto;
+    margin-right: 40px;
     margin-top: 50px;
+    box-sizing: border-box;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .delivery-form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .delivery-mode-buttons {
+        margin-left: 0;
+    }
+
+    .delivery-form {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .delivery-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .delivery-mode-buttons {
+        grid-template-columns: 1fr;
+        margin-left: 0;
+    }
+
+    .delivery-form {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+
+    .delivery-mode-button {
+        min-height: 44px;
+    }
+
+    .delivery-next-btn {
+        width: 100%;
+        margin-right: 16px;
+        margin-left: 16px;
+        padding: 12px 20px;
+    }
+
+    .delivery-label {
+        font-size: 16px;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .delivery-title {
+        font-size: 1.5rem;
+    }
+
+    .delivery-section-title {
+        font-size: 1.2rem;
+    }
+
+    .delivery-label {
+        font-size: 14px;
+    }
+
+    .delivery-input {
+        padding: 12px 14px;
+        font-size: 0.9rem;
+    }
+
+    .delivery-mode-button {
+        font-size: 15px;
+        padding: 6px;
+    }
+
+    .delivery-next-btn {
+        font-size: 16px;
+        padding: 10px 16px;
+    }
 }

@@ -274,3 +274,127 @@
     margin-top: 4px;
     display: block;
 }
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .pr-main-header {
+        padding: 20px 30px;
+        margin-left: 0;
+    }
+
+    .pr-logout-btn {
+        margin-right: 0;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .pr-main-header {
+        padding: 15px 16px;
+        margin-left: 0;
+        margin-top: 0;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .pr-system-title {
+        font-size: 22px;
+    }
+
+    .pr-logout-btn {
+        width: auto;
+        padding: 6px 20px;
+        font-size: 16px;
+        margin-right: 0;
+    }
+
+    .pr-content {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .pr-user-name {
+        font-size: clamp(28px, 5vw, 64px);
+        margin-bottom: 16px;
+    }
+
+    .pr-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .pr-balance-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .pr-balance-amount {
+        font-size: 24px;
+    }
+
+    .upload-zone {
+        padding: 24px;
+    }
+
+    .file-display-badge {
+        margin-left: 0;
+    }
+
+    .pr-form-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .pr-btn-cancel, .pr-btn-submit {
+        width: 100%;
+        padding: 12px 20px;
+        text-align: center;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .pr-user-name {
+        font-size: 24px;
+    }
+
+    .pr-section-title {
+        font-size: 20px;
+    }
+
+    .pr-label {
+        font-size: 16px;
+    }
+
+    .pr-balance-label {
+        font-size: 18px;
+    }
+
+    .pr-balance-amount {
+        font-size: 20px;
+    }
+
+    .pr-credit-header, .pr-credit-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .pr-system-title {
+        font-size: 18px;
+    }
+
+    .pr-logout-btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        height: 34px;
+    }
+
+    .upload-zone {
+        padding: 16px;
+    }
+
+    .file-name {
+        max-width: 120px;
+    }
+}

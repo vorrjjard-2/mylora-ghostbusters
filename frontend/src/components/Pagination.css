@@ -4,6 +4,7 @@
   align-items: center;
   gap: 12px;
   margin-top: 16px;
+  flex-wrap: wrap;
 }
 
 .pagination-btn {
@@ -26,4 +27,19 @@
   font-size: 14px;
   font-weight: 600;
   color: #333;
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    gap: 8px;
+  }
+
+  .pagination-btn {
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+
+  .pagination-info {
+    font-size: 13px;
+  }
 }

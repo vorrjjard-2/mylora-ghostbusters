@@ -2,6 +2,7 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
+import { orderStatusBadgeStyle, getOrderStatusLabel } from "../../utils/orderStatus";
 import "./OrderDetail.css";
 
 
@@ -56,7 +57,12 @@ return (
 
     {/* order ID + date */}
   <main className="order-content">
-    <h1 className="order-detail-title">ORDER ID {order.order_id}</h1>
+    <h1 className="order-detail-title">
+      ORDER ID {order.order_id}
+      <span className="order-detail-status-tag" style={orderStatusBadgeStyle(order.order_status)}>
+        {getOrderStatusLabel(order.order_status)}
+      </span>
+    </h1>
     <p className="order-detail-date">
       <span className="meta-label">DATE SUBMITTED:</span> 
       <span className="meta-value">{formatDate(order.date_submitted)}</span>

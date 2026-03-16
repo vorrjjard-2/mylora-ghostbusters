@@ -65,6 +65,29 @@ export default function CustomerDashboard() {
 
   const notifPag = usePagination(notifHistory, 5, []);
 
+  const handleOpenHistory = async () => {
+    const opening = !showHistory;
+    setShowHistory(opening);
+
+    if (opening && unreadCount > 0) {
+      try {
+        await fetch(`${API_BASE_URL}/api/customer/notifications/mark-read/`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        });
+        setNotifHistory((prev) =>
+          prev.map((n) => (n.is_read ? n : { ...n, is_read: true }))
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   const handleAcknowledge = async () => {
     try {
       await fetch(
@@ -132,7 +155,7 @@ return (
           {/* Notification Bell */}
           <div ref={historyRef} style={{ position: "relative" }}>
             <button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={handleOpenHistory}
               style={{
                 background: "white",
                 border: "1.3px solid #183112",
@@ -164,7 +187,7 @@ return (
             {showHistory && (
               <div style={{
                 position: "absolute", top: "calc(100% + 8px)", right: 0,
-                width: "380px", maxHeight: "400px", overflowY: "auto",
+                width: "min(380px, 90vw)", maxHeight: "400px", overflowY: "auto",
                 backgroundColor: "white", border: "1px solid #262626",
                 borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 zIndex: 1000, fontFamily: "'Arimo', sans-serif",

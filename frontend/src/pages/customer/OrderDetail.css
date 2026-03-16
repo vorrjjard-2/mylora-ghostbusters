@@ -47,6 +47,12 @@
     color: #000000;
 }
 
+.order-detail-status-tag {
+    vertical-align: middle;
+    margin-left: 12px;
+    font-size: 14px;
+}
+
 .order-detail-date {
     font-size: 25px;
     margin-bottom: 40px;
@@ -87,7 +93,6 @@
 .order-detail-table-wrapper {
   border: 1px solid #ccc;
   border-radius: 8px;
-  overflow: hidden;
   margin-bottom: 1.75rem;
 }
 
@@ -146,4 +151,108 @@
     font-size: 18px;
     letter-spacing: 0.5px;
     cursor: pointer;
+}
+
+.order-detail-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .order-content {
+        max-width: 95%;
+        padding: 0 20px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .order-main-header {
+        padding: 15px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .order-system-title {
+        font-size: 22px;
+    }
+
+    .order-content {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .order-detail-title {
+        font-size: clamp(28px, 5vw, 64px);
+        margin-bottom: 4px;
+    }
+
+    .order-detail-date,
+    .order-detail-customer,
+    .order-detail-phone {
+        font-size: 18px;
+    }
+
+    .order-detail-subtitle {
+        font-size: 22px;
+    }
+
+    .order-detail-th {
+        font-size: 14px;
+        padding: 0.5rem 0.6rem;
+    }
+
+    .order-detail-td {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .order-detail-back-btn {
+        padding: 12px 40px;
+        width: 100%;
+    }
+
+    .order-detail-table {
+        min-width: 400px;
+    }
+
+    .order-logo-img {
+        height: 36px;
+    }
+
+    .order-actions-container {
+        margin-top: 24px;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .order-detail-title {
+        font-size: 28px;
+    }
+
+    .order-system-title {
+        font-size: 18px;
+    }
+
+    .order-detail-date,
+    .order-detail-customer,
+    .order-detail-phone {
+        font-size: 16px;
+    }
+
+    .order-detail-subtitle {
+        font-size: 20px;
+    }
+
+    .order-detail-th {
+        font-size: 12px;
+        padding: 0.4rem;
+    }
+
+    .order-detail-td {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+    }
 }

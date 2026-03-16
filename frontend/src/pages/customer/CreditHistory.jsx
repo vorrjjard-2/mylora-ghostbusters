@@ -64,11 +64,7 @@ export default function CreditHistory() {
 
         {/* Credit Summary */}
         {creditInfo && (
-          <div style={{
-            display: "flex",
-            gap: "20px",
-            marginBottom: "30px",
-          }}>
+          <div className="cd-credit-summary">
             <div style={{
               flex: 1,
               backgroundColor: "white",

@@ -147,4 +147,88 @@
   font-weight: 600;
 }
 
+/* Tablet */
+@media (max-width: 1024px) {
+    .profile-content {
+        max-width: 95%;
+        padding: 0 20px;
+    }
+}
 
+/* Mobile */
+@media (max-width: 768px) {
+    .profile-header-section {
+        padding: 15px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .profile-system-title {
+        font-size: 22px;
+    }
+
+    .profile-back-btn {
+        width: auto;
+        padding: 6px 20px;
+        font-size: 16px;
+    }
+
+    .profile-content {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .profile-title {
+        font-size: clamp(28px, 5vw, 64px);
+        padding-bottom: 20px;
+    }
+
+    .profile-section-title {
+        font-size: 24px;
+    }
+
+    .profile-form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .profile-save-password-btn {
+        padding: 12px 40px;
+        width: 100%;
+    }
+
+    .profile-save-btn {
+        padding: 12px 40px;
+        width: 100%;
+    }
+
+    .profile-button-row {
+        justify-content: stretch;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .profile-title {
+        font-size: 28px;
+    }
+
+    .profile-section-title {
+        font-size: 20px;
+    }
+
+    .profile-label {
+        font-size: 16px;
+    }
+
+    .profile-back-btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        height: 34px;
+    }
+
+    .profile-save-password-btn, .profile-save-btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+    }
+}

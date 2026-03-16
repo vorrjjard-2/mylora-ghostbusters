@@ -150,7 +150,7 @@ export default function OrderHistory() {
               checked={activeStatuses.has(s)}
               onChange={() => toggleStatus(s)}
             />
-            {STATUS_LABEL[s]}
+            {getOrderStatusLabel(s)}
           </label>
         ))}
       </div>

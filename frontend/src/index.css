@@ -1,4 +1,8 @@
 /* index.css */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body, #root {
   margin: 0;
   padding: 0;
@@ -7,3 +11,21 @@ html, body, #root {
 }
 
 /* Do NOT put overflow: hidden here anymore */
+
+/* Responsive table wrapper utility */
+.responsive-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+}

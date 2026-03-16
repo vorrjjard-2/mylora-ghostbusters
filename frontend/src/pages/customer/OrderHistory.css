@@ -160,7 +160,6 @@
 .history-table-wrapper {
   border: 1px solid #ccc;
   border-radius: 8px;
-  overflow: hidden;
 }
 
 .history-table {
@@ -198,4 +197,111 @@
   text-align: center;
   color: #888;
   padding: 2rem;
+}
+
+.history-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .order-history-content {
+        max-width: 95%;
+        padding: 0 20px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .history-header-section {
+        padding: 15px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .history-system-title {
+        font-size: 22px;
+    }
+
+    .history-back-btn {
+        width: auto;
+        padding: 6px 20px;
+        font-size: 16px;
+    }
+
+    .order-history-content {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .history-title {
+        font-size: clamp(28px, 5vw, 64px);
+        margin-bottom: 16px;
+    }
+
+    .history-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .history-search-wrapper {
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .history-filter-bar {
+        gap: 0.5rem;
+    }
+
+    .history-table {
+        min-width: 500px;
+    }
+
+    .history-logo-img {
+        height: 36px;
+    }
+
+    .history-th, .history-td {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .history-title {
+        font-size: 24px;
+    }
+
+    .history-system-title {
+        font-size: 18px;
+    }
+
+    .history-back-btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        height: 34px;
+    }
+
+    .history-filter-bar {
+        gap: 0.4rem;
+    }
+
+    .history-checkbox-label {
+        font-size: 0.8rem;
+    }
+
+    .history-sort-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .history-search-wrapper {
+        max-width: 100%;
+    }
+
+    .history-th, .history-td {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.4rem;
+    }
 }

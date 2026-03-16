@@ -591,6 +591,24 @@ def acknowledge_notification(request, notification_id):
     return Response({"message": "Notification acknowledged."})
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def mark_notifications_read(request):
+    """Mark all unread notifications as read for the logged-in customer"""
+    try:
+        customer = Customer.objects.get(user=request.user)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    from .models import Notification
+    from django.utils import timezone
+    Notification.objects.filter(
+        customer=customer, is_read=False
+    ).update(is_read=True, read_at=timezone.now())
+
+    return Response({"message": "Notifications marked as read."})
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def customer_notification_history(request):
