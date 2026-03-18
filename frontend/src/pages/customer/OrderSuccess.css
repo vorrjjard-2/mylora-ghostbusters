@@ -27,7 +27,7 @@
 }
 
 .success-system-title {
-    font-size: 64px;
+    font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.64px;
     color: #395A31;
@@ -116,6 +116,10 @@
 
     .success-system-title {
         font-size: 22px;
+    }
+
+    .success-logo-img {
+        height: 36px;
     }
 
     .success-content {

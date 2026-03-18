@@ -147,6 +147,85 @@ box-sizing: border-box;
     background-color: #f0f0f0;
 }
 
+/* Tablet */
+@media (max-width: 1024px) {
+    .apply1-page-wrapper .apply-header {
+        margin-left: 0;
+        margin-top: 0;
+    }
 
+    .apply1-page-wrapper .main-title {
+        margin-left: 0;
+    }
 
+    .apply1-page-wrapper .sub-title {
+        margin-left: 0;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .apply1-page-wrapper {
+        padding: 1rem 16px;
+    }
+
+    .apply1-page-wrapper .apply-header {
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .apply1-page-wrapper .mylora-logo {
+        height: 36px;
+    }
+
+    .apply1-page-wrapper .header-title {
+        font-size: 22px;
+    }
+
+    .apply1-page-wrapper .main-title {
+        font-size: clamp(28px, 5vw, 64px);
+        margin-left: 0;
+    }
+
+    .apply1-page-wrapper .sub-title {
+        font-size: 18px;
+        margin-left: 0;
+        margin-bottom: 40px;
+    }
+
+    .apply1-page-wrapper .input-group {
+        margin-bottom: 50px;
+    }
+
+    .apply1-page-wrapper .btn-continue {
+        font-size: 16px;
+        padding: 8px 20px;
+    }
+
+    .apply1-page-wrapper .form-footer {
+        flex-direction: column;
+    }
+
+    .apply1-page-wrapper .btn-back {
+        font-size: 16px;
+        padding: 8px 20px;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .apply1-page-wrapper .main-title {
+        font-size: 28px;
+    }
+
+    .apply1-page-wrapper .sub-title {
+        font-size: 16px;
+    }
+
+    .apply1-page-wrapper .header-title {
+        font-size: 18px;
+    }
+}
 

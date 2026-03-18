@@ -178,7 +178,7 @@ return (
               </div>
             </div>
 
-            <div className="delivery-form-group" style={{ width: "calc(33% - 0.67rem)" }}>
+            <div className="delivery-form-group delivery-zip-group">
               <label className="delivery-label">
                 Zip Code<span className="delivery-required">*</span>
               </label>

@@ -228,6 +228,16 @@
 
 /* Tablet */
 @media (max-width: 1024px) {
+    .um-header-section {
+        padding: 20px 30px;
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .um-cancel-btn {
+        margin-right: 0;
+    }
+
     .order-content {
         padding: 0 30px;
     }
@@ -239,6 +249,29 @@
 
 /* Mobile */
 @media (max-width: 768px) {
+    .um-header-section {
+        padding: 15px 16px;
+        margin-left: 0;
+        margin-top: 0;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .um-system-title {
+        font-size: 22px;
+    }
+
+    .mylora-logo {
+        height: 36px;
+    }
+
+    .um-cancel-btn {
+        width: auto;
+        padding: 6px 20px;
+        font-size: 16px;
+        margin-right: 0;
+    }
+
     .order-header {
         font-size: 26px;
         margin-left: 16px;
@@ -251,15 +284,8 @@
         gap: 1rem;
     }
 
-    .um-cancel-btn {
-        width: auto;
-        padding: 6px 20px;
-        font-size: 16px;
-        margin-right: 0;
-    }
-
     .order-table {
-        min-width: 420px;
+        min-width: 360px;
     }
 
     .order-right-panel {
@@ -274,6 +300,16 @@
 
 /* Small phone */
 @media (max-width: 480px) {
+    .um-system-title {
+        font-size: 18px;
+    }
+
+    .um-cancel-btn {
+        padding: 6px 14px;
+        font-size: 14px;
+        height: 34px;
+    }
+
     .order-header {
         font-size: 22px;
         margin-left: 16px;
@@ -282,12 +318,6 @@
 
     .order-subheader {
         font-size: 16px;
-    }
-
-    .um-cancel-btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        height: 34px;
     }
 
     .order-product-card {

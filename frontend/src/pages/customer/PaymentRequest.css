@@ -301,6 +301,10 @@
         font-size: 22px;
     }
 
+    .pr-logo-img {
+        height: 36px;
+    }
+
     .pr-logout-btn {
         width: auto;
         padding: 6px 20px;

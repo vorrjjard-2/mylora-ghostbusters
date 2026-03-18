@@ -286,5 +286,143 @@ input, select {
     font-size: 20px;
 }
 
+/* Tablet */
+@media (max-width: 1024px) {
+    .apply2-page-wrapper {
+        padding: 2rem;
+    }
 
+    .apply2-page-wrapper .apply-header {
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .apply2-page-wrapper .main-title {
+        margin-left: 0;
+    }
+
+    .apply2-page-wrapper .section-title {
+        margin-left: 0;
+    }
+
+    .apply2-page-wrapper .input-group {
+        margin-left: 0;
+    }
+
+    .apply2-page-wrapper .upload-zone {
+        margin-left: 0;
+    }
+
+    .file-list-container {
+        margin-left: 0;
+    }
+
+    .section-header-text, .id-hint-text {
+        margin-left: 0;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .apply2-page-wrapper {
+        padding: 1rem 16px;
+    }
+
+    .apply2-page-wrapper .apply-header {
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .apply2-page-wrapper .mylora-logo {
+        height: 36px;
+    }
+
+    .apply2-page-wrapper .header-title {
+        font-size: 22px;
+    }
+
+    .apply2-page-wrapper .main-title {
+        font-size: clamp(28px, 5vw, 64px);
+        margin-left: 0;
+        margin-bottom: 24px;
+    }
+
+    .apply2-page-wrapper .section-title {
+        font-size: 24px;
+        margin-left: 0;
+    }
+
+    .apply2-page-wrapper .input-grid {
+        grid-template-columns: 1fr;
+        column-gap: 0;
+    }
+
+    .apply2-page-wrapper .three-col {
+        grid-template-columns: 1fr;
+    }
+
+    .apply2-page-wrapper .input-group {
+        margin-left: 0;
+    }
+
+    .apply2-page-wrapper .input-group.full-width {
+        grid-column: span 1;
+    }
+
+    .apply2-page-wrapper .input-group label {
+        font-size: 16px;
+    }
+
+    .apply2-page-wrapper .upload-zone {
+        margin-left: 0;
+        padding: 30px 12px;
+    }
+
+    .file-list-container {
+        margin-left: 0;
+    }
+
+    .section-header-text, .id-hint-text {
+        margin-left: 0;
+        font-size: 16px;
+    }
+
+    .required-docs-list {
+        font-size: 16px;
+    }
+
+    .apply2-page-wrapper .form-footer {
+        flex-direction: column;
+        margin-top: 30px;
+    }
+
+    .apply2-page-wrapper .btn-next {
+        min-width: 0;
+        width: 100%;
+        padding: 8px 20px;
+        font-size: 16px;
+    }
+
+    .apply2-page-wrapper .btn-back {
+        width: 100%;
+        padding: 8px 20px;
+        font-size: 16px;
+        text-align: center;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .apply2-page-wrapper .main-title {
+        font-size: 28px;
+    }
+
+    .apply2-page-wrapper .section-title {
+        font-size: 20px;
+    }
+
+    .apply2-page-wrapper .header-title {
+        font-size: 18px;
+    }
+}
 

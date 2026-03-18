@@ -345,7 +345,26 @@
     }
 
     .cd-table {
-        min-width: 650px;
+        min-width: 480px;
+    }
+
+    .cd-notif-bell-btn {
+        height: 36px;
+        width: 42px;
+        font-size: 16px;
+    }
+
+    .cd-notif-modal {
+        padding: 24px 20px;
+    }
+
+    .cd-notif-modal-title {
+        font-size: 20px;
+    }
+
+    .cd-notif-modal-body {
+        font-size: 14px;
+        padding: 14px;
     }
 
     .cd-credit-summary {
@@ -356,6 +375,154 @@
         padding: 10px 12px;
         font-size: 13px;
     }
+}
+
+/* Notification Bell */
+.cd-notif-bell-btn {
+    background: white;
+    border: 1.3px solid #183112;
+    border-radius: 10px;
+    height: 41px;
+    width: 50px;
+    cursor: pointer;
+    position: relative;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cd-notif-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cd-notif-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(380px, 90vw);
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #262626;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    font-family: 'Arimo', sans-serif;
+}
+
+.cd-notif-dropdown-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.cd-notif-empty {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+}
+
+.cd-notif-item {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cd-notif-message {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 6px;
+}
+
+.cd-notif-meta {
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Notification Modal */
+.cd-notif-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.cd-notif-modal {
+    background-color: white;
+    border-radius: 15px;
+    padding: 40px;
+    width: 500px;
+    max-width: 90vw;
+    font-family: 'Arimo', sans-serif;
+}
+
+.cd-notif-modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #262626;
+}
+
+.cd-notif-modal-date {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.cd-notif-modal-body {
+    background-color: #FFF8E1;
+    border: 1px solid #FFE082;
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.cd-notif-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cd-notif-ack-btn {
+    padding: 10px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background-color: #1E2D1A;
+    color: white;
+    cursor: pointer;
+}
+
+.cd-notif-modal-remaining {
+    font-size: 12px;
+    color: #888;
+    margin-top: 15px;
+    text-align: center;
 }
 
 /* Credit Summary Cards (used by CreditHistory) */

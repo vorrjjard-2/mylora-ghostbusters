@@ -373,6 +373,9 @@
 
     .review-submit-btn {
         margin-right: 0;
+        padding: 10px 60px;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 }
 

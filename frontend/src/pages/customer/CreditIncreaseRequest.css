@@ -201,6 +201,10 @@
         font-size: 22px;
     }
 
+    .cir-logo-img {
+        height: 36px;
+    }
+
     .cir-logout-btn {
         width: auto;
         padding: 6px 20px;

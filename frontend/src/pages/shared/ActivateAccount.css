@@ -141,9 +141,122 @@
   margin-bottom: 0;
 }
 
+/* Tablet */
+@media (max-width: 1024px) {
+    .activate-page-wrapper .logo-container {
+        margin-left: 0;
+        margin-top: 0;
+    }
 
+    .activate-page-wrapper .main-header {
+        margin-left: 0;
+    }
 
+    .activate-page-wrapper .welcome-text {
+        margin-left: 0;
+    }
 
+    .activate-page-wrapper .form-label {
+        margin-left: 0;
+    }
+
+    .activate-page-wrapper .form-input {
+        width: 100%;
+        max-width: 715px;
+        margin-left: 0;
+        box-sizing: border-box;
+    }
+
+    .activate-page-wrapper .input-hint {
+        margin-left: 0;
+    }
+
+    .activate-page-wrapper .btn-submit {
+        width: 100%;
+        max-width: 715px;
+        margin-left: 0;
+        box-sizing: border-box;
+    }
+
+    .activate-page-wrapper .error-message {
+        margin-left: 0;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .activate-page-wrapper {
+        padding: 1rem 16px;
+    }
+
+    .activate-page-wrapper .logo-container {
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .activate-page-wrapper .logo-img {
+        height: 36px;
+    }
+
+    .activate-page-wrapper .system-title {
+        font-size: 22px;
+    }
+
+    .activate-page-wrapper .main-header {
+        font-size: clamp(28px, 5vw, 64px);
+        margin-left: 0;
+        margin-top: 24px;
+    }
+
+    .activate-page-wrapper .welcome-text {
+        font-size: 18px;
+        margin-left: 0;
+        margin-top: 20px;
+    }
+
+    .activate-page-wrapper .form-label {
+        font-size: 16px;
+        margin-left: 0;
+    }
+
+    .activate-page-wrapper .form-input {
+        width: 100%;
+        margin-left: 0;
+        box-sizing: border-box;
+    }
+
+    .activate-page-wrapper .input-hint {
+        font-size: 16px;
+        margin-left: 0;
+    }
+
+    .activate-page-wrapper .btn-submit {
+        width: 100%;
+        margin-left: 0;
+        box-sizing: border-box;
+        font-size: 16px;
+        padding: 8px 20px;
+    }
+
+    .activate-page-wrapper .error-message {
+        margin-left: 0;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .activate-page-wrapper .main-header {
+        font-size: 28px;
+    }
+
+    .activate-page-wrapper .welcome-text {
+        font-size: 16px;
+    }
+
+    .activate-page-wrapper .system-title {
+        font-size: 18px;
+    }
+}
 
 
 

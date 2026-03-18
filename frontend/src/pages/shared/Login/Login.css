@@ -145,7 +145,7 @@
 .forgot-password-link {
   background: none;
   border: none;
-  color: #183112; 
+  color: #183112;
   text-decoration: underline;
   font-size: 14px;
   font-weight: 500;
@@ -155,6 +155,62 @@
   transition: color 0.2s ease-in-out;
 }
 
+/* Mobile */
+@media (max-width: 768px) {
+    .login-page-wrapper {
+        height: auto;
+        min-height: 100vh;
+        overflow: auto;
+        padding: 1rem 16px;
+        justify-content: flex-start;
+        padding-top: 40px;
+    }
 
+    .login-page-wrapper .logo-img {
+        height: 120px;
+        margin-top: 0;
+        margin-bottom: -20px;
+    }
 
+    .login-page-wrapper .system-title {
+        font-size: 36px;
+        margin-bottom: 20px;
+        letter-spacing: -1px;
+    }
 
+    .login-page-wrapper .login-card-section {
+        max-width: 100%;
+    }
+
+    .login-page-wrapper .form-label {
+        font-size: 16px;
+    }
+
+    .login-page-wrapper .btn-submit {
+        padding: 8px 20px;
+        font-size: 16px;
+    }
+
+    .login-page-wrapper .enroll-link {
+        padding: 8px 20px;
+        font-size: 16px;
+    }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+    .login-page-wrapper .logo-img {
+        height: 90px;
+    }
+
+    .login-page-wrapper .system-title {
+        font-size: 28px;
+    }
+
+    .login-page-wrapper .btn-submit,
+    .login-page-wrapper .enroll-link {
+        font-size: 15px;
+        height: auto;
+        min-height: 41px;
+    }
+}

@@ -173,6 +173,10 @@
   cursor: not-allowed;
 }
 
+.delivery-zip-group {
+    width: calc(33% - 0.67rem);
+}
+
 .delivery-next-btn {
     width: 431px;
     max-width: 100%;
@@ -227,8 +231,12 @@
         min-height: 44px;
     }
 
-    .delivery-next-btn {
+    .delivery-zip-group {
         width: 100%;
+    }
+
+    .delivery-next-btn {
+        width: calc(100% - 32px);
         margin-right: 16px;
         margin-left: 16px;
         padding: 12px 20px;

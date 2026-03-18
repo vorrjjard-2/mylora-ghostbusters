@@ -154,68 +154,27 @@ return (
         <div className="cd-header-actions">
           {/* Notification Bell */}
           <div ref={historyRef} style={{ position: "relative" }}>
-            <button
-              onClick={handleOpenHistory}
-              style={{
-                background: "white",
-                border: "1.3px solid #183112",
-                borderRadius: "10px",
-                height: "41px",
-                width: "50px",
-                cursor: "pointer",
-                position: "relative",
-                fontSize: "20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <button onClick={handleOpenHistory} className="cd-notif-bell-btn">
               🔔
               {unreadCount > 0 && (
-                <span style={{
-                  position: "absolute", top: "-5px", right: "-5px",
-                  backgroundColor: "#dc3545", color: "white",
-                  borderRadius: "50%", width: "20px", height: "20px",
-                  fontSize: "12px", fontWeight: "700",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  {unreadCount}
-                </span>
+                <span className="cd-notif-badge">{unreadCount}</span>
               )}
             </button>
 
             {showHistory && (
-              <div style={{
-                position: "absolute", top: "calc(100% + 8px)", right: 0,
-                width: "min(380px, 90vw)", maxHeight: "400px", overflowY: "auto",
-                backgroundColor: "white", border: "1px solid #262626",
-                borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                zIndex: 1000, fontFamily: "'Arimo', sans-serif",
-              }}>
-                <div style={{
-                  padding: "15px 20px", borderBottom: "1px solid #e0e0e0",
-                  fontWeight: "700", fontSize: "16px",
-                }}>
-                  Notifications
-                </div>
+              <div className="cd-notif-dropdown">
+                <div className="cd-notif-dropdown-header">Notifications</div>
                 {notifHistory.length === 0 ? (
-                  <div style={{ padding: "20px", textAlign: "center", color: "#888", fontSize: "14px" }}>
-                    No notifications yet
-                  </div>
+                  <div className="cd-notif-empty">No notifications yet</div>
                 ) : (
                   notifPag.paginatedData.map((n) => (
                     <div
                       key={n.notification_id}
-                      style={{
-                        padding: "12px 20px",
-                        borderBottom: "1px solid #f0f0f0",
-                        backgroundColor: n.is_read ? "white" : "#fff8e1",
-                      }}
+                      className="cd-notif-item"
+                      style={{ backgroundColor: n.is_read ? "white" : "#fff8e1" }}
                     >
-                      <div style={{ fontSize: "14px", lineHeight: "1.5", marginBottom: "6px" }}>
-                        {n.message}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#888", display: "flex", justifyContent: "space-between" }}>
+                      <div className="cd-notif-message">{n.message}</div>
+                      <div className="cd-notif-meta">
                         <span>{n.created_at}</span>
                         <span style={{ fontStyle: "italic" }}>
                           {n.is_read ? "Read" : "Unread"}
@@ -365,47 +324,23 @@ return (
 
       {/* Notification Acknowledgment Modal */}
       {currentNotification && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 2000,
-        }}>
-          <div style={{
-            backgroundColor: "white", borderRadius: "15px",
-            padding: "40px", width: "500px", maxWidth: "90vw",
-            fontFamily: "'Arimo', sans-serif",
-          }}>
-            <h2 style={{ fontSize: "24px", fontWeight: "700", marginTop: 0, marginBottom: "8px", color: "#262626" }}>
-              Important Notice
-            </h2>
-            <p style={{ fontSize: "12px", color: "#888", marginBottom: "20px" }}>
-              {currentNotification.created_at}
-            </p>
+        <div className="cd-notif-modal-overlay">
+          <div className="cd-notif-modal">
+            <h2 className="cd-notif-modal-title">Important Notice</h2>
+            <p className="cd-notif-modal-date">{currentNotification.created_at}</p>
 
-            <div style={{
-              backgroundColor: "#FFF8E1", border: "1px solid #FFE082",
-              borderRadius: "10px", padding: "20px",
-              fontSize: "16px", lineHeight: "1.6", marginBottom: "25px",
-            }}>
+            <div className="cd-notif-modal-body">
               {currentNotification.message}
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button
-                onClick={handleAcknowledge}
-                style={{
-                  padding: "10px 28px", fontSize: "16px", fontWeight: "600",
-                  border: "none", borderRadius: "8px",
-                  backgroundColor: "#1E2D1A", color: "white", cursor: "pointer",
-                }}
-              >
+            <div className="cd-notif-modal-actions">
+              <button onClick={handleAcknowledge} className="cd-notif-ack-btn">
                 Acknowledge
               </button>
             </div>
 
             {unreadNotifications.length > 1 && (
-              <p style={{ fontSize: "12px", color: "#888", marginTop: "15px", textAlign: "center" }}>
+              <p className="cd-notif-modal-remaining">
                 {unreadNotifications.length - 1} more notification{unreadNotifications.length - 1 > 1 ? "s" : ""} remaining
               </p>
             )}
