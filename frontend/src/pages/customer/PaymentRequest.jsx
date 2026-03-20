@@ -3,12 +3,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
+import useIsMobile from "../../hooks/useIsMobile";
+import MobileBottomNav from "../../components/MobileBottomNav";
 import logo from "../../assets/mylora-logo.png";
 import fileIcon from "../../assets/file.png";
 import "./PaymentRequest.css";
 
 export default function PaymentRequest() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [creditInfo, setCreditInfo] = useState(null);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -330,6 +333,7 @@ return (
         </div>
       </form>
     </main>
+    {isMobile && <MobileBottomNav />}
   </div>
 );
 };

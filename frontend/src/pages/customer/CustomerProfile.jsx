@@ -2,12 +2,15 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
+import useIsMobile from "../../hooks/useIsMobile";
+import MobileBottomNav from "../../components/MobileBottomNav";
 import logo from "../../assets/mylora-logo.png";
 import "./CustomerProfile.css";
 
 
 export default function CustomerProfile() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -358,6 +361,7 @@ return (
           </div>
         </div>
       )}
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 };

@@ -3,8 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
+import useIsMobile from "../../hooks/useIsMobile";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
+import MobileBottomNav from "../../components/MobileBottomNav";
 import logo from "../../assets/mylora-logo.png";
 import { getOrderStatusLabel, orderStatusBadgeStyle } from "../../utils/orderStatus";
 import "./Dashboard.css";
@@ -13,6 +15,7 @@ export default function CustomerDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Notification state
   const [unreadNotifications, setUnreadNotifications] = useState([]);
@@ -149,7 +152,7 @@ return (
       <header className="cd-main-header">
         <div className="cd-brand-group">
           <img src={logo} alt="Mylora Logo" className="cd-logo-img" />
-          <span className="cd-system-title">Web Credit System</span>
+          {!isMobile && <span className="cd-system-title">Web Credit System</span>}
         </div>
         <div className="cd-header-actions">
           {/* Notification Bell */}
@@ -188,97 +191,148 @@ return (
             )}
           </div>
 
-          <button className="cd-profile-btn" onClick={() => navigate("/account")}>
-            Profile
-          </button>
-          <button className="cd-logout-btn" onClick={() => handleLogout(navigate)}>
-            Logout
-          </button>
+          {!isMobile && (
+            <>
+              <button className="cd-profile-btn" onClick={() => navigate("/account")}>
+                Profile
+              </button>
+              <button className="cd-logout-btn" onClick={() => handleLogout(navigate)}>
+                Logout
+              </button>
+            </>
+          )}
+          {isMobile && (
+            <button className="cd-logout-btn" onClick={() => handleLogout(navigate)}>
+              Logout
+            </button>
+          )}
         </div>
       </header>
 
       <main className="cd-content">
-        <h1 className="cd-title">Hello, {data.user.name}</h1>
+        <h1 className={`cd-title ${isMobile ? "cd-title-mobile" : ""}`}>Hello, {data.user.name}</h1>
 
-        {/* Action Cards */}
-        <div className="cd-action-grid">
-          <button className="cd-action-card" onClick={() => navigate("/orders/create")}>
-            <span className="cd-action-icon">+</span>
-            <div className="cd-action-text">
-              <span>Create Purchase</span>
-              <span>Request</span>
-            </div>
-          </button>
+        {/* Action Cards — hidden on mobile since bottom nav covers these */}
+        {!isMobile && (
+          <div className="cd-action-grid">
+            <button className="cd-action-card" onClick={() => navigate("/orders/create")}>
+              <span className="cd-action-icon">+</span>
+              <div className="cd-action-text">
+                <span>Create Purchase</span>
+                <span>Request</span>
+              </div>
+            </button>
 
-          <button className="cd-action-card" onClick={() => navigate("/credit/update")}>
-            <span className="cd-action-icon">⟳</span>
-            <div className="cd-action-text">
-              <span>Payments</span>
-            </div>
-          </button>
+            <button className="cd-action-card" onClick={() => navigate("/credit/update")}>
+              <span className="cd-action-icon">⟳</span>
+              <div className="cd-action-text">
+                <span>Payments</span>
+              </div>
+            </button>
 
-          <button className="cd-action-card" onClick={() => navigate("/orders")}>
-            <span className="cd-action-icon">📋</span>
-            <div className="cd-action-text">
-              <span>View Order History</span>
-            </div>
-          </button>
+            <button className="cd-action-card" onClick={() => navigate("/orders")}>
+              <span className="cd-action-icon">📋</span>
+              <div className="cd-action-text">
+                <span>View Order History</span>
+              </div>
+            </button>
 
-          <button className="cd-action-card" onClick={() => navigate("/credit/history")}>
-            <span className="cd-action-icon">💳</span>
-            <div className="cd-action-text">
-              <span>Credit History</span>
-            </div>
-          </button>
+            <button className="cd-action-card" onClick={() => navigate("/credit/history")}>
+              <span className="cd-action-icon">💳</span>
+              <div className="cd-action-text">
+                <span>Credit History</span>
+              </div>
+            </button>
 
-          <button className="cd-action-card" onClick={() => navigate("/credit/increase")}>
-            <span className="cd-action-icon">↑</span>
-            <div className="cd-action-text">
-              <span>Request Credit</span>
-              <span>Increase</span>
-            </div>
-          </button>
-        </div>
+            <button className="cd-action-card" onClick={() => navigate("/credit/increase")}>
+              <span className="cd-action-icon">↑</span>
+              <div className="cd-action-text">
+                <span>Request Credit</span>
+                <span>Increase</span>
+              </div>
+            </button>
+          </div>
+        )}
 
         {/* Credit Term + Balance Section */}
-        <fieldset className="cd-credit-fieldset">
-          <legend className="cd-credit-legend">
-            Credit Term: {data.credit.credit_term ? `${data.credit.credit_term} days` : "N/A"}
-          </legend>
-
-          <h2 className="cd-section-title">Your Credit Balance</h2>
-          <div className="cd-credit-info">
-            <div className="cd-credit-row">
-              <span className="cd-label">Available Credit:</span>
-              <span className="cd-credit-value">
-                ₱ {parseFloat(data.credit.available_credit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+        {isMobile ? (
+          <div className="cd-credit-mobile">
+            <div className="cd-credit-mobile-title">Credit Status</div>
+            <div className="cd-credit-mobile-header">
+              <span className="cd-credit-mobile-term">
+                Credit Term: {data.credit.credit_term ? `${data.credit.credit_term} days` : "N/A"}
               </span>
             </div>
-            <div className="cd-credit-row align-right">
-              <span className="cd-label">Credit Limit:</span>
-              <span className="cd-credit-limit">
-                ₱ {parseFloat(data.credit.credit_limit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+            <div className="cd-credit-mobile-row">
+              <div className="cd-credit-mobile-stat">
+                <span className="cd-credit-mobile-label">Available</span>
+                <span className="cd-credit-mobile-value">
+                  ₱ {parseFloat(data.credit.available_credit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="cd-credit-mobile-stat">
+                <span className="cd-credit-mobile-label">Limit</span>
+                <span className="cd-credit-mobile-value">
+                  ₱ {parseFloat(data.credit.credit_limit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+            <div className="cd-progress-container" style={{ height: "10px", borderRadius: "5px", marginBottom: "10px" }}>
+              <div
+                className="cd-progress-bar"
+                style={{
+                  width: `${Math.min(creditUtilization, 100)}%`,
+                  background: exceedsCreditLimit ? "#c62828" : "#86A07D",
+                }}
+              />
+            </div>
+            <div className="cd-credit-mobile-balance">
+              <span className="cd-credit-mobile-label">Outstanding Balance</span>
+              <span className="cd-credit-mobile-balance-amount">
+                ₱ {parseFloat(data.credit.outstanding_balance).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
               </span>
             </div>
           </div>
+        ) : (
+          <fieldset className="cd-credit-fieldset">
+            <legend className="cd-credit-legend">
+              Credit Term: {data.credit.credit_term ? `${data.credit.credit_term} days` : "N/A"}
+            </legend>
 
-          <div className="cd-progress-container">
-            <div
-              className="cd-progress-bar"
-              style={{
-                width: `${Math.min(creditUtilization, 100)}%`,
-                background: exceedsCreditLimit ? "#c62828" : "#86A07D",
-              }}
-            />
-          </div>
-
-          <div className="cd-balance-section">
-            <h2 className="cd-section-title">Outstanding Balance</h2>
-            <div className="cd-balance-amount">
-              ₱ {parseFloat(data.credit.outstanding_balance).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+            <h2 className="cd-section-title">Your Credit Balance</h2>
+            <div className="cd-credit-info">
+              <div className="cd-credit-row">
+                <span className="cd-label">Available Credit:</span>
+                <span className="cd-credit-value">
+                  ₱ {parseFloat(data.credit.available_credit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="cd-credit-row align-right">
+                <span className="cd-label">Credit Limit:</span>
+                <span className="cd-credit-limit">
+                  ₱ {parseFloat(data.credit.credit_limit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
             </div>
-          </div>
-        </fieldset>
+
+            <div className="cd-progress-container">
+              <div
+                className="cd-progress-bar"
+                style={{
+                  width: `${Math.min(creditUtilization, 100)}%`,
+                  background: exceedsCreditLimit ? "#c62828" : "#86A07D",
+                }}
+              />
+            </div>
+
+            <div className="cd-balance-section">
+              <h2 className="cd-section-title">Outstanding Balance</h2>
+              <div className="cd-balance-amount">
+                ₱ {parseFloat(data.credit.outstanding_balance).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+              </div>
+            </div>
+          </fieldset>
+        )}
 
         {/* Recent Orders */}
         <div className="cd-section">
@@ -291,6 +345,29 @@ return (
 
           {data.recent_orders.length === 0 ? (
             <p className="cd-no-orders">No orders yet</p>
+          ) : isMobile ? (
+            <div className="mobile-card-list">
+              {data.recent_orders.slice(0, 5).map((order) => (
+                <div key={order.order_id} className="mobile-card" onClick={() => navigate(`/orders/${order.raw_id}`)}>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Order ID</span>
+                    <span className="mobile-card-value">{order.order_id}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Amount</span>
+                    <span className="mobile-card-value">₱ {parseFloat(order.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Date</span>
+                    <span className="mobile-card-value">{order.date_ordered}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Status</span>
+                    <span style={orderStatusBadgeStyle(order.status)}>{getOrderStatusLabel(order.status)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="cd-table-wrapper">
               <table className="cd-table">
@@ -320,7 +397,17 @@ return (
             </div>
           )}
         </div>
+
+        {/* Mobile: Create Purchase button at bottom */}
+        {isMobile && (
+          <button className="cd-mobile-create-btn" onClick={() => navigate("/orders/create")}>
+            + Create Purchase Request
+          </button>
+        )}
       </main>
+
+      {/* Bottom Nav for Mobile */}
+      {isMobile && <MobileBottomNav />}
 
       {/* Notification Acknowledgment Modal */}
       {currentNotification && (

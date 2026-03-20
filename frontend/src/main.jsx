@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "./index.css";
 
 import {
   BrowserRouter,
@@ -79,7 +80,7 @@ function Layout() {
 
   return (
     <>
-      <div style={{ padding: "2rem" }}>
+      <div className="app-layout">
         <Routes>
           {/* 👇 default redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />

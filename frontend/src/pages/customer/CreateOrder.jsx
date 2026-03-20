@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import useIsMobile from "../../hooks/useIsMobile";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
 import logo from "../../assets/mylora-logo.png";
@@ -9,6 +10,7 @@ import "./CreateOrder.css";
 
 export default function CreateOrder() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -177,60 +179,101 @@ export default function CreateOrder() {
             </div>
 
             <div className="order-right-panel">
-              <table className="order-table">
-                <thead>
-                  <tr>
-                    <th className="order-th">ITEM</th>
-                    <th className="order-th">QUANTITY</th>
-                    <th className="order-th">AMOUNT</th>
-                    <th className="order-th"></th>
-                  </tr>
-                </thead>
-                <tbody>
+              {isMobile ? (
+                <>
                   {selectedItems.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="order-td empty-msg">
-                        No items added yet
-                      </td>
-                    </tr>
+                    <p style={{ textAlign: "center", color: "#888", padding: "1rem" }}>No items added yet</p>
                   ) : (
-                    selectedItems.map((item) => (
-                      <tr key={item.product_id}>
-                        <td className="order-td">
-                          <div>{item.name}</div>
-                          <div className="order-item-unit">
-                            ₱{item.unit_price.toFixed(2)}/{item.unit}
+                    <div className="mobile-card-list">
+                      {selectedItems.map((item) => (
+                        <div key={item.product_id} className="mobile-card" style={{ cursor: "default" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div>
+                              <div className="mobile-card-header" style={{ marginBottom: 4 }}>{item.name}</div>
+                              <div style={{ fontSize: "12px", color: "#888" }}>₱{item.unit_price.toFixed(2)}/{item.unit}</div>
+                            </div>
+                            <button onClick={() => handleRemoveItem(item.product_id)} className="order-remove-btn">×</button>
                           </div>
-                        </td>
-                        <td className="order-td">
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              handleQuantityChange(item.product_id, e.target.value)
-                            }
-                            onBlur={() => handleQuantityBlur(item.product_id)}
-                            min="1"
-                            step="1"
-                            className="order-quantity-input"
-                          />
-                        </td>
-                        <td className="order-td">
-                          ₱{(item.unit_price * (item.quantity || 0)).toFixed(2)}
-                        </td>
-                        <td className="order-td">
-                          <button
-                            onClick={() => handleRemoveItem(item.product_id)}
-                            className="order-remove-btn"
-                          >
-                            ×
-                          </button>
+                          <hr className="mobile-card-divider" />
+                          <div className="mobile-card-row">
+                            <span className="mobile-card-label">Qty</span>
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => handleQuantityChange(item.product_id, e.target.value)}
+                              onBlur={() => handleQuantityBlur(item.product_id)}
+                              min="1"
+                              step="1"
+                              className="order-quantity-input"
+                            />
+                          </div>
+                          <div className="mobile-card-row">
+                            <span className="mobile-card-label">Amount</span>
+                            <span className="mobile-card-value" style={{ fontWeight: 700 }}>
+                              ₱{(item.unit_price * (item.quantity || 0)).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <table className="order-table">
+                  <thead>
+                    <tr>
+                      <th className="order-th">ITEM</th>
+                      <th className="order-th">QUANTITY</th>
+                      <th className="order-th">AMOUNT</th>
+                      <th className="order-th"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="order-td empty-msg">
+                          No items added yet
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      selectedItems.map((item) => (
+                        <tr key={item.product_id}>
+                          <td className="order-td">
+                            <div>{item.name}</div>
+                            <div className="order-item-unit">
+                              ₱{item.unit_price.toFixed(2)}/{item.unit}
+                            </div>
+                          </td>
+                          <td className="order-td">
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) =>
+                                handleQuantityChange(item.product_id, e.target.value)
+                              }
+                              onBlur={() => handleQuantityBlur(item.product_id)}
+                              min="1"
+                              step="1"
+                              className="order-quantity-input"
+                            />
+                          </td>
+                          <td className="order-td">
+                            ₱{(item.unit_price * (item.quantity || 0)).toFixed(2)}
+                          </td>
+                          <td className="order-td">
+                            <button
+                              onClick={() => handleRemoveItem(item.product_id)}
+                              className="order-remove-btn"
+                            >
+                              ×
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )}
 
               <div className="order-total-section">
                 <div className="order-total-row">

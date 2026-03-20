@@ -12,6 +12,11 @@ html, body, #root {
 
 /* Do NOT put overflow: hidden here anymore */
 
+/* App layout padding — responsive */
+.app-layout {
+  padding: 2rem;
+}
+
 /* Responsive table wrapper utility */
 .responsive-table-wrap {
   overflow-x: auto;
@@ -22,10 +27,110 @@ html, body, #root {
   html {
     font-size: 16px;
   }
+  .app-layout {
+    padding: 0;
+  }
 }
 
 @media (max-width: 480px) {
   html {
     font-size: 14px;
+  }
+}
+
+/* ── Mobile card list (replaces tables on small screens) ── */
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mobile-card {
+  background: white;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 0;
+}
+
+.mobile-card:last-child {
+  border-bottom: none;
+}
+
+.mobile-card:active {
+  background: #f5f5f5;
+}
+
+.mobile-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.mobile-card-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mobile-card-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  text-align: right;
+}
+
+.mobile-card-header {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.mobile-card-divider {
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  margin: 8px 0;
+}
+
+/* Credit summary cards — stacks vertically on mobile */
+.mobile-credit-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.mobile-credit-card {
+  background: white;
+  border: 1px solid #262626;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  flex: 1;
+}
+
+.mobile-credit-card-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.mobile-credit-card-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .mobile-credit-card-value {
+    font-size: 20px;
   }
 }

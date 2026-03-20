@@ -2,11 +2,13 @@ import { API_BASE_URL } from "../../utils/api";
 import { getCsrfToken } from "../../utils/csrf";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import useIsMobile from "../../hooks/useIsMobile";
 import logo from "../../assets/mylora-logo.png";
 import "./ReviewOrder.css";
 
 export default function ReviewOrder() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [orderItems, setOrderItems] = useState([]);
   const [customerInfo, setCustomerInfo] = useState(null);
   const [deliveryDetails, setDeliveryDetails] = useState(null);
@@ -171,41 +173,65 @@ return (
       <div className="review-section">
         <h3 className="review-section-title">Your order</h3>
         
-        <div className="review-table-wrapper">
-          <table className="review-table">
-            <thead>
-              <tr>
-                <th className="review-th">ITEM</th>
-                <th className="review-th review-text-center">QUANTITY</th>
-                <th className="review-th review-text-right">AMOUNT</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orderItems.map((item, index) => (
-                <tr key={index} className="review-tr">
-                  <td className="review-td">
-                    <div className="review-item-name">{item.name}</div>
-                    <div className="review-item-unit">
-                     {/* ₱{item.unit_price.toFixed(2)} / {item.unit} */}
-                    </div>
-                  </td>
-                  <td className="review-td review-text-center">{item.quantity}</td>
-                  <td className="review-td review-text-right">
+        {isMobile ? (
+          <div className="mobile-card-list">
+            {orderItems.map((item, index) => (
+              <div key={index} className="mobile-card" style={{ cursor: "default" }}>
+                <div className="mobile-card-header">{item.name}</div>
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Quantity</span>
+                  <span className="mobile-card-value">{item.quantity}</span>
+                </div>
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Amount</span>
+                  <span className="mobile-card-value">
                     ₱{(item.unit_price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderTop: "2px solid #333", fontWeight: 700, fontSize: "1rem" }}>
+              <span>TOTAL</span>
+              <span>₱{calculateTotal().toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="review-table-wrapper">
+            <table className="review-table">
+              <thead>
+                <tr>
+                  <th className="review-th">ITEM</th>
+                  <th className="review-th review-text-center">QUANTITY</th>
+                  <th className="review-th review-text-right">AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orderItems.map((item, index) => (
+                  <tr key={index} className="review-tr">
+                    <td className="review-td">
+                      <div className="review-item-name">{item.name}</div>
+                      <div className="review-item-unit">
+                      {/* ₱{item.unit_price.toFixed(2)} / {item.unit} */}
+                      </div>
+                    </td>
+                    <td className="review-td review-text-center">{item.quantity}</td>
+                    <td className="review-td review-text-right">
+                      ₱{(item.unit_price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                ))}
+
+                {/* Total Row with emphasis */}
+                <tr className="review-total-row">
+                  <td colSpan="2" className="review-total-label">TOTAL</td>
+                  <td className="review-total-amount">
+                    ₱{calculateTotal().toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                 </tr>
-              ))}
-              
-              {/* Total Row with emphasis */}
-              <tr className="review-total-row">
-                <td colSpan="2" className="review-total-label">TOTAL</td>
-                <td className="review-total-amount">
-                  ₱{calculateTotal().toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Delivery Details */}

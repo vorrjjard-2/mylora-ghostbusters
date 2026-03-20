@@ -572,9 +572,9 @@ export default function ApplyStep2() {
           <div className="section-header-text">
             <p>The following supporting documents are required:</p>
             <ul className="required-docs-list">
-              <li>Document 1<span className="required">*</span></li>
-              <li>Document 2<span className="required">*</span></li>
-              <li>Document 3 <span>(optional)</span></li>
+              <li>Mayor's / Business Permit -- Valid for Current Year<span className="required">*</span></li>
+              <li>BIR Certificate of Registration (2303)<span className="required">*</span></li>
+              <li>Proof of Billing<span>(optional)</span></li>
             </ul>
           </div>
           {supportingDocs.length > 0 ? (

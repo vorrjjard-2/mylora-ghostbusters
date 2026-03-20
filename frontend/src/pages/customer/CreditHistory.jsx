@@ -2,13 +2,16 @@ import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
+import useIsMobile from "../../hooks/useIsMobile";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
+import MobileBottomNav from "../../components/MobileBottomNav";
 import logo from "../../assets/mylora-logo.png";
 import "./Dashboard.css";
 
 export default function CreditHistory() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [creditInfo, setCreditInfo] = useState(null);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,43 +67,22 @@ export default function CreditHistory() {
 
         {/* Credit Summary */}
         {creditInfo && (
-          <div className="cd-credit-summary">
-            <div style={{
-              flex: 1,
-              backgroundColor: "white",
-              border: "1px solid #262626",
-              borderRadius: "12px",
-              padding: "20px",
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}>Available Credit</div>
-              <div style={{ fontSize: "24px", fontWeight: "700", color: "#1E2D1A" }}>
+          <div className={isMobile ? "mobile-credit-summary" : "cd-credit-summary"}>
+            <div className="mobile-credit-card">
+              <div className="mobile-credit-card-label">Available Credit</div>
+              <div className="mobile-credit-card-value" style={{ color: "#1E2D1A" }}>
                 ₱ {fmt(creditInfo.available_credit)}
               </div>
             </div>
-            <div style={{
-              flex: 1,
-              backgroundColor: "white",
-              border: "1px solid #262626",
-              borderRadius: "12px",
-              padding: "20px",
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}>Credit Limit</div>
-              <div style={{ fontSize: "24px", fontWeight: "700" }}>
+            <div className="mobile-credit-card">
+              <div className="mobile-credit-card-label">Credit Limit</div>
+              <div className="mobile-credit-card-value">
                 ₱ {fmt(creditInfo.credit_limit)}
               </div>
             </div>
-            <div style={{
-              flex: 1,
-              backgroundColor: "white",
-              border: "1px solid #262626",
-              borderRadius: "12px",
-              padding: "20px",
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}>Outstanding Balance</div>
-              <div style={{ fontSize: "24px", fontWeight: "700", color: "#b03a2e" }}>
+            <div className="mobile-credit-card">
+              <div className="mobile-credit-card-label">Outstanding Balance</div>
+              <div className="mobile-credit-card-value" style={{ color: "#b03a2e" }}>
                 ₱ {fmt(creditInfo.outstanding_balance)}
               </div>
             </div>
@@ -111,6 +93,42 @@ export default function CreditHistory() {
         <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "15px" }}>Payment History</h2>
         {payments.length === 0 ? (
           <p style={{ color: "#888", padding: "1rem" }}>No payment history yet.</p>
+        ) : isMobile ? (
+          <div className="mobile-card-list">
+            {paginatedData.map((p) => {
+              const badge = statusStyles[p.payment_status] || { backgroundColor: "#e0e0e0", color: "#333" };
+              return (
+                <div key={p.payment_id} className="mobile-card" style={{ cursor: "default" }}>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Invoice #</span>
+                    <span className="mobile-card-value">{p.inv_number || "—"}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Amount Paid</span>
+                    <span className="mobile-card-value">₱ {fmt(p.amount_paid)}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Date Paid</span>
+                    <span className="mobile-card-value">{p.date_paid}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Date Submitted</span>
+                    <span className="mobile-card-value">{p.date_submitted}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Status</span>
+                    <span style={{ padding: "4px 12px", borderRadius: "12px", fontSize: "12px", fontWeight: "600", ...badge }}>
+                      {p.payment_status}
+                    </span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Confirmed By</span>
+                    <span className="mobile-card-value">{p.approved_by || "—"}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <div className="cd-table-wrapper">
             <table className="cd-table">
@@ -157,20 +175,13 @@ export default function CreditHistory() {
         <div style={{ marginTop: "20px" }}>
           <button
             onClick={() => navigate("/customer/dashboard")}
-            style={{
-              padding: "10px 24px",
-              fontSize: "16px",
-              fontWeight: "600",
-              border: "1px solid #262626",
-              borderRadius: "8px",
-              backgroundColor: "white",
-              cursor: "pointer",
-            }}
+            className="cd-back-dashboard-btn"
           >
             Back to Dashboard
           </button>
         </div>
       </main>
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 }

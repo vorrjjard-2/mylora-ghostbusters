@@ -1,8 +1,10 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import useIsMobile from "../../hooks/useIsMobile";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
+import MobileBottomNav from "../../components/MobileBottomNav";
 import searchIcon from "../../assets/search.png";
 import logo from "../../assets/mylora-logo.png";
 import "./OrderHistory.css";
@@ -13,6 +15,7 @@ const ALL_STATUSES = ["PENDING", "APPROVED", "PROCESSING", "COMPLETED", "CANCELL
 
 export default function OrderHistory() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -155,24 +158,53 @@ export default function OrderHistory() {
         ))}
       </div>
 
-      {/* table */}
-      <div className="history-table-wrapper">
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th className="history-th">ORDER ID</th>
-              <th className="history-th">AMOUNT</th>
-              <th className="history-th">DATE ORDERED</th>
-              <th className="history-th">STATUS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
+      {/* table / mobile cards */}
+      {filtered.length === 0 ? (
+        <p style={{ textAlign: "center", color: "#888", padding: "2rem" }}>No orders match your filters.</p>
+      ) : isMobile ? (
+        <div className="mobile-card-list">
+          {paginatedData.map((order) => (
+            <div
+              key={order.order_id}
+              className="mobile-card"
+              onClick={() => navigate(`/orders/${order.order_id}`, { state: { from: "/orders" } })}
+            >
+              <div className="mobile-card-row">
+                <span className="mobile-card-label">Order ID</span>
+                <span className="mobile-card-value">{order.order_id}</span>
+              </div>
+              <div className="mobile-card-row">
+                <span className="mobile-card-label">Amount</span>
+                <span className="mobile-card-value">
+                  ₱ {parseFloat(order.total_amount).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="mobile-card-row">
+                <span className="mobile-card-label">Date</span>
+                <span className="mobile-card-value">{order.date_ordered}</span>
+              </div>
+              <div className="mobile-card-row">
+                <span className="mobile-card-label">Status</span>
+                <span style={orderStatusBadgeStyle(order.order_status)}>
+                  {getOrderStatusLabel(order.order_status)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="history-table-wrapper">
+          <table className="history-table">
+            <thead>
               <tr>
-                <td colSpan={4} className="history-empty-cell">No orders match your filters.</td>
+                <th className="history-th">ORDER ID</th>
+                <th className="history-th">AMOUNT</th>
+                <th className="history-th">DATE ORDERED</th>
+                <th className="history-th">STATUS</th>
               </tr>
-            ) : (
-              paginatedData.map((order) => (
+            </thead>
+            <tbody>
+              {paginatedData.map((order) => (
                 <tr
                   key={order.order_id}
                   className="history-row"
@@ -192,13 +224,14 @@ export default function OrderHistory() {
                     </span>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
       </main>
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 }

@@ -3,11 +3,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
+import useIsMobile from "../../hooks/useIsMobile";
+import MobileBottomNav from "../../components/MobileBottomNav";
 import logo from "../../assets/mylora-logo.png";
 import "./CreditIncreaseRequest.css";
 
 export default function CreditIncreaseRequest() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [creditInfo, setCreditInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -205,6 +208,7 @@ export default function CreditIncreaseRequest() {
           </div>
         </div>
       )}
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 }

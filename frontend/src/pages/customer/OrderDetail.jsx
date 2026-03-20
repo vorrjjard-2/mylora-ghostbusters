@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "../../utils/api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import useIsMobile from "../../hooks/useIsMobile";
+import MobileBottomNav from "../../components/MobileBottomNav";
 import logo from "../../assets/mylora-logo.png";
 import { orderStatusBadgeStyle, getOrderStatusLabel } from "../../utils/orderStatus";
 import "./OrderDetail.css";
@@ -10,6 +12,7 @@ export default function OrderDetail() {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -82,54 +85,80 @@ return (
 
     {/* order form table */}
     <h2 className="order-detail-subtitle">Order Form</h2>
-    <div className="order-detail-table-wrapper">
-      <table className="order-detail-table">
-        <thead>
-          <tr>
-            <th className="order-detail-th">ITEM</th>
-            <th className="order-detail-th">QUANTITY</th>
-            <th className="order-detail-th">AMOUNT</th>
-          </tr>
-        </thead>
-        <tbody>
-          {order.items.map((item, i) => (
-            <tr key={i}>
-              <td className="order-detail-td">{item.name}</td>
-              <td className="order-detail-td">{item.quantity}</td>
-              <td className="order-detail-td">
-                ₱ {parseFloat(item.subtotal).toLocaleString("en-PH", {
+    {isMobile ? (
+      <div className="mobile-card-list" style={{ marginBottom: "1.75rem" }}>
+        {order.items.map((item, i) => (
+          <div key={i} className="mobile-card" style={{ cursor: "default" }}>
+            <div className="mobile-card-header">{item.name}</div>
+            <div className="mobile-card-row">
+              <span className="mobile-card-label">Quantity</span>
+              <span className="mobile-card-value">{item.quantity}</span>
+            </div>
+            <div className="mobile-card-row">
+              <span className="mobile-card-label">Amount</span>
+              <span className="mobile-card-value">
+                ₱ {parseFloat(item.subtotal).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+          </div>
+        ))}
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderTop: "2px solid #333", fontWeight: 700, fontSize: "1rem" }}>
+          <span>TOTAL</span>
+          <span>₱ {parseFloat(order.total_amount).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+      </div>
+    ) : (
+      <div className="order-detail-table-wrapper">
+        <table className="order-detail-table">
+          <thead>
+            <tr>
+              <th className="order-detail-th">ITEM</th>
+              <th className="order-detail-th">QUANTITY</th>
+              <th className="order-detail-th">AMOUNT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.items.map((item, i) => (
+              <tr key={i}>
+                <td className="order-detail-td">{item.name}</td>
+                <td className="order-detail-td">{item.quantity}</td>
+                <td className="order-detail-td">
+                  ₱ {parseFloat(item.subtotal).toLocaleString("en-PH", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={2} className="order-detail-total-label">TOTAL</td>
+              <td className="order-detail-total-value">
+                ₱ {parseFloat(order.total_amount).toLocaleString("en-PH", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </td>
             </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan={2} className="order-detail-total-label">TOTAL</td>
-            <td className="order-detail-total-value">
-              ₱ {parseFloat(order.total_amount).toLocaleString("en-PH", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+          </tfoot>
+        </table>
+      </div>
+    )}
 
     {/* Credit Term & Payment Due */}
     {order.credit_term && (
       <div style={{
         display: "flex",
+        flexDirection: isMobile ? "column" : "row",
         justifyContent: "space-between",
+        gap: isMobile ? "6px" : "0",
         border: "1px solid #ccc",
         borderRadius: "6px",
         padding: "0.75rem 1.25rem",
         marginTop: "1.25rem",
         fontWeight: 700,
-        fontSize: "0.9rem",
+        fontSize: isMobile ? "0.8rem" : "0.9rem",
       }}>
         <span>CREDIT TERM: {order.credit_term} DAYS</span>
         {order.payment_due_date && (
@@ -145,6 +174,7 @@ return (
       </button>
     </div>
     </main>
+    {isMobile && <MobileBottomNav />}
   </div>
 );
 };
