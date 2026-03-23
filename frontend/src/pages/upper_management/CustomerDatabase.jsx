@@ -15,10 +15,12 @@ export default function CustomerDatabase() {
   const [reminderTarget, setReminderTarget] = useState(null);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
+  const [sortBy, setSortBy] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
+  const [showSortMenu, setShowSortMenu] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredCustomers, 5, [searchTerm, sortConfig]);
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredCustomers, 5, [searchTerm, sortBy, sortDirection]);
 
   useEffect(() => {
     apiFetch("/api/um/customers/")
@@ -52,46 +54,11 @@ export default function CustomerDatabase() {
     }
     
     // Re-apply current sort to filtered results
-    if (sortConfig.key) {
-      const sorted = [...filtered].sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
+    const sorted = [...filtered].sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
 
-        if (sortConfig.key === "credit_limit" || sortConfig.key === "outstanding_balance") {
-          aVal = parseFloat(aVal) || 0;
-          bVal = parseFloat(bVal) || 0;
-        } else if (typeof aVal === "string") {
-          aVal = aVal.toLowerCase();
-          bVal = bVal.toLowerCase();
-        }
-
-        if (aVal < bVal) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aVal > bVal) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-      setFilteredCustomers(sorted);
-    } else {
-      setFilteredCustomers(filtered);
-    }
-  }, [searchTerm, customers, sortConfig]);
-
-  // Handle sorting
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-
-    const sorted = [...filteredCustomers].sort((a, b) => {
-      let aVal = a[key];
-      let bVal = b[key];
-
-      if (key === "credit_limit" || key === "outstanding_balance") {
+      if (sortBy === "credit_limit" || sortBy === "outstanding_balance") {
         aVal = parseFloat(aVal) || 0;
         bVal = parseFloat(bVal) || 0;
       } else if (typeof aVal === "string") {
@@ -100,15 +67,35 @@ export default function CustomerDatabase() {
       }
 
       if (aVal < bVal) {
-        return direction === "asc" ? -1 : 1;
+        return sortDirection === "asc" ? -1 : 1;
       }
       if (aVal > bVal) {
-        return direction === "asc" ? 1 : -1;
+        return sortDirection === "asc" ? 1 : -1;
       }
       return 0;
     });
-
     setFilteredCustomers(sorted);
+  }, [searchTerm, customers, sortBy, sortDirection]);
+
+  const handleSortChange = (newSortBy) => {
+    if (newSortBy === sortBy) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(newSortBy);
+      setSortDirection("asc");
+    }
+    setShowSortMenu(false);
+  };
+
+  const sortOptions = [
+    { value: "name", label: "Name" },
+    { value: "credit_limit", label: "Credit Limit" },
+    { value: "outstanding_balance", label: "Outstanding Balance" },
+  ];
+
+  const getSortLabel = () => {
+    const opt = sortOptions.find(o => o.value === sortBy);
+    return opt ? opt.label : "Name";
   };
 
   if (loading) {
@@ -147,40 +134,103 @@ export default function CustomerDatabase() {
           <h1 className="um-welcome-text">Customer Database</h1>
 
           {/* Search and Sort Controls */}
-          <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
-            <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
-              <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 10px 10px 45px",
-                  fontSize: "16px",
-                  border: "1px solid #262626",
-                  borderRadius: "8px",
-                  backgroundColor: "white"
-                }}
-              />
-            </div>
-            <button
-              style={{
-                padding: "10px 20px",
-                fontSize: "16px",
-                border: "1px solid #262626",
-                borderRadius: "8px",
-                backgroundColor: "white",
-                cursor: "pointer",
-                display: "flex",
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
+              <span style={{
+                padding: "6px 12px",
+                backgroundColor: "#1E2D1A",
+                color: "white",
+                borderRadius: "20px",
+                fontSize: "14px",
+                fontWeight: "600",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "8px"
-              }}
-              onClick={() => handleSort(sortConfig.key)}
-            >
-              ↕ Sort By
-            </button>
+                gap: "6px"
+              }}>
+                {getSortLabel()}
+                <span style={{ fontSize: "12px" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+              <div style={{ position: "relative", maxWidth: "300px" }}>
+                <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 10px 10px 45px",
+                    fontSize: "16px",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    backgroundColor: "white"
+                  }}
+                />
+              </div>
+              <div style={{ position: "relative" }}>
+                <button
+                  onClick={() => setShowSortMenu(!showSortMenu)}
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: "16px",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    backgroundColor: "white",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontWeight: "600"
+                  }}
+                >
+                  <span>↕</span>
+                  <span>Sort By: {getSortLabel()}</span>
+                  <span style={{ fontSize: "12px", color: "#666" }}>
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                </button>
+
+                {showSortMenu && (
+                  <div style={{
+                    position: "absolute",
+                    top: "calc(100% + 5px)",
+                    right: 0,
+                    backgroundColor: "white",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    minWidth: "200px",
+                    zIndex: 1000
+                  }}>
+                    {sortOptions.map((option, index) => (
+                      <div
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        style={{
+                          padding: "12px 16px",
+                          cursor: "pointer",
+                          borderBottom: index < sortOptions.length - 1 ? "1px solid #e0e0e0" : "none",
+                          backgroundColor: sortBy === option.value ? "#f5f5f5" : "white",
+                          fontWeight: sortBy === option.value ? "600" : "400",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          borderRadius: index === sortOptions.length - 1 ? "0 0 8px 8px" : index === 0 ? "8px 8px 0 0" : "0"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === option.value ? "#f5f5f5" : "white"}
+                      >
+                        <span>{option.label}</span>
+                        {sortBy === option.value && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Customer Cards */}

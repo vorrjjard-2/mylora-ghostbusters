@@ -51,7 +51,7 @@ html, body, #root {
 
 .mobile-card {
   background: white;
-  padding: 14px 16px;
+  padding: 16px 18px;
   cursor: pointer;
   transition: background 0.1s;
   border-bottom: 1px solid #f0f0f0;
@@ -70,11 +70,11 @@ html, body, #root {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2px 0;
+  padding: 4px 0;
 }
 
 .mobile-card-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #999;
   text-transform: uppercase;
@@ -82,7 +82,7 @@ html, body, #root {
 }
 
 .mobile-card-value {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #222;
   text-align: right;

@@ -13,9 +13,11 @@ export default function UMPaymentRequests() {
   const [payments, setPayments] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "date_paid", direction: "desc" });
+  const [sortBy, setSortBy] = useState("date_paid");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
-  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredPayments, 10, [searchTerm, sortConfig]);
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredPayments, 10, [searchTerm, sortBy, sortDirection]);
 
   useEffect(() => {
     apiFetch("/api/um/all-payments/")
@@ -52,41 +54,53 @@ export default function UMPaymentRequests() {
       );
     }
 
-    if (sortConfig.key) {
-      const sorted = [...filtered].sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
+    const sorted = [...filtered].sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
 
-        if (sortConfig.key === "payment_id") {
-          aVal = parseInt(aVal) || 0;
-          bVal = parseInt(bVal) || 0;
-        } else if (sortConfig.key === "amount_paid") {
-          aVal = parseFloat(aVal) || 0;
-          bVal = parseFloat(bVal) || 0;
-        } else if (sortConfig.key === "date_paid") {
-          aVal = new Date(aVal);
-          bVal = new Date(bVal);
-        } else if (typeof aVal === "string") {
-          aVal = aVal.toLowerCase();
-          bVal = (bVal || "").toLowerCase();
-        }
+      if (sortBy === "payment_id") {
+        aVal = parseInt(aVal) || 0;
+        bVal = parseInt(bVal) || 0;
+      } else if (sortBy === "amount_paid") {
+        aVal = parseFloat(aVal) || 0;
+        bVal = parseFloat(bVal) || 0;
+      } else if (sortBy === "date_paid") {
+        aVal = new Date(aVal);
+        bVal = new Date(bVal);
+      } else if (typeof aVal === "string") {
+        aVal = aVal.toLowerCase();
+        bVal = (bVal || "").toLowerCase();
+      }
 
-        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-      setFilteredPayments(sorted);
+      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+    setFilteredPayments(sorted);
+  }, [searchTerm, payments, sortBy, sortDirection]);
+
+  const handleSortChange = (newSortBy) => {
+    if (newSortBy === sortBy) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      setFilteredPayments(filtered);
+      setSortBy(newSortBy);
+      setSortDirection(newSortBy === "date_paid" ? "desc" : "asc");
     }
-  }, [searchTerm, payments, sortConfig]);
+    setShowSortMenu(false);
+  };
 
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
+  const sortOptions = [
+    { value: "date_paid", label: "Date of Payment" },
+    { value: "payment_id", label: "Payment ID" },
+    { value: "customer_name", label: "Customer" },
+    { value: "amount_paid", label: "Amount" },
+    { value: "status", label: "Status" },
+    { value: "confirmed_by", label: "Confirmed By" },
+  ];
+
+  const getSortLabel = () => {
+    const opt = sortOptions.find(o => o.value === sortBy);
+    return opt ? opt.label : "Date of Payment";
   };
 
   const getStatusColor = (status) => {
@@ -136,40 +150,103 @@ export default function UMPaymentRequests() {
         <main className="um-dashboard-content">
           <h1 className="um-welcome-text">Payment Requests</h1>
 
-          <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
-            <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
-              <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 10px 10px 45px",
-                  fontSize: "16px",
-                  border: "1px solid #262626",
-                  borderRadius: "8px",
-                  backgroundColor: "white"
-                }}
-              />
-            </div>
-            <button
-              style={{
-                padding: "10px 20px",
-                fontSize: "16px",
-                border: "1px solid #262626",
-                borderRadius: "8px",
-                backgroundColor: "white",
-                cursor: "pointer",
-                display: "flex",
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
+              <span style={{
+                padding: "6px 12px",
+                backgroundColor: "#1E2D1A",
+                color: "white",
+                borderRadius: "20px",
+                fontSize: "14px",
+                fontWeight: "600",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "8px"
-              }}
-              onClick={() => handleSort(sortConfig.key)}
-            >
-              ↕ Sort By
-            </button>
+                gap: "6px"
+              }}>
+                {getSortLabel()}
+                <span style={{ fontSize: "12px" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+              <div style={{ position: "relative", maxWidth: "300px" }}>
+                <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 10px 10px 45px",
+                    fontSize: "16px",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    backgroundColor: "white"
+                  }}
+                />
+              </div>
+              <div style={{ position: "relative" }}>
+                <button
+                  onClick={() => setShowSortMenu(!showSortMenu)}
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: "16px",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    backgroundColor: "white",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontWeight: "600"
+                  }}
+                >
+                  <span>↕</span>
+                  <span>Sort By: {getSortLabel()}</span>
+                  <span style={{ fontSize: "12px", color: "#666" }}>
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                </button>
+
+                {showSortMenu && (
+                  <div style={{
+                    position: "absolute",
+                    top: "calc(100% + 5px)",
+                    right: 0,
+                    backgroundColor: "white",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    minWidth: "200px",
+                    zIndex: 1000
+                  }}>
+                    {sortOptions.map((option, index) => (
+                      <div
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        style={{
+                          padding: "12px 16px",
+                          cursor: "pointer",
+                          borderBottom: index < sortOptions.length - 1 ? "1px solid #e0e0e0" : "none",
+                          backgroundColor: sortBy === option.value ? "#f5f5f5" : "white",
+                          fontWeight: sortBy === option.value ? "600" : "400",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          borderRadius: index === sortOptions.length - 1 ? "0 0 8px 8px" : index === 0 ? "8px 8px 0 0" : "0"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === option.value ? "#f5f5f5" : "white"}
+                      >
+                        <span>{option.label}</span>
+                        {sortBy === option.value && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div style={{
@@ -185,24 +262,12 @@ export default function UMPaymentRequests() {
             }}>
               <thead>
                 <tr style={{ backgroundColor: "#F9F9F9", borderBottom: "1px solid #262626" }}>
-                  <th onClick={() => handleSort("payment_id")} style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700", cursor: "pointer", userSelect: "none" }}>
-                    PAYMENT ID {sortConfig.key === "payment_id" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th onClick={() => handleSort("customer_name")} style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700", cursor: "pointer", userSelect: "none" }}>
-                    CUSTOMER {sortConfig.key === "customer_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th onClick={() => handleSort("amount_paid")} style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700", cursor: "pointer", userSelect: "none" }}>
-                    AMOUNT {sortConfig.key === "amount_paid" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th onClick={() => handleSort("date_paid")} style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700", cursor: "pointer", userSelect: "none" }}>
-                    DATE OF PAYMENT {sortConfig.key === "date_paid" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th onClick={() => handleSort("status")} style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700", cursor: "pointer", userSelect: "none" }}>
-                    STATUS {sortConfig.key === "status" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th onClick={() => handleSort("confirmed_by")} style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700", cursor: "pointer", userSelect: "none" }}>
-                    CONFIRMED BY {sortConfig.key === "confirmed_by" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>PAYMENT ID</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>CUSTOMER</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>AMOUNT</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>DATE OF PAYMENT</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>STATUS</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>CONFIRMED BY</th>
                 </tr>
               </thead>
               <tbody>

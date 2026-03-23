@@ -234,7 +234,7 @@
 
     .order-history-content {
         max-width: 100%;
-        padding: 0 16px 80px;
+        padding: 0 16px calc(64px + env(safe-area-inset-bottom, 0px) + 24px);
     }
 
     .history-title {

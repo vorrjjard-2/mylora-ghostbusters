@@ -14,9 +14,11 @@ export default function AllOrders() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "date_submitted", direction: "desc" });
+  const [sortBy, setSortBy] = useState("date_submitted");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
-  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredOrders, 10, [searchTerm, sortConfig]);
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredOrders, 10, [searchTerm, sortBy, sortDirection]);
 
   useEffect(() => {
     apiFetch("/api/um/all-orders/")
@@ -27,11 +29,10 @@ export default function AllOrders() {
         return res.json();
       })
       .then(data => {
-        // Sort by date descending (most recent first) by default
         const sorted = [...data].sort((a, b) => {
           const dateA = new Date(a.date_submitted);
           const dateB = new Date(b.date_submitted);
-          return dateB - dateA; // descending
+          return dateB - dateA;
         });
         setOrders(sorted);
         setFilteredOrders(sorted);
@@ -41,7 +42,7 @@ export default function AllOrders() {
       });
   }, []);
 
-  // Handle search
+  // Handle search + sort
   useEffect(() => {
     let filtered;
     if (searchTerm === "") {
@@ -51,89 +52,61 @@ export default function AllOrders() {
       filtered = orders.filter(order => {
         const orderIdWithPrefix = `xx${order.order_id}`.toLowerCase();
         const orderIdPlain = order.order_id.toString().toLowerCase();
-        
+
         return orderIdWithPrefix.includes(searchLower) ||
                orderIdPlain.includes(searchLower) ||
                order.ordered_by.toLowerCase().includes(searchLower) ||
                order.status.toLowerCase().includes(searchLower);
       });
     }
-    
-    // Re-apply current sort to filtered results
-    if (sortConfig.key) {
-      const sorted = [...filtered].sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
 
-        if (sortConfig.key === "order_id") {
-          aVal = parseInt(aVal) || 0;
-          bVal = parseInt(bVal) || 0;
-        } else if (sortConfig.key === "amount") {
-          aVal = parseFloat(aVal) || 0;
-          bVal = parseFloat(bVal) || 0;
-        } else if (sortConfig.key === "date_submitted") {
-          aVal = new Date(aVal);
-          bVal = new Date(bVal);
-        } else if (typeof aVal === "string") {
-          aVal = aVal.toLowerCase();
-          bVal = bVal.toLowerCase();
-        }
+    const sorted = [...filtered].sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
 
-        if (aVal < bVal) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aVal > bVal) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-      setFilteredOrders(sorted);
-    } else {
-      setFilteredOrders(filtered);
-    }
-  }, [searchTerm, orders, sortConfig]);
-
-  // Handle sorting
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-
-    const sorted = [...filteredOrders].sort((a, b) => {
-      let aVal = a[key];
-      let bVal = b[key];
-
-      // Handle numeric values
-      if (key === "order_id") {
+      if (sortBy === "order_id") {
         aVal = parseInt(aVal) || 0;
         bVal = parseInt(bVal) || 0;
-      } else if (key === "amount") {
+      } else if (sortBy === "amount") {
         aVal = parseFloat(aVal) || 0;
         bVal = parseFloat(bVal) || 0;
-      }
-      // Handle dates - convert to Date objects for proper comparison
-      else if (key === "date_submitted") {
+      } else if (sortBy === "date_submitted") {
         aVal = new Date(aVal);
         bVal = new Date(bVal);
-      }
-      // Handle strings (ordered_by, status)
-      else if (typeof aVal === "string") {
+      } else if (typeof aVal === "string") {
         aVal = aVal.toLowerCase();
         bVal = bVal.toLowerCase();
       }
 
-      if (aVal < bVal) {
-        return direction === "asc" ? -1 : 1;
-      }
-      if (aVal > bVal) {
-        return direction === "asc" ? 1 : -1;
-      }
+      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
 
     setFilteredOrders(sorted);
+  }, [searchTerm, orders, sortBy, sortDirection]);
+
+  const handleSortChange = (newSortBy) => {
+    if (newSortBy === sortBy) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(newSortBy);
+      setSortDirection(newSortBy === "date_submitted" ? "desc" : "asc");
+    }
+    setShowSortMenu(false);
+  };
+
+  const sortOptions = [
+    { value: "date_submitted", label: "Date Submitted" },
+    { value: "order_id", label: "Order ID" },
+    { value: "ordered_by", label: "Ordered By" },
+    { value: "amount", label: "Amount" },
+    { value: "status", label: "Status" },
+  ];
+
+  const getSortLabel = () => {
+    const opt = sortOptions.find(o => o.value === sortBy);
+    return opt ? opt.label : "Date Submitted";
   };
 
   return (
@@ -158,116 +131,124 @@ export default function AllOrders() {
           <h1 className="um-welcome-text">View Orders</h1>
 
           {/* Search and Sort Controls */}
-          <div style={{ display: "flex", gap: "15px", marginBottom: "25px" }}>
-            <div style={{ position: "relative", flex: 1, maxWidth: "400px" }}>
-              <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 10px 10px 45px",
-                  fontSize: "16px",
-                  border: "1px solid #262626",
-                  borderRadius: "8px",
-                  backgroundColor: "white"
-                }}
-              />
-            </div>
-            <button
-              style={{
-                padding: "10px 20px",
-                fontSize: "16px",
-                border: "1px solid #262626",
-                borderRadius: "8px",
-                backgroundColor: "white",
-                cursor: "pointer",
-                display: "flex",
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
+              <span style={{
+                padding: "6px 12px",
+                backgroundColor: "#1E2D1A",
+                color: "white",
+                borderRadius: "20px",
+                fontSize: "14px",
+                fontWeight: "600",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "8px"
-              }}
-              onClick={() => handleSort(sortConfig.key)}
-            >
-              ↕ Sort By
-            </button>
+                gap: "6px"
+              }}>
+                {getSortLabel()}
+                <span style={{ fontSize: "12px" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+              <div style={{ position: "relative", maxWidth: "300px" }}>
+                <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 10px 10px 45px",
+                    fontSize: "16px",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    backgroundColor: "white"
+                  }}
+                />
+              </div>
+              <div style={{ position: "relative" }}>
+                <button
+                  onClick={() => setShowSortMenu(!showSortMenu)}
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: "16px",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    backgroundColor: "white",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontWeight: "600"
+                  }}
+                >
+                  <span>↕</span>
+                  <span>Sort By: {getSortLabel()}</span>
+                  <span style={{ fontSize: "12px", color: "#666" }}>
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                </button>
+
+                {showSortMenu && (
+                  <div style={{
+                    position: "absolute",
+                    top: "calc(100% + 5px)",
+                    right: 0,
+                    backgroundColor: "white",
+                    border: "1px solid #262626",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    minWidth: "200px",
+                    zIndex: 1000
+                  }}>
+                    {sortOptions.map((option, index) => (
+                      <div
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        style={{
+                          padding: "12px 16px",
+                          cursor: "pointer",
+                          borderBottom: index < sortOptions.length - 1 ? "1px solid #e0e0e0" : "none",
+                          backgroundColor: sortBy === option.value ? "#f5f5f5" : "white",
+                          fontWeight: sortBy === option.value ? "600" : "400",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          borderRadius: index === sortOptions.length - 1 ? "0 0 8px 8px" : index === 0 ? "8px 8px 0 0" : "0"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === option.value ? "#f5f5f5" : "white"}
+                      >
+                        <span>{option.label}</span>
+                        {sortBy === option.value && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Orders Table */}
-          <div style={{ 
-            backgroundColor: "white", 
-            border: "1px solid #262626", 
+          <div style={{
+            backgroundColor: "white",
+            border: "1px solid #262626",
             borderRadius: "15px",
             overflow: "hidden"
           }}>
-            <table style={{ 
-              width: "100%", 
+            <table style={{
+              width: "100%",
               borderCollapse: "collapse",
               fontSize: "16px"
             }}>
               <thead>
                 <tr style={{ backgroundColor: "#F9F9F9", borderBottom: "1px solid #262626" }}>
-                  <th 
-                    onClick={() => handleSort("order_id")}
-                    style={{ 
-                      padding: "15px 20px", 
-                      textAlign: "left", 
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      userSelect: "none"
-                    }}
-                  >
-                    ORDER ID {sortConfig.key === "order_id" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th 
-                    onClick={() => handleSort("amount")}
-                    style={{ 
-                      padding: "15px 20px", 
-                      textAlign: "left", 
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      userSelect: "none"
-                    }}
-                  >
-                    AMOUNT {sortConfig.key === "amount" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th 
-                    onClick={() => handleSort("date_submitted")}
-                    style={{ 
-                      padding: "15px 20px", 
-                      textAlign: "left", 
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      userSelect: "none"
-                    }}
-                  >
-                    DATE SUBMITTED {sortConfig.key === "date_submitted" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th 
-                    onClick={() => handleSort("ordered_by")}
-                    style={{ 
-                      padding: "15px 20px", 
-                      textAlign: "left", 
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      userSelect: "none"
-                    }}
-                  >
-                    ORDERED BY {sortConfig.key === "ordered_by" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th 
-                    onClick={() => handleSort("status")}
-                    style={{ 
-                      padding: "15px 20px", 
-                      textAlign: "left", 
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      userSelect: "none"
-                    }}
-                  >
-                    STATUS {sortConfig.key === "status" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                  </th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>ORDER ID</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>AMOUNT</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>DATE SUBMITTED</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>ORDERED BY</th>
+                  <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>STATUS</th>
                 </tr>
               </thead>
               <tbody>

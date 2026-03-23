@@ -270,38 +270,38 @@
 /* Mobile */
 @media (max-width: 768px) {
     .cd-main-header {
-        padding: 10px 16px;
+        padding: 12px 16px;
         margin-left: 0;
         margin-top: 0;
         margin-bottom: 0;
-        gap: 8px;
+        gap: 10px;
     }
 
     .cd-logo-img {
-        height: 28px;
+        height: 36px;
     }
 
     .cd-header-actions {
-        gap: 8px;
+        gap: 10px;
     }
 
     .cd-profile-btn, .cd-logout-btn {
         width: auto;
-        padding: 6px 14px;
-        font-size: 13px;
-        height: 34px;
+        padding: 8px 16px;
+        font-size: 14px;
+        height: 36px;
     }
 
     .cd-content {
-        padding: 20px 16px 80px;
+        padding: 16px 20px calc(64px + env(safe-area-inset-bottom, 0px) + 24px);
     }
 
     .cd-title-mobile {
-        font-size: 20px;
+        font-size: 26px;
         font-weight: 800;
-        margin-bottom: 16px;
-        margin-top: 20px;
-        text-align: center;
+        margin-bottom: 20px;
+        margin-top: 8px;
+        text-align: left;
     }
 
     .cd-action-grid {
@@ -322,29 +322,29 @@
     }
 
     .cd-action-text {
-        font-size: 13px;
+        font-size: 14px;
         line-height: 1.3;
     }
 
     .cd-section {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
     }
 
     .cd-section-header {
         flex-direction: row;
         align-items: baseline;
         gap: 0;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
     .cd-section-title {
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 800;
         margin-bottom: 0;
     }
 
     .cd-view-all-btn {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .cd-table {
@@ -352,9 +352,9 @@
     }
 
     .cd-notif-bell-btn {
-        height: 34px;
-        width: 40px;
-        font-size: 16px;
+        height: 36px;
+        width: 42px;
+        font-size: 18px;
     }
 
     .cd-notif-modal {
@@ -383,15 +383,15 @@
 /* Mobile Create Purchase Button */
 .cd-mobile-create-btn {
     width: 100%;
-    padding: 13px;
+    padding: 16px;
     background: #1f3d1a;
     color: white;
     border: none;
-    border-radius: 10px;
-    font-size: 15px;
+    border-radius: 12px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     font-family: 'Arimo', sans-serif;
     letter-spacing: 0.2px;
 }
@@ -400,26 +400,26 @@
 .cd-credit-mobile {
     background: #f7f9f6;
     border: 1px solid #d4ddd1;
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 20px;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 24px;
 }
 
 .cd-credit-mobile-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     color: #1f3d1a;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .cd-credit-mobile-header {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .cd-credit-mobile-term {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: #1f3d1a;
     text-transform: uppercase;
@@ -428,45 +428,45 @@
 
 .cd-credit-mobile-row {
     display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 14px;
 }
 
 .cd-credit-mobile-stat {
     flex: 1;
     background: white;
-    border-radius: 8px;
-    padding: 10px 8px;
+    border-radius: 10px;
+    padding: 14px 10px;
     text-align: center;
     border: 1px solid #e8ede6;
 }
 
 .cd-credit-mobile-label {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #888;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
 }
 
 .cd-credit-mobile-value {
-    font-size: 15px;
+    font-size: 20px;
     font-weight: 800;
     color: #1E2D1A;
 }
 
 .cd-credit-mobile-balance {
     border-top: 1px solid #d4ddd1;
-    padding-top: 10px;
+    padding-top: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .cd-credit-mobile-balance-amount {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 800;
     color: #911818;
 }
@@ -639,19 +639,19 @@
 }
 
 /* Small phone */
-@media (max-width: 480px) {
+@media (max-width: 380px) {
     .cd-system-title {
         font-size: 18px;
     }
 
     .cd-profile-btn, .cd-logout-btn {
-        padding: 6px 10px;
+        padding: 6px 12px;
         font-size: 12px;
-        height: 30px;
+        height: 32px;
     }
 
-    .cd-title {
-        font-size: 20px;
+    .cd-title-mobile {
+        font-size: 22px;
     }
 
     .cd-action-grid {
@@ -672,11 +672,11 @@
     }
 
     .cd-credit-mobile-value {
-        font-size: 14px;
+        font-size: 17px;
     }
 
     .cd-credit-mobile-balance-amount {
-        font-size: 18px;
+        font-size: 20px;
     }
 
     .cd-section-title {

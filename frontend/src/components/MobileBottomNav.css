@@ -3,14 +3,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
   background: #fff;
   border-top: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 900;
-  padding-bottom: env(safe-area-inset-bottom, 0);
   font-family: 'Arimo', sans-serif;
 }
 

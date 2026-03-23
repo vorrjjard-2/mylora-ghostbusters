@@ -10,6 +10,9 @@ export default function CreditChanges() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
     apiFetch("/api/um/credit-increases/")
@@ -20,6 +23,71 @@ export default function CreditChanges() {
 
   const pending = requests.filter((r) => r.status === "PENDING");
   const completed = requests.filter((r) => r.status !== "PENDING");
+
+  const sortData = (data) => {
+    return [...data].sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
+
+      if (sortBy === "current_limit" || sortBy === "requested_limit") {
+        aVal = parseFloat(aVal) || 0;
+        bVal = parseFloat(bVal) || 0;
+      } else if (sortBy === "created_at" || sortBy === "reviewed_at") {
+        aVal = new Date(aVal || 0);
+        bVal = new Date(bVal || 0);
+      } else {
+        aVal = (aVal || "").toString().toLowerCase();
+        bVal = (bVal || "").toString().toLowerCase();
+      }
+
+      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const sortedPending = sortData(pending);
+  const sortedCompleted = sortData(completed);
+
+  const pendingSortOptions = [
+    { value: "created_at", label: "Date Submitted" },
+    { value: "customer_name", label: "Customer Name" },
+    { value: "current_limit", label: "Current Limit" },
+    { value: "requested_limit", label: "Requested Limit" },
+  ];
+
+  const completedSortOptions = [
+    { value: "reviewed_at", label: "Date" },
+    { value: "customer_name", label: "Customer Name" },
+    { value: "current_limit", label: "Current Limit" },
+    { value: "requested_limit", label: "Requested Limit" },
+    { value: "status", label: "Status" },
+    { value: "reviewed_by", label: "Reviewed By" },
+  ];
+
+  const sortOptions = activeTab === "pending" ? pendingSortOptions : completedSortOptions;
+
+  const getSortLabel = () => {
+    const opt = sortOptions.find((o) => o.value === sortBy);
+    return opt ? opt.label : "Date Submitted";
+  };
+
+  const handleSortChange = (newSortBy) => {
+    if (newSortBy === sortBy) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(newSortBy);
+      setSortDirection(newSortBy === "created_at" || newSortBy === "reviewed_at" ? "desc" : "asc");
+    }
+    setShowSortMenu(false);
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSortBy(tab === "pending" ? "created_at" : "reviewed_at");
+    setSortDirection("desc");
+    setShowSortMenu(false);
+  };
 
   const formatCurrency = (val) =>
     `₱ ${parseFloat(val).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -47,16 +115,94 @@ export default function CreditChanges() {
           <div className="um-tabs-row">
             <button
               className={`um-tab${activeTab === "pending" ? " active-tab" : ""}`}
-              onClick={() => setActiveTab("pending")}
+              onClick={() => handleTabChange("pending")}
             >
               Pending
             </button>
             <button
               className={`um-tab${activeTab === "completed" ? " active-tab" : ""}`}
-              onClick={() => setActiveTab("completed")}
+              onClick={() => handleTabChange("completed")}
             >
               Completed
             </button>
+          </div>
+
+          {/* Sort Controls */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "14px", color: "#666" }}>Sorted by:</span>
+              <span style={{
+                padding: "6px 12px",
+                backgroundColor: "#1E2D1A",
+                color: "white",
+                borderRadius: "20px",
+                fontSize: "14px",
+                fontWeight: "600",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px"
+              }}>
+                {getSortLabel()}
+                <span style={{ fontSize: "12px" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
+              </span>
+            </div>
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setShowSortMenu(!showSortMenu)}
+                style={{
+                  padding: "10px 20px",
+                  fontSize: "16px",
+                  border: "1px solid #262626",
+                  borderRadius: "8px",
+                  backgroundColor: "white",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontWeight: "600"
+                }}
+              >
+                <span>↕</span>
+                <span>Sort By: {getSortLabel()}</span>
+                <span style={{ fontSize: "12px", color: "#666" }}>{sortDirection === "asc" ? "↑" : "↓"}</span>
+              </button>
+              {showSortMenu && (
+                <div style={{
+                  position: "absolute",
+                  top: "calc(100% + 5px)",
+                  right: 0,
+                  backgroundColor: "white",
+                  border: "1px solid #262626",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                  minWidth: "200px",
+                  zIndex: 1000
+                }}>
+                  {sortOptions.map((option, index) => (
+                    <div
+                      key={option.value}
+                      onClick={() => handleSortChange(option.value)}
+                      style={{
+                        padding: "12px 16px",
+                        cursor: "pointer",
+                        borderBottom: index < sortOptions.length - 1 ? "1px solid #e0e0e0" : "none",
+                        backgroundColor: sortBy === option.value ? "#f5f5f5" : "white",
+                        fontWeight: sortBy === option.value ? "600" : "400",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderRadius: index === sortOptions.length - 1 ? "0 0 8px 8px" : index === 0 ? "8px 8px 0 0" : "0"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f9f9f9"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = sortBy === option.value ? "#f5f5f5" : "white"}
+                    >
+                      <span>{option.label}</span>
+                      {sortBy === option.value && <span>{sortDirection === "asc" ? "↑" : "↓"}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {activeTab === "pending" && (
@@ -65,7 +211,6 @@ export default function CreditChanges() {
               border: "1px solid #262626",
               borderRadius: "15px",
               overflow: "hidden",
-              marginTop: "20px",
             }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "16px" }}>
                 <thead>
@@ -78,14 +223,14 @@ export default function CreditChanges() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pending.length === 0 && (
+                  {sortedPending.length === 0 && (
                     <tr>
                       <td colSpan="5" style={{ padding: "30px", textAlign: "center", color: "#888" }}>
                         No pending requests
                       </td>
                     </tr>
                   )}
-                  {pending.map((r) => (
+                  {sortedPending.map((r) => (
                     <tr
                       key={r.request_id}
                       onClick={() => navigate(`/upper-management/credit-increase/${r.request_id}`)}
@@ -115,7 +260,6 @@ export default function CreditChanges() {
               border: "1px solid #262626",
               borderRadius: "15px",
               overflow: "hidden",
-              marginTop: "20px",
             }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "16px" }}>
                 <thead>
@@ -129,14 +273,14 @@ export default function CreditChanges() {
                   </tr>
                 </thead>
                 <tbody>
-                  {completed.length === 0 && (
+                  {sortedCompleted.length === 0 && (
                     <tr>
                       <td colSpan="6" style={{ padding: "30px", textAlign: "center", color: "#888" }}>
                         No completed requests
                       </td>
                     </tr>
                   )}
-                  {completed.map((r) => (
+                  {sortedCompleted.map((r) => (
                     <tr
                       key={r.request_id}
                       style={{ borderBottom: "1px solid #E9ECEF" }}

@@ -171,15 +171,6 @@ export default function CreditHistory() {
           </div>
         )}
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
-
-        <div style={{ marginTop: "20px" }}>
-          <button
-            onClick={() => navigate("/customer/dashboard")}
-            className="cd-back-dashboard-btn"
-          >
-            Back to Dashboard
-          </button>
-        </div>
       </main>
       {isMobile && <MobileBottomNav />}
     </div>
