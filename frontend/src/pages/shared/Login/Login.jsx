@@ -67,6 +67,10 @@ export default function Login() {
         setCsrfToken(me.csrfToken);
       }
 
+      if (!me.authenticated || !me.roles) {
+        throw new Error("Login succeeded but session was not established. Please try again.");
+      }
+
       // Clear any stale ordering cache from previous sessions
       localStorage.removeItem("order_items");
       localStorage.removeItem("delivery_details");
