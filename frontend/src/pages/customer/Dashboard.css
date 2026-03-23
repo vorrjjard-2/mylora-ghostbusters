@@ -333,18 +333,22 @@
     .cd-section-header {
         flex-direction: row;
         align-items: baseline;
-        gap: 0;
+        gap: 8px;
         margin-bottom: 12px;
+        flex-wrap: nowrap;
     }
 
     .cd-section-title {
         font-size: 18px;
         font-weight: 800;
         margin-bottom: 0;
+        white-space: nowrap;
     }
 
     .cd-view-all-btn {
-        font-size: 14px;
+        font-size: 13px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .cd-table {
@@ -434,9 +438,10 @@
 
 .cd-credit-mobile-stat {
     flex: 1;
+    min-width: 0;
     background: white;
     border-radius: 10px;
-    padding: 14px 10px;
+    padding: 14px 8px;
     text-align: center;
     border: 1px solid #e8ede6;
 }
@@ -452,9 +457,10 @@
 }
 
 .cd-credit-mobile-value {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
     color: #1E2D1A;
+    word-break: break-word;
 }
 
 .cd-credit-mobile-balance {
@@ -463,12 +469,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
+}
+
+.cd-credit-mobile-balance .cd-credit-mobile-label {
+    white-space: nowrap;
+    margin-bottom: 0;
+    flex-shrink: 0;
 }
 
 .cd-credit-mobile-balance-amount {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #911818;
+    white-space: nowrap;
 }
 
 /* Notification Bell */
@@ -515,6 +529,17 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 1000;
     font-family: 'Arimo', sans-serif;
+}
+
+@media (max-width: 768px) {
+    .cd-notif-dropdown {
+        position: fixed;
+        top: 60px;
+        left: 8px;
+        right: 8px;
+        width: auto;
+        max-height: 70vh;
+    }
 }
 
 .cd-notif-dropdown-header {
