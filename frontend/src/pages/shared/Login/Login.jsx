@@ -53,33 +53,17 @@ export default function Login() {
         setCsrfToken(loginData.csrfToken);
       }
 
-      // 2️⃣ Get logged-in user + roles
-      const meRes = await fetch(`${API_BASE_URL}/api/me/`, {
-        credentials: "include",
-      });
-
-      if (!meRes.ok) {
-        throw new Error("Failed to fetch user info");
-      }
-
-      const me = await meRes.json();
-      if (me.csrfToken) {
-        setCsrfToken(me.csrfToken);
-      }
-
-      if (!me.authenticated || !me.roles) {
-        throw new Error("Login succeeded but session was not established. Please try again.");
-      }
+      const roles = loginData.roles || [];
 
       // Clear any stale ordering cache from previous sessions
       localStorage.removeItem("order_items");
       localStorage.removeItem("delivery_details");
 
-      if (me.roles.includes("upper_management")) {
+      if (roles.includes("upper_management")) {
         navigate("/internal/dashboard");
-      } else if (me.roles.includes("credit_manager")) {
+      } else if (roles.includes("credit_manager")) {
         navigate("/credit-manager/dashboard");
-      } else if (me.roles.includes("order_processor")) {
+      } else if (roles.includes("order_processor")) {
         navigate("/order-processor/dashboard");
       } else {
         navigate("/customer/dashboard");

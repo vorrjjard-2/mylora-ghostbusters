@@ -31,7 +31,13 @@ def login_view(request):
 
     login(request, user)
     log_audit(user=user, action="LOGIN", details={"username": username}, request=request)
-    return Response({'message': 'Logged in', 'csrfToken': get_token(request)})
+    roles = list(user.groups.values_list("name", flat=True))
+    return Response({
+        'message': 'Logged in',
+        'csrfToken': get_token(request),
+        'username': user.username,
+        'roles': roles,
+    })
 
 @ensure_csrf_cookie
 @api_view(["GET"])
