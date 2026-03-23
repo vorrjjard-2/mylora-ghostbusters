@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
@@ -21,7 +20,7 @@ export default function SetMessages() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/reminder-messages/`, { credentials: "include" })
+    apiFetch("/api/um/reminder-messages/")
       .then((res) => res.json())
       .then((data) => setMessages(data))
       .catch(() => setError("Failed to load messages"))
@@ -49,12 +48,10 @@ export default function SetMessages() {
     setSuccess("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/um/reminder-messages/update/`, {
+      const res = await apiFetch("/api/um/reminder-messages/update/", {
         method: "PUT",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
         },
         body: JSON.stringify({ messages }),
       });

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -19,9 +19,7 @@ export default function AllOrders() {
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredOrders, 10, [searchTerm, sortConfig]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/all-orders/`, {
-      credentials: "include"
-    })
+    apiFetch("/api/um/all-orders/")
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load orders: ${res.status}`);

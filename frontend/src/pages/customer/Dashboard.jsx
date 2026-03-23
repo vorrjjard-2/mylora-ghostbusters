@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import useIsMobile from "../../hooks/useIsMobile";
 import usePagination from "../../hooks/usePagination";
@@ -25,9 +24,7 @@ export default function CustomerDashboard() {
   const historyRef = useRef(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/customer/dashboard/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load dashboard");
         return res.json();
@@ -40,7 +37,7 @@ export default function CustomerDashboard() {
       .finally(() => setLoading(false));
 
     // Fetch unread notifications
-    fetch(`${API_BASE_URL}/api/customer/notifications/unread/`, { credentials: "include" })
+    apiFetch("/api/customer/notifications/unread/")
       .then((r) => r.json())
       .then((notifs) => {
         setUnreadNotifications(notifs);
@@ -49,7 +46,7 @@ export default function CustomerDashboard() {
       .catch(console.error);
 
     // Fetch notification history
-    fetch(`${API_BASE_URL}/api/customer/notifications/history/`, { credentials: "include" })
+    apiFetch("/api/customer/notifications/history/")
       .then((r) => r.json())
       .then(setNotifHistory)
       .catch(console.error);
@@ -74,12 +71,10 @@ export default function CustomerDashboard() {
 
     if (opening && unreadCount > 0) {
       try {
-        await fetch(`${API_BASE_URL}/api/customer/notifications/mark-read/`, {
+        await apiFetch("/api/customer/notifications/mark-read/", {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
           },
         });
         setNotifHistory((prev) =>
@@ -93,14 +88,12 @@ export default function CustomerDashboard() {
 
   const handleAcknowledge = async () => {
     try {
-      await fetch(
-        `${API_BASE_URL}/api/customer/notifications/${currentNotification.notification_id}/acknowledge/`,
+      await apiFetch(
+        `/api/customer/notifications/${currentNotification.notification_id}/acknowledge/`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
           },
         }
       );
@@ -117,7 +110,7 @@ export default function CustomerDashboard() {
       }
 
       // Refresh history
-      fetch(`${API_BASE_URL}/api/customer/notifications/history/`, { credentials: "include" })
+      apiFetch("/api/customer/notifications/history/")
         .then((r) => r.json())
         .then(setNotifHistory)
         .catch(console.error);

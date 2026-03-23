@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -19,9 +19,7 @@ export default function EmployeeDatabase() {
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredEmployees, 5, [searchTerm, sortConfig]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/employees/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/um/employees/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load employees");
         return res.json();

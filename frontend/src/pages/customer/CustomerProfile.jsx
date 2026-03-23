@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import useIsMobile from "../../hooks/useIsMobile";
 import MobileBottomNav from "../../components/MobileBottomNav";
 import logo from "../../assets/mylora-logo.png";
@@ -29,9 +28,7 @@ export default function CustomerProfile() {
 
   useEffect(() => {
     // Fetch customer profile data
-    fetch(`${API_BASE_URL}/api/customer/profile/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/customer/profile/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load profile");
         return res.json();
@@ -70,15 +67,12 @@ export default function CustomerProfile() {
     }
 
     setSaving(true);
-    const csrfToken = getCookie("csrftoken");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/customer/change-password/`, {
+      const response = await apiFetch("/api/customer/change-password/", {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
         },
         body: JSON.stringify(passwordForm),
       });

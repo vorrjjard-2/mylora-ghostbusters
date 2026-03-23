@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import fileIcon from "../../assets/file.png";
@@ -36,9 +35,7 @@ export default function UpdateBalance() {
 
   useEffect(() => {
     // Fetch customer details
-    fetch(`${API_BASE_URL}/api/cm/customers/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/cm/customers/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customers");
         return res.json();
@@ -93,7 +90,6 @@ export default function UpdateBalance() {
     }
 
     setProcessing(true);
-    const csrfToken = getCookie("csrftoken");
 
     try {
       const formData = new FormData();
@@ -105,14 +101,10 @@ export default function UpdateBalance() {
         formData.append("proof_of_payment", paymentForm.proof_of_payment);
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/cm/customer/${customerId}/adjust-balance/`,
+      const response = await apiFetch(
+        `/api/cm/customer/${customerId}/adjust-balance/`,
         {
           method: "POST",
-          credentials: "include",
-          headers: {
-            "X-CSRFToken": csrfToken,
-          },
           body: formData,
         }
       );

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import usePagination from "../../hooks/usePagination";
@@ -22,8 +22,8 @@ export default function OrderProcessorDashboard() {
     const fetchData = async () => {
       try {
         const [ordersRes, meRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/op/pending-orders/`, { credentials: "include" }),
-          fetch(`${API_BASE_URL}/api/me/`, { credentials: "include" }),
+          apiFetch("/api/op/pending-orders/"),
+          apiFetch("/api/me/"),
         ]);
         if (!ordersRes.ok) throw new Error("Failed to load orders");
         const ordersData = await ordersRes.json();

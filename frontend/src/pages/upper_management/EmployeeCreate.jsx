@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
@@ -39,10 +38,9 @@ export default function EmployeeCreate() {
       role: formData.role,
     };
 
-    fetch(`${API_BASE_URL}/api/um/employee/create/`, {
+    apiFetch("/api/um/employee/create/", {
       method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(createData),
     })
       .then((res) => {

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { MEDIA_BASE_URL } from "../../utils/media";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -34,9 +34,7 @@ export default function CustomerDetails() {
   }
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/cm/customers/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/cm/customers/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customers");
         return res.json();

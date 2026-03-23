@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -11,7 +11,7 @@ export default function Dashboard() {
   const [user, setUser] = useState({ username: "" });
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/me/`, { credentials: "include" })
+    apiFetch("/api/me/")
       .then(r => r.json())
       .then(data => { if (data.username) setUser({ username: data.username }); })
       .catch(console.error);
@@ -33,9 +33,7 @@ export default function Dashboard() {
   const [sortedOrders, setSortedOrders] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/enrollments/pending/`, {
-      credentials: "include"
-    })
+    apiFetch("/api/enrollments/pending/")
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load enrollments: ${res.status}`);
@@ -47,9 +45,7 @@ export default function Dashboard() {
         console.error("Failed to load enrollments", err);
       });
 
-    fetch(`${API_BASE_URL}/api/um/pending-overrides/`, {
-      credentials: "include"
-    })
+    apiFetch("/api/um/pending-overrides/")
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load overrides: ${res.status}`);
@@ -61,9 +57,7 @@ export default function Dashboard() {
         console.error("Failed to load override requests", err);
       });
 
-    fetch(`${API_BASE_URL}/api/um/pending-orders/`, {
-      credentials: "include"
-    })
+    apiFetch("/api/um/pending-orders/")
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load pending orders: ${res.status}`);

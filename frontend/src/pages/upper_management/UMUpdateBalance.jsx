@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import fileIcon from "../../assets/file.png";
@@ -34,9 +33,7 @@ export default function UMUpdateBalance() {
   };
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/customer/${customerId}/`, {
-      credentials: "include",
-    })
+    apiFetch(`/api/um/customer/${customerId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customer");
         return res.json();
@@ -74,7 +71,6 @@ export default function UMUpdateBalance() {
     }
 
     setProcessing(true);
-    const csrfToken = getCookie("csrftoken");
 
     try {
       const formData = new FormData();
@@ -86,12 +82,10 @@ export default function UMUpdateBalance() {
         formData.append("proof_of_payment", paymentForm.proof_of_payment);
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/um/customer/${customerId}/update-balance/`,
+      const response = await apiFetch(
+        `/api/um/customer/${customerId}/update-balance/`,
         {
           method: "POST",
-          credentials: "include",
-          headers: { "X-CSRFToken": csrfToken },
           body: formData,
         }
       );

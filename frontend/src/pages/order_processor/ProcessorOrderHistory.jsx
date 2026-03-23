@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import usePagination from "../../hooks/usePagination";
@@ -30,8 +30,8 @@ export default function ProcessorOrderHistory() {
     const fetchBoth = async () => {
       try {
         const [pendingRes, completedRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/op/pending-orders/`, { credentials: "include" }),
-          fetch(`${API_BASE_URL}/api/op/completed-orders/`, { credentials: "include" }),
+          apiFetch("/api/op/pending-orders/"),
+          apiFetch("/api/op/completed-orders/"),
         ]);
         if (!pendingRes.ok || !completedRes.ok) throw new Error("Failed to load orders");
         const [pending, completed] = await Promise.all([pendingRes.json(), completedRes.json()]);

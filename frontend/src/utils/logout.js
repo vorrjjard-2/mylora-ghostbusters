@@ -1,16 +1,15 @@
-import { API_BASE_URL } from "./api";
-import { getCookie, setCsrfToken } from "./csrf";
+import apiFetch from "./apiFetch";
+import { setCsrfToken } from "./csrf";
 
 export async function handleLogout(navigate) {
   try {
-    await fetch(`${API_BASE_URL}/api/logout/`, {
+    await apiFetch("/api/logout/", {
       method: "POST",
-      credentials: "include",
-      headers: { "X-CSRFToken": getCookie("csrftoken") },
     });
   } catch (err) {
     console.error("Logout failed:", err);
   }
+  localStorage.removeItem("authToken");
   localStorage.removeItem("auth");
   localStorage.removeItem("order_items");
   localStorage.removeItem("delivery_details");

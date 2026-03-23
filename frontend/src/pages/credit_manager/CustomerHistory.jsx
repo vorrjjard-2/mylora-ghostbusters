@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import usePagination from "../../hooks/usePagination";
@@ -15,12 +15,8 @@ export default function CustomerHistory() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE_URL}/api/cm/customers/`, {
-        credentials: "include",
-      }).then((res) => res.json()),
-      fetch(`${API_BASE_URL}/api/cm/customer/${customerId}/history/`, {
-        credentials: "include",
-      }).then((res) => res.json()),
+      apiFetch("/api/cm/customers/").then((res) => res.json()),
+      apiFetch(`/api/cm/customer/${customerId}/history/`).then((res) => res.json()),
     ])
       .then(([customers, historyData]) => {
         const found = customers.find((c) => c.customer_id === parseInt(customerId));

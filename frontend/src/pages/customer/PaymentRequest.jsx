@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import useIsMobile from "../../hooks/useIsMobile";
 import MobileBottomNav from "../../components/MobileBottomNav";
@@ -29,9 +28,7 @@ export default function PaymentRequest() {
 
   useEffect(() => {
     // Fetch credit info and user info to display on the page
-    fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/customer/dashboard/")
       .then((res) => res.json())
       .then((data) => {
         setCreditInfo(data.credit);
@@ -134,15 +131,8 @@ export default function PaymentRequest() {
       formDataToSend.append("payment_type", formData.payment_type);
       formDataToSend.append("proof_payment", formData.proof_payment);
       
-      // Get CSRF token
-      const csrfToken = getCookie("csrftoken");
-      
-      const response = await fetch(`${API_BASE_URL}/api/payments/submit/`, {
+      const response = await apiFetch("/api/payments/submit/", {
         method: "POST",
-        credentials: "include",
-        headers: {
-          "X-CSRFToken": csrfToken,
-        },
         body: formDataToSend,
       });
       

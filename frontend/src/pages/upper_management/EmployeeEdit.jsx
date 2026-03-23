@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
@@ -22,9 +21,7 @@ export default function EmployeeEdit() {
   });
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/employee/${userId}/`, {
-      credentials: "include",
-    })
+    apiFetch(`/api/um/employee/${userId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load employee");
         return res.json();
@@ -62,10 +59,9 @@ export default function EmployeeEdit() {
       updateData.password = formData.password;
     }
 
-    fetch(`${API_BASE_URL}/api/um/employee/${userId}/update/`, {
+    apiFetch(`/api/um/employee/${userId}/update/`, {
       method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updateData),
     })
       .then((res) => {

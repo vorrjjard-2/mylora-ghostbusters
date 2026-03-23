@@ -1,8 +1,7 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { MEDIA_BASE_URL } from "../../utils/media";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import paperIcon from "../../assets/paper.png";
@@ -43,9 +42,7 @@ export default function UMCustomerDetail() {
   const [showReminderModal, setShowReminderModal] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/customer/${customerId}/`, {
-      credentials: "include",
-    })
+    apiFetch(`/api/um/customer/${customerId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customer");
         return res.json();
@@ -66,15 +63,13 @@ export default function UMCustomerDetail() {
     }
 
     setProcessing(true);
-    const csrfToken = getCookie("csrftoken");
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/um/customer/${customerId}/deactivate/`,
+      const response = await apiFetch(
+        `/api/um/customer/${customerId}/deactivate/`,
         {
           method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password }),
         }
       );

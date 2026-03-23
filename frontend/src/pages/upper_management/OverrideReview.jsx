@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 
 export default function OverrideReview() {
   const { overrideId } = useParams();
@@ -16,9 +15,7 @@ export default function OverrideReview() {
   const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/override/${overrideId}/`, {
-      credentials: "include",
-    })
+    apiFetch(`/api/um/override/${overrideId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load override request");
         return res.json();
@@ -45,17 +42,14 @@ export default function OverrideReview() {
     }
 
     setProcessing(true);
-    const csrfToken = getCookie("csrftoken");
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/um/override/${overrideId}/${pendingAction}/`,
+      const response = await apiFetch(
+        `/api/um/override/${overrideId}/${pendingAction}/`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
           },
           body: JSON.stringify({
             password,

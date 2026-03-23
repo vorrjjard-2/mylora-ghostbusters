@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import Sidebar from "../../components/internal/Sidebar";
 import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
@@ -21,7 +20,7 @@ export default function CreditIncreaseReview() {
   const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/credit-increase/${requestId}/`, { credentials: "include" })
+    apiFetch(`/api/um/credit-increase/${requestId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load request");
         return res.json();
@@ -59,14 +58,12 @@ export default function CreditIncreaseReview() {
     setPasswordError("");
 
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/um/credit-increase/${requestId}/${pendingAction}/`,
+      const res = await apiFetch(
+        `/api/um/credit-increase/${requestId}/${pendingAction}/`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
           },
           body: JSON.stringify({ password }),
         }

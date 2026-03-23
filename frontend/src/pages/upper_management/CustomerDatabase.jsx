@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -21,9 +21,7 @@ export default function CustomerDatabase() {
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredCustomers, 5, [searchTerm, sortConfig]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/customers/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/um/customers/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customers");
         return res.json();

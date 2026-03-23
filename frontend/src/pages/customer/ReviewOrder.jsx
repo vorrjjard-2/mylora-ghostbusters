@@ -1,5 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
-import { getCsrfToken } from "../../utils/csrf";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -33,9 +32,7 @@ export default function ReviewOrder() {
     setDeliveryDetails(JSON.parse(delivery));
 
     // Fetch customer info
-    fetch(`${API_BASE_URL}/api/customer/dashboard/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/customer/dashboard/")
       .then((res) => res.json())
       .then((data) => {
         setCustomerInfo(data);
@@ -68,13 +65,11 @@ export default function ReviewOrder() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/orders/create/`, {
+      const res = await apiFetch("/api/orders/create/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCsrfToken(),
         },
-        credentials: "include",
         body: JSON.stringify({
           delivery_mode: deliveryDetails.deliveryMode,
           shipping_address: shippingAddress,

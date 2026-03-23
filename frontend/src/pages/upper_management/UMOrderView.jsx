@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
@@ -15,9 +15,7 @@ export default function UMOrderView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/order/${orderId}/view/`, {
-      credentials: "include",
-    })
+    apiFetch(`/api/um/order/${orderId}/view/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load order");
         return res.json();

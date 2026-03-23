@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -21,7 +21,7 @@ export default function OrderDetail() {
   const backTo = location.state?.from || "/orders";
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/orders/${orderId}/`, { credentials: "include" })
+    apiFetch(`/api/orders/${orderId}/`)
       .then((r) => {
         if (!r.ok) throw new Error("Order not found");
         return r.json();

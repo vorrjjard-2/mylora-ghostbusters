@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -27,7 +27,7 @@ export default function DeliveryDetails() {
       return;
     }
 
-    fetch(`${API_BASE_URL}/api/customer/profile/`, { credentials: "include" })
+    apiFetch("/api/customer/profile/")
       .then(r => r.json())
       .then(data => {
         setAddress1(data.address1 || "");

@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import useIsMobile from "../../hooks/useIsMobile";
 import MobileBottomNav from "../../components/MobileBottomNav";
@@ -24,7 +23,7 @@ export default function CreditIncreaseRequest() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/customer/dashboard/`, { credentials: "include" })
+    apiFetch("/api/customer/dashboard/")
       .then((res) => res.json())
       .then((data) => {
         setCreditInfo(data.credit);
@@ -69,12 +68,10 @@ export default function CreditIncreaseRequest() {
     setInlineError("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/customer/credit-increase/`, {
+      const res = await apiFetch("/api/customer/credit-increase/", {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
         },
         body: JSON.stringify({
           requested_limit: requestedLimit,

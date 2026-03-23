@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -19,7 +19,7 @@ export default function ActivateAccount() {
 
   useEffect(() => {
     // Verify token on page load
-    fetch(`${API_BASE_URL}/api/activate/verify/${token}/`)
+    apiFetch(`/api/activate/verify/${token}/`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Invalid or expired activation link");
@@ -56,7 +56,7 @@ export default function ActivateAccount() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/activate/${token}/`, {
+      const res = await apiFetch(`/api/activate/${token}/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

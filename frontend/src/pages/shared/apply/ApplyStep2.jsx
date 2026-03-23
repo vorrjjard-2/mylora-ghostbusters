@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../../utils/api";
+import apiFetch from "../../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ApplicationSubmittedModal from "../../../components/ApplicationSubmittedModal";
@@ -41,7 +41,7 @@ export default function ApplyStep2() {
   const [branches, setBranches] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/branches/`)
+    apiFetch("/api/branches/")
       .then(r => r.json())
       .then(data => setBranches(data))
       .catch(console.error);
@@ -208,7 +208,7 @@ export default function ApplyStep2() {
       if (supportingDocs[1]) formData.append("doc2", supportingDocs[1]);
       if (govId) formData.append("gov_id", govId);
 
-      const res = await fetch(`${API_BASE_URL}/api/applications/`, {
+      const res = await apiFetch("/api/applications/", {
         method: "POST",
         body: formData,
       });

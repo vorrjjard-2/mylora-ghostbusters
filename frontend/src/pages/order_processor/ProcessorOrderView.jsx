@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -12,9 +12,7 @@ export default function ProcessorOrderView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/op/order/${orderId}/view/`, {
-      credentials: "include",
-    })
+    apiFetch(`/api/op/order/${orderId}/view/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load order");
         return res.json();

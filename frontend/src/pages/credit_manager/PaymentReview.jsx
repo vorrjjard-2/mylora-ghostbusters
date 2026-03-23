@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import logo from "../../assets/mylora-logo.png";
 import "./PaymentReview.css";
@@ -23,9 +22,7 @@ export default function PaymentReview() {
   const [rejectReasonError, setRejectReasonError] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/cm/payment/${paymentId}/`, { 
-      credentials: "include",
-    })
+    apiFetch(`/api/cm/payment/${paymentId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load payment");
         return res.json();
@@ -63,7 +60,6 @@ export default function PaymentReview() {
     }
 
     setProcessing(true);
-    const csrfToken = getCookie("csrftoken");
 
     const bodyData = { password };
     if (pendingAction === "reject") {
@@ -71,14 +67,12 @@ export default function PaymentReview() {
     }
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/cm/payment/${paymentId}/${pendingAction}/`,
+      const response = await apiFetch(
+        `/api/cm/payment/${paymentId}/${pendingAction}/`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
           },
           body: JSON.stringify(bodyData),
         }

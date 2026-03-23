@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import usePagination from "../../hooks/usePagination";
 import Pagination from "../../components/Pagination";
@@ -33,7 +32,7 @@ export default function AllProducts() {
   }, []);
 
   const fetchProducts = () => {
-    fetch(`${API_BASE_URL}/api/um/products/`, { credentials: "include" })
+    apiFetch("/api/um/products/")
       .then(res => res.json())
       .then(data => {
         setProducts(data);
@@ -43,7 +42,7 @@ export default function AllProducts() {
   };
 
   const fetchBranches = () => {
-    fetch(`${API_BASE_URL}/api/um/branches/`, { credentials: "include" })
+    apiFetch("/api/um/branches/")
       .then(res => res.json())
       .then(data => setBranches(data))
       .catch(err => console.error("Failed to load branches", err));
@@ -124,15 +123,13 @@ export default function AllProducts() {
     }
 
     const url = modalMode === "add"
-      ? `${API_BASE_URL}/api/um/product/create/`
-      : `${API_BASE_URL}/api/um/product/${selectedProduct.product_id}/update/`;
+      ? "/api/um/product/create/"
+      : `/api/um/product/${selectedProduct.product_id}/update/`;
 
-    fetch(url, {
+    apiFetch(url, {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
       },
       body: JSON.stringify(formData),
     })
@@ -148,12 +145,10 @@ export default function AllProducts() {
   };
 
   const handleDelete = () => {
-    fetch(`${API_BASE_URL}/api/um/product/${selectedProduct.product_id}/delete/`, {
+    apiFetch(`/api/um/product/${selectedProduct.product_id}/delete/`, {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
       },
     })
       .then(res => {

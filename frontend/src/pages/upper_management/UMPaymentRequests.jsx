@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -18,9 +18,7 @@ export default function UMPaymentRequests() {
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredPayments, 10, [searchTerm, sortConfig]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/all-payments/`, {
-      credentials: "include"
-    })
+    apiFetch("/api/um/all-payments/")
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load payments: ${res.status}`);

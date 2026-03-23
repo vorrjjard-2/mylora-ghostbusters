@@ -1,9 +1,8 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
 import logo from "../../assets/mylora-logo.png";
-import { getCookie } from "../../utils/csrf";
 import { handleLogout } from "../../utils/logout";
 import ConfirmPasswordModal from "../../components/internal/ConfirmPasswordModal";
 import { MEDIA_BASE_URL } from "../../utils/media";
@@ -49,9 +48,7 @@ export default function EnrollmentReview() {
   }
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/enrollments/${applicationId}/`, {
-      credentials: "include"
-    })
+    apiFetch(`/api/enrollments/${applicationId}/`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load enrollment: ${res.status}`);
@@ -83,12 +80,10 @@ export default function EnrollmentReview() {
     setLoading(true);
     setError("");
 
-    fetch(`${API_BASE_URL}/api/enrollments/${applicationId}/${pendingAction}/`, {
+    apiFetch(`/api/enrollments/${applicationId}/${pendingAction}/`, {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
       },
       body: JSON.stringify({ password }),
     })
@@ -128,12 +123,10 @@ export default function EnrollmentReview() {
     setLoading(true);
     setRejectPasswordError("");
 
-    fetch(`${API_BASE_URL}/api/enrollments/${applicationId}/reject/`, {
+    apiFetch(`/api/enrollments/${applicationId}/reject/`, {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
       },
       body: JSON.stringify({ password: rejectPassword, rejection_reason: rejectReason.trim() }),
     })

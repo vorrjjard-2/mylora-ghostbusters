@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
@@ -18,8 +18,8 @@ export default function CreditHistory() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE_URL}/api/customer/dashboard/`, { credentials: "include" }).then((r) => r.json()),
-      fetch(`${API_BASE_URL}/api/payments/history/`, { credentials: "include" }).then((r) => r.json()),
+      apiFetch("/api/customer/dashboard/").then((r) => r.json()),
+      apiFetch("/api/payments/history/").then((r) => r.json()),
     ])
       .then(([dashData, paymentData]) => {
         setCreditInfo(dashData.credit);

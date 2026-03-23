@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -20,9 +20,7 @@ export default function AuditLog() {
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredLogs, 10, [searchTerm, sortConfig]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/audit-logs/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/um/audit-logs/")
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to load audit logs: ${res.status}`);
         return res.json();

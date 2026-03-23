@@ -1,7 +1,7 @@
-import { API_BASE_URL } from "../../../utils/api";
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getCookie, setCsrfToken } from "../../../utils/csrf";
+import { setCsrfToken } from "../../../utils/csrf";
+import apiFetch from "../../../utils/apiFetch";
 import "./Login.css";
 import logo from "../../../assets/mylora-logo.png";
 
@@ -15,7 +15,7 @@ export default function Login() {
 
   useEffect(() => {
     // Fetch a fresh CSRF token when the login page loads
-    fetch(`${API_BASE_URL}/api/me/`, { credentials: "include" })
+    apiFetch("/api/me/")
       .then((res) => res.json())
       .then((data) => {
         if (data.csrfToken) setCsrfToken(data.csrfToken);
@@ -30,13 +30,11 @@ export default function Login() {
 
     try {
       // 1️⃣ Login
-      const res = await fetch(`${API_BASE_URL}/api/login/`, {
+      const res = await apiFetch("/api/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
         },
-        credentials: "include",
         body: JSON.stringify({
           username,
           password,
@@ -55,7 +53,10 @@ export default function Login() {
 
       const roles = loginData.roles || [];
 
-      // Store auth state for ProtectedRoute
+      // Store auth token and state
+      if (loginData.token) {
+        localStorage.setItem("authToken", loginData.token);
+      }
       localStorage.setItem("auth", JSON.stringify({
         authenticated: true,
         username: loginData.username,

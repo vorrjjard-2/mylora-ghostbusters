@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -21,9 +21,7 @@ export default function CreateOrder() {
 
   useEffect(() => {
     // Fetch available products
-    fetch(`${API_BASE_URL}/api/products/`, {
-      credentials: "include",
-    })
+    apiFetch("/api/products/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load products");
         return res.json();

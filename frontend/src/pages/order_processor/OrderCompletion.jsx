@@ -1,7 +1,6 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCookie } from "../../utils/csrf";
 import logo from "../../assets/mylora-logo.png";
 import completeIcon from "../../assets/check_white.png"
 import successImage from "../../assets/check_outline_green.png";
@@ -20,9 +19,7 @@ export default function OrderCompletion() {
   const [completionInfo, setCompletionInfo] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/op/order/${orderId}/`, {
-      credentials: "include",
-    })
+    apiFetch(`/api/op/order/${orderId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load order");
         return res.json();
@@ -125,17 +122,14 @@ export default function OrderCompletion() {
     }
 
     setProcessing(true);
-    const csrfToken = getCookie("csrftoken");
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/op/order/${orderId}/complete/`,
+      const response = await apiFetch(
+        `/api/op/order/${orderId}/complete/`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
           },
           body: JSON.stringify({ password }),
         }

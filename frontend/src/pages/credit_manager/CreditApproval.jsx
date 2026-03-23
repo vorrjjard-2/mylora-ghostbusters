@@ -1,5 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
-import { getCookie } from "../../utils/csrf";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -28,7 +27,7 @@ export default function CreditApproval() {
   const [rejectPasswordError, setRejectPasswordError] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/cm/order/${orderId}/`, { credentials: "include" })
+    apiFetch(`/api/cm/order/${orderId}/`)
       .then((r) => {
         if (!r.ok) throw new Error("Not found");
         return r.json();
@@ -54,13 +53,11 @@ export default function CreditApproval() {
       if (password) payload.password = password;
       if (rejectionReason) payload.rejection_reason = rejectionReason;
       const body = Object.keys(payload).length > 0 ? JSON.stringify(payload) : undefined;
-      const res = await fetch(
-        `${API_BASE_URL}/api/cm/order/${orderId}/${action}/`,
+      const res = await apiFetch(
+        `/api/cm/order/${orderId}/${action}/`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
             ...(body ? { "Content-Type": "application/json" } : {}),
           },
           body,
@@ -143,14 +140,12 @@ export default function CreditApproval() {
 
     setActing(true);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/cm/order/${orderId}/request-override/`,
+      const res = await apiFetch(
+        `/api/cm/order/${orderId}/request-override/`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
           },
           body: JSON.stringify({ reason: overrideReason }),
         }

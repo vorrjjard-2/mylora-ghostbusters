@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -27,7 +27,7 @@ export default function OrderHistory() {
 
   /* ── fetch ── */
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/orders/`, { credentials: "include" })
+    apiFetch("/api/orders/")
       .then((r) => r.json())
       .then(setOrders)
       .catch(console.error)

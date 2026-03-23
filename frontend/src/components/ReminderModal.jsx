@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { API_BASE_URL } from "../utils/api";
-import { getCookie } from "../utils/csrf";
+import apiFetch from "../utils/apiFetch";
 
 export default function ReminderModal({ customerId, customerName, onClose }) {
   const [messages, setMessages] = useState([]);
@@ -11,7 +10,7 @@ export default function ReminderModal({ customerId, customerName, onClose }) {
   const [loadingMessages, setLoadingMessages] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/reminder-messages/`, { credentials: "include" })
+    apiFetch("/api/um/reminder-messages/")
       .then((res) => res.json())
       .then((data) => setMessages(data))
       .catch(() => setError("Failed to load reminder messages"))
@@ -29,12 +28,10 @@ export default function ReminderModal({ customerId, customerName, onClose }) {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/customer/${customerId}/send-reminder/`, {
+      const res = await apiFetch(`/api/customer/${customerId}/send-reminder/`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
         },
         body: JSON.stringify({ message: selected.message }),
       });

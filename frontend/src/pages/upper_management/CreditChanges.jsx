@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../utils/api";
+import apiFetch from "../../utils/apiFetch";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/internal/Sidebar";
@@ -12,7 +12,7 @@ export default function CreditChanges() {
   const [activeTab, setActiveTab] = useState("pending");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/um/credit-increases/`, { credentials: "include" })
+    apiFetch("/api/um/credit-increases/")
       .then((res) => res.json())
       .then(setRequests)
       .catch(console.error);

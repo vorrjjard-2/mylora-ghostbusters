@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.middleware.csrf import get_token
@@ -32,11 +33,13 @@ def login_view(request):
     login(request, user)
     log_audit(user=user, action="LOGIN", details={"username": username}, request=request)
     roles = list(user.groups.values_list("name", flat=True))
+    token, _ = Token.objects.get_or_create(user=user)
     return Response({
         'message': 'Logged in',
         'csrfToken': get_token(request),
         'username': user.username,
         'roles': roles,
+        'token': token.key,
     })
 
 @ensure_csrf_cookie
