@@ -31,15 +31,37 @@ export default function ProtectedRoute({ children, requiredRole }) {
             username: data.username,
             roles: data.roles || [],
           }));
+          setAuthState({
+            loading: false,
+            authenticated: true,
+            roles: data.roles || [],
+          });
+        } else {
+          // API says not authenticated — fall back to localStorage
+          // (handles mobile cross-site cookie blocking)
+          const stored = localStorage.getItem("auth");
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              if (parsed.authenticated) {
+                setAuthState({
+                  loading: false,
+                  authenticated: true,
+                  roles: parsed.roles || [],
+                });
+                return;
+              }
+            } catch {}
+          }
+          setAuthState({
+            loading: false,
+            authenticated: false,
+            roles: [],
+          });
         }
-        setAuthState({
-          loading: false,
-          authenticated: data.authenticated,
-          roles: data.roles || [],
-        });
       })
       .catch(() => {
-        // Fallback to localStorage (handles mobile cross-site cookie blocking)
+        // Network error — fall back to localStorage
         const stored = localStorage.getItem("auth");
         if (stored) {
           try {
