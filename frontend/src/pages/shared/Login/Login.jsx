@@ -55,6 +55,13 @@ export default function Login() {
 
       const roles = loginData.roles || [];
 
+      // Store auth state for ProtectedRoute
+      localStorage.setItem("auth", JSON.stringify({
+        authenticated: true,
+        username: loginData.username,
+        roles: roles,
+      }));
+
       // Clear any stale ordering cache from previous sessions
       localStorage.removeItem("order_items");
       localStorage.removeItem("delivery_details");

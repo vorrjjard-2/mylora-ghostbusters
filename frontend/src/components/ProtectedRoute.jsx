@@ -25,6 +25,13 @@ export default function ProtectedRoute({ children, requiredRole }) {
         if (data.csrfToken) {
           setCsrfToken(data.csrfToken);
         }
+        if (data.authenticated) {
+          localStorage.setItem("auth", JSON.stringify({
+            authenticated: true,
+            username: data.username,
+            roles: data.roles || [],
+          }));
+        }
         setAuthState({
           loading: false,
           authenticated: data.authenticated,
@@ -32,6 +39,21 @@ export default function ProtectedRoute({ children, requiredRole }) {
         });
       })
       .catch(() => {
+        // Fallback to localStorage (handles mobile cross-site cookie blocking)
+        const stored = localStorage.getItem("auth");
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (parsed.authenticated) {
+              setAuthState({
+                loading: false,
+                authenticated: true,
+                roles: parsed.roles || [],
+              });
+              return;
+            }
+          } catch {}
+        }
         setAuthState({
           loading: false,
           authenticated: false,

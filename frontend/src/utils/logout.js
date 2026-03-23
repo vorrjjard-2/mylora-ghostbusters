@@ -11,6 +11,7 @@ export async function handleLogout(navigate) {
   } catch (err) {
     console.error("Logout failed:", err);
   }
+  localStorage.removeItem("auth");
   localStorage.removeItem("order_items");
   localStorage.removeItem("delivery_details");
   setCsrfToken(null);
