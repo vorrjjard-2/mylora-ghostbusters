@@ -433,6 +433,14 @@ Mylora Web Credit System
     )
 
     log_audit(user=request.user, action="APPROVE_ORDER", details={"order_id": order_id}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('order_approved', properties={
+            'order_id': order.order_id,
+            'total_amount': float(order.total_amount),
+        })
+
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -482,6 +490,13 @@ def cm_request_override(request, order_id):
     )
 
     log_audit(user=request.user, action="REQUEST_OVERRIDE", details={"order_id": order_id, "reason": reason}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('override_requested', properties={
+            'order_id': order.order_id,
+        })
+
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -568,6 +583,14 @@ Mylora Web Credit System
     )
 
     log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id, "rejection_reason": rejection_reason}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('order_rejected', properties={
+            'order_id': order.order_id,
+            'total_amount': float(order.total_amount),
+        })
+
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -788,6 +811,15 @@ Mylora Web Credit System
     )
 
     log_audit(user=request.user, action="APPROVE_OVERRIDE", details={"override_id": override_id, "order_id": order.order_id, "approved_by": request.user.username}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('override_approved', properties={
+            'override_id': override_req.override_id,
+            'order_id': order.order_id,
+            'total_amount': float(order.total_amount),
+        })
+
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -892,6 +924,14 @@ Mylora Web Credit System
     )
 
     log_audit(user=request.user, action="REJECT_OVERRIDE", details={"override_id": override_id, "rejection_reason": rejection_reason, "rejected_by": request.user.username}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('override_rejected', properties={
+            'override_id': override_req.override_id,
+            'order_id': order.order_id,
+        })
+
     return Response({
         "success": True,
         "override_id": override_req.override_id,
@@ -1111,6 +1151,14 @@ def cm_adjust_customer_balance(request, customer_id):
         credit.save()
 
     log_audit(user=request.user, action="ADJUST_BALANCE", details={"customer_id": customer_id, "amount": str(amount_decimal)}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('balance_adjusted', properties={
+            'customer_id': customer_id,
+            'amount': float(amount_decimal),
+        })
+
     # Return updated customer data
     app = customer.application
     return Response({
@@ -1292,6 +1340,13 @@ def op_complete_order(request, order_id):
         order.save()
 
     log_audit(user=request.user, action="COMPLETE_ORDER", details={"order_id": order_id}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('order_completed', properties={
+            'order_id': order.order_id,
+        })
+
     return Response({
         "success": True,
         "order_id": order.order_id,
@@ -1686,6 +1741,13 @@ def um_deactivate_customer(request, customer_id):
     customer.user.save(update_fields=["is_active"])
 
     log_audit(user=request.user, action="DEACTIVATE_CUSTOMER", details={"customer_id": customer_id, "customer_name": customer_name}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('customer_deactivated', properties={
+            'customer_id': customer_id,
+        })
+
     return Response({"success": True, "message": "Customer account deactivated successfully"})
 
 

@@ -108,6 +108,10 @@ def signup_view(request):
         password=password,
     )
 
+    with new_context():
+        identify_context(str(user.id))
+        capture('user_signed_up')
+
     return Response({"success": True})
 
 
@@ -566,6 +570,12 @@ def send_reminder(request, customer_id):
         "customer_name": customer.user.get_full_name(),
         "message": message,
     }, request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('reminder_sent', properties={
+            'customer_id': customer_id,
+        })
 
     return Response({
         "notification_id": notification.notification_id,
