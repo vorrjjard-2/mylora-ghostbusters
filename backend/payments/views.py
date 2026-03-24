@@ -8,6 +8,8 @@ from django.db import transaction
 
 from .models import PaymentRequest
 from accounts.models import Customer, log_audit, Notification
+import posthog
+from posthog import new_context, identify_context, capture
 
 
 def _require_role(request, role_name):
@@ -93,6 +95,13 @@ def submit_payment(request):
         # Auto-generate invoice number based on payment_id
         payment.inv_number = f"INV-{payment.payment_id:06d}"
         payment.save(update_fields=["inv_number"])
+
+        with new_context():
+            identify_context(str(request.user.id))
+            capture('payment_submitted', properties={
+                'amount_paid': float(amount_decimal),
+                'payment_type': payment_type,
+            })
 
         return Response({
             "success": True,
@@ -326,6 +335,14 @@ def cm_approve_payment(request, payment_id):
     )
 
     log_audit(user=request.user, action="APPROVE_PAYMENT", details={"payment_id": payment_id, "amount": str(payment.amount_paid)}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('payment_verified', properties={
+            'amount_paid': float(payment_amount),
+            'payment_type': payment.payment_type or '',
+        })
+
     return Response({
         "success": True,
         "payment_id": payment.payment_id,
@@ -396,6 +413,14 @@ def cm_reject_payment(request, payment_id):
     )
 
     log_audit(user=request.user, action="REJECT_PAYMENT", details={"payment_id": payment_id, "rejection_reason": rejection_reason}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('payment_rejected', properties={
+            'amount_paid': float(payment.amount_paid),
+            'payment_type': payment.payment_type or '',
+        })
+
     return Response({
         "success": True,
         "payment_id": payment.payment_id,

@@ -12,6 +12,9 @@ from django.middleware.csrf import get_token
 from django.contrib.auth import logout
 from rest_framework.response import Response
 
+import posthog
+from posthog import new_context, identify_context, tag, capture
+
 from django.contrib.auth.models import User
 from .models import Customer, CreditAccount, AuditLog, log_audit
 from orders.models import Order
@@ -34,6 +37,15 @@ def login_view(request):
     log_audit(user=user, action="LOGIN", details={"username": username}, request=request)
     roles = list(user.groups.values_list("name", flat=True))
     token, _ = Token.objects.get_or_create(user=user)
+
+    with new_context():
+        identify_context(str(user.id))
+        tag('username', user.username)
+        tag('roles', roles)
+        capture('user_logged_in', properties={
+            'role_count': len(roles),
+        })
+
     return Response({
         'message': 'Logged in',
         'csrfToken': get_token(request),
@@ -64,6 +76,12 @@ def me_view(request):
 def logout_view(request):
     user = request.user
     log_audit(user=user if user.is_authenticated else None, action="LOGOUT", details={"username": user.username if user.is_authenticated else "anonymous"}, request=request)
+
+    if user.is_authenticated:
+        with new_context():
+            identify_context(str(user.id))
+            capture('user_logged_out')
+
     logout(request)
     return Response({"success": True})
 
@@ -220,7 +238,11 @@ def change_password(request):
     # Set new password
     request.user.set_password(new_password)
     request.user.save()
-    
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('password_changed')
+
     return Response({"success": True, "message": "Password changed successfully"})
 
 
@@ -743,6 +765,13 @@ def customer_submit_credit_increase(request):
         justification=justification,
     )
 
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('credit_increase_requested', properties={
+            'requested_limit': requested_limit,
+            'current_limit': float(credit_account.credit_limit),
+        })
+
     return Response({"success": True, "request_id": req.request_id}, status=status.HTTP_201_CREATED)
 
 
@@ -858,6 +887,13 @@ def um_approve_credit_increase(request, request_id):
         "new_limit": str(new_limit),
     }, request)
 
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('credit_increase_approved', properties={
+            'old_limit': float(old_limit),
+            'new_limit': float(new_limit),
+        })
+
     return Response({"success": True})
 
 
@@ -900,5 +936,11 @@ def um_reject_credit_increase(request, request_id):
         "customer_name": customer.user.get_full_name(),
         "requested_limit": str(credit_request.requested_limit),
     }, request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('credit_increase_rejected', properties={
+            'requested_limit': float(credit_request.requested_limit),
+        })
 
     return Response({"success": True})

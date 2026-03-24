@@ -293,7 +293,7 @@
     }
 
     .cd-content {
-        padding: 16px 20px calc(64px + env(safe-area-inset-bottom, 0px) + 24px);
+        padding: 16px 20px calc(64px + env(safe-area-inset-bottom, 0px) + 60px);
     }
 
     .cd-title-mobile {

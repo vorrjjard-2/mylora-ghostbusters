@@ -10,6 +10,8 @@ from .models import Order, OrderItem, OrderApproval
 from accounts.models import Customer, CreditAccount, log_audit, Notification
 from products.models import Product
 from payments.models import PaymentRequest
+import posthog
+from posthog import new_context, identify_context, capture
 
 
 @api_view(["POST"])
@@ -67,6 +69,15 @@ def create_order(request):
             
             credit_account.save()
         
+        with new_context():
+            identify_context(str(request.user.id))
+            capture('order_created', properties={
+                'total_amount': float(total_amount),
+                'item_count': len(items),
+                'delivery_mode': delivery_mode,
+                'exceeds_credit': exceeds_credit,
+            })
+
         return Response({
             "success": True,
             "order_id": order.order_id,

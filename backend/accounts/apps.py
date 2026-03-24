@@ -3,3 +3,11 @@ from django.apps import AppConfig
 
 class AccountsConfig(AppConfig):
     name = 'accounts'
+
+    def ready(self):
+        import posthog
+        from django.conf import settings
+
+        posthog.api_key = settings.POSTHOG_PROJECT_TOKEN
+        posthog.host = settings.POSTHOG_HOST
+        posthog.enable_exception_autocapture = True

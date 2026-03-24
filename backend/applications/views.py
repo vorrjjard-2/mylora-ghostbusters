@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import CreditEnrollment
 from accounts.models import log_audit
+import posthog
+from posthog import new_context, identify_context, capture
 
 
 @api_view(["POST"])
@@ -109,6 +111,12 @@ def create_application(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+    with new_context():
+        capture('credit_application_submitted', properties={
+            'credit_amt_request': float(application.credit_amt_request),
+            'credit_term_request': int(application.credit_term_request),
+        })
 
     return Response(
         {"application_id": str(application.application_id)},
@@ -257,6 +265,15 @@ def approve_enrollment(request, application_id):
         print(f"Email sending failed: {e}")
 
     log_audit(user=request.user, action="APPROVE_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('enrollment_approved', properties={
+            'credit_amt_request': float(app.credit_amt_request),
+            'credit_term_request': int(app.credit_term_request),
+            'email_sent': email_sent,
+        })
+
     response_data = {"status": "approved", "email_sent": email_sent, "activation_link": activation_link}
     if email_error:
         response_data["email_error"] = email_error
@@ -324,6 +341,13 @@ def reject_enrollment(request, application_id):
         print(f"Rejection email sending failed: {e}")
 
     log_audit(user=request.user, action="REJECT_ENROLLMENT", details={"application_id": str(application_id), "applicant_email": app.email, "rejection_reason": rejection_reason}, request=request)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('enrollment_rejected', properties={
+            'email_sent': email_sent,
+        })
+
     response_data = {"status": "rejected", "email_sent": email_sent}
     if email_error:
         response_data["email_error"] = email_error
@@ -445,6 +469,13 @@ def activate_account(request, token):
             app.activation_token = None  # Invalidate token
             app.save()
         
+        with new_context():
+            identify_context(str(user.id))
+            capture('account_activated', properties={
+                'credit_limit': float(app.credit_amt_request),
+                'credit_term': int(app.credit_term_request),
+            })
+
         return Response({
             "success": True,
             "message": "Account created successfully",

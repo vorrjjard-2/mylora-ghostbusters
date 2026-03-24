@@ -1,8 +1,7 @@
 backend/media
 backend/staticfiles
 .DS_Store
-
-
+/.claude
 
 
 
