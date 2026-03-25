@@ -148,6 +148,7 @@ return (
       {/* Customer Information */}
       <div className="review-section">
         <h3 className="review-section-title">Customer Information</h3>
+
         
         <div className="review-field-group">
           <label className="review-field-label">Name</label>
@@ -164,9 +165,19 @@ return (
         </div>
       </div>
 
+      <hr className="review-divider" />
+
       {/* Order Items */}
       <div className="review-section">
-        <h3 className="review-section-title">Your order</h3>
+        <div className="review-section-header">
+          <h3 className="review-section-title">Your order</h3>
+          <button
+            onClick={() => navigate("/orders/create")}
+            className="review-edit-link"
+          >
+            Edit Order
+          </button>
+        </div>
         
         {isMobile ? (
           <div className="mobile-card-list">
@@ -185,7 +196,7 @@ return (
                 </div>
               </div>
             ))}
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderTop: "2px solid #333", fontWeight: 700, fontSize: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 18px", borderTop: "2px solid #333", fontWeight: 700, fontSize: "1rem" }}>
               <span>TOTAL</span>
               <span>₱{calculateTotal().toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
@@ -228,6 +239,8 @@ return (
           </div>
         )}
       </div>
+
+      <hr className="review-divider" />
 
       {/* Delivery Details */}
       <div className="review-section">
@@ -284,13 +297,6 @@ return (
 
       {/* Action Buttons */}
       <div className="review-actions">
-        <button
-          onClick={() => navigate("/orders/create")}
-          className="review-back-link"
-        >
-          Back to Edit Order
-        </button>
-        
         <button
           onClick={handleSubmit}
           disabled={submitting}

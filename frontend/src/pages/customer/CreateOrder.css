@@ -34,21 +34,27 @@
 
 
 .order-header {
-    font-size: 34px; 
-    font-weight: 700;
     color: black;
     margin-bottom: 10px;
-    margin-top: 30px;
+    margin-top: 20px;
     margin-left: 70px;
 }
 
-.order-subheader {
-    font-size: 20px; 
+.order-header h1 {
+    font-size: 34px;
     font-weight: 700;
-    color: black;
-    margin-bottom: 20px;
-    margin-top: 10px;
-    margin-left: 5px;
+    margin: 0 0 8px 0;
+}
+
+.order-subheader {
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+.order-subheader h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
 }
 
 
@@ -249,93 +255,125 @@
 
 /* Mobile */
 @media (max-width: 768px) {
-    .um-header-section {
-        padding: 15px 16px;
+    .order-container .um-header-section {
+        padding: 12px 16px;
         margin-left: 0;
         margin-top: 0;
-        flex-wrap: wrap;
+        margin-bottom: 0;
+        flex-wrap: nowrap;
         gap: 10px;
     }
 
-    .um-system-title {
-        font-size: 22px;
-    }
-
-    .mylora-logo {
-        height: 36px;
-    }
-
-    .um-cancel-btn {
-        width: auto;
-        padding: 6px 20px;
+    .order-container .um-system-title {
         font-size: 16px;
+    }
+
+    .order-container .mylora-logo {
+        height: 32px;
+    }
+
+    .order-container .um-cancel-btn {
+        width: auto;
+        padding: 6px 18px;
+        font-size: 14px;
+        height: 34px;
         margin-right: 0;
     }
 
     .order-header {
-        font-size: 26px;
         margin-left: 16px;
-        margin-top: 16px;
+        margin-top: 8px;
+        margin-bottom: 0;
+    }
+
+    .order-header h1 {
+        font-size: 22px;
+        margin: 0 0 2px 0;
+    }
+
+    .order-subheader {
+        margin-top: 2px;
+        margin-bottom: 4px;
+    }
+
+    .order-subheader h2 {
+        font-size: 15px;
+        margin: 0;
     }
 
     .order-content {
         grid-template-columns: 1fr;
         padding: 0 16px;
-        gap: 1rem;
+        gap: 12px;
+        margin-top: 4px;
+    }
+
+    .order-left-panel {
+        padding: 12px;
+    }
+
+    .order-product-card {
+        flex-direction: row;
+        align-items: center;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+    }
+
+    .order-product-name {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .order-product-price {
+        font-size: 12px;
+    }
+
+    .order-add-btn {
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+
+    .order-right-panel {
+        padding: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .order-table {
         min-width: 360px;
     }
 
-    .order-right-panel {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
     .order-quantity-input {
-        width: 60px;
-    }
-}
-
-/* Small phone */
-@media (max-width: 480px) {
-    .um-system-title {
-        font-size: 18px;
-    }
-
-    .um-cancel-btn {
-        padding: 6px 14px;
+        width: 56px;
+        padding: 4px;
         font-size: 14px;
-        height: 34px;
     }
 
-    .order-header {
-        font-size: 22px;
-        margin-left: 16px;
-        margin-top: 12px;
-    }
-
-    .order-subheader {
-        font-size: 16px;
-    }
-
-    .order-product-card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .order-add-btn {
-        width: 100%;
-        text-align: center;
-    }
-
-    .order-quantity-input {
-        width: 50px;
+    .order-total-section {
+        margin-bottom: 1rem;
     }
 
     .order-total-amount {
         font-size: 1.25rem;
+    }
+
+    .order-continue-btn {
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 10px;
+    }
+
+    .order-product-list {
+        min-height: auto;
+    }
+
+    .order-search-input {
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 8px;
+        margin-bottom: 10px;
     }
 }
