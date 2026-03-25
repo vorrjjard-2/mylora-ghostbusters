@@ -331,9 +331,11 @@ return (
         <div className="cd-section">
           <div className="cd-section-header">
             <h2 className="cd-section-title">Recent Orders</h2>
-            <button className="cd-view-all-btn" onClick={() => navigate("/orders")}>
-              View All Orders →
-            </button>
+            {!isMobile && (
+              <button className="cd-view-all-btn" onClick={() => navigate("/orders")}>
+                View All Orders →
+              </button>
+            )}
           </div>
 
           {data.recent_orders.length === 0 ? (
@@ -391,12 +393,6 @@ return (
           )}
         </div>
 
-        {/* Mobile: Create Purchase button at bottom */}
-        {isMobile && (
-          <button className="cd-mobile-create-btn" onClick={() => navigate("/orders/create")}>
-            + Create Purchase Request
-          </button>
-        )}
       </main>
 
       {/* Bottom Nav for Mobile */}

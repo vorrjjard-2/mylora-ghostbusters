@@ -120,6 +120,21 @@ return (
 
       <h1 className="profile-title">Your profile</h1>
 
+      {/* Your History Section */}
+      <div className="profile-section">
+        <h2 className="profile-section-title profile-history-title">Your History</h2>
+        <div className="profile-history-buttons">
+          <button className="profile-history-btn" onClick={() => navigate("/orders")}>
+            <span className="profile-history-icon">📋</span>
+            <span>Order History</span>
+          </button>
+          <button className="profile-history-btn" onClick={() => navigate("/credit/history")}>
+            <span className="profile-history-icon">💳</span>
+            <span>Credit History</span>
+          </button>
+        </div>
+      </div>
+
       {/* Password Section */}
       <div className="profile-section">
         <h2 className="profile-section-title">Password</h2>
