@@ -2,8 +2,7 @@ backend/media
 backend/staticfiles
 .DS_Store
 /.claude
-
-
+*.csv
 
 
 # Byte-compiled / optimized / DLL files
