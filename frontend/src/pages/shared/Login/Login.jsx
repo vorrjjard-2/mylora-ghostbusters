@@ -61,11 +61,18 @@ export default function Login() {
         authenticated: true,
         username: loginData.username,
         roles: roles,
+        must_change_password: loginData.must_change_password || false,
       }));
 
       // Clear any stale ordering cache from previous sessions
       localStorage.removeItem("order_items");
       localStorage.removeItem("delivery_details");
+
+      // Force password change for imported customers
+      if (loginData.must_change_password) {
+        navigate("/set-password");
+        return;
+      }
 
       if (roles.includes("upper_management")) {
         navigate("/internal/dashboard");

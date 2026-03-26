@@ -18,7 +18,8 @@ class Customer(models.Model):
         blank=True,
         related_name='customer'
     )
-    
+    must_change_password = models.BooleanField(default=False)
+
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
 

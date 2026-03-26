@@ -46,12 +46,17 @@ def login_view(request):
             'role_count': len(roles),
         })
 
+    must_change = False
+    if hasattr(user, 'customer_profile') and user.customer_profile.must_change_password:
+        must_change = True
+
     return Response({
         'message': 'Logged in',
         'csrfToken': get_token(request),
         'username': user.username,
         'roles': roles,
         'token': token.key,
+        'must_change_password': must_change,
     })
 
 @ensure_csrf_cookie
@@ -248,6 +253,44 @@ def change_password(request):
         capture('password_changed')
 
     return Response({"success": True, "message": "Password changed successfully"})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def force_set_password(request):
+    """Set password for first-time login (imported customers)"""
+    new_password = request.data.get("new_password")
+    if not new_password or len(new_password) < 8:
+        return Response(
+            {"error": "Password must be at least 8 characters"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    customer = getattr(request.user, 'customer_profile', None)
+    if not customer or not customer.must_change_password:
+        return Response(
+            {"error": "Password change not required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    request.user.set_password(new_password)
+    request.user.save()
+    customer.must_change_password = False
+    customer.save()
+
+    # Re-create token since password change invalidates session
+    Token.objects.filter(user=request.user).delete()
+    token = Token.objects.create(user=request.user)
+
+    with new_context():
+        identify_context(str(request.user.id))
+        capture('first_login_password_set')
+
+    return Response({
+        "success": True,
+        "message": "Password set successfully",
+        "token": token.key,
+    })
 
 
 @api_view(["POST"])

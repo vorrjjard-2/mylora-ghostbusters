@@ -17,6 +17,7 @@ import Login from "./pages/shared/Login/Login";
 import ApplyStep1 from "./pages/shared/apply/ApplyStep1";
 import ApplyStep2 from "./pages/shared/apply/ApplyStep2";
 import ActivateAccount from "./pages/shared/ActivateAccount";
+import SetPassword from "./pages/shared/SetPassword";
 
 // Customer pages
 import CustomerLanding from "./pages/customer/CustomerLanding";
@@ -90,6 +91,7 @@ function Layout() {
           <Route path="/apply/step-1" element={<ApplyStep1 />} />
           <Route path="/apply/step-2" element={<ApplyStep2 />} />
           <Route path="/activate/:token" element={<ActivateAccount />} />
+          <Route path="/set-password" element={<SetPassword />} />
           
           {/* Upper Management routes */}
           <Route

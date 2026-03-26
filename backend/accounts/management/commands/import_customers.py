@@ -201,6 +201,7 @@ class Command(BaseCommand):
                     customer = Customer.objects.create(
                         user=user,
                         application=enrollment,
+                        must_change_password=True,
                     )
 
                     CreditAccount.objects.create(

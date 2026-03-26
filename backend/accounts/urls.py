@@ -7,6 +7,7 @@ from .views import (
     customer_dashboard,
     customer_profile,
     change_password,
+    force_set_password,
     update_address,
     um_employees_list,
     um_employee_detail,
@@ -37,6 +38,7 @@ urlpatterns = [
     path("api/customer/dashboard/", customer_dashboard),
     path("api/customer/profile/", customer_profile),
     path("api/customer/change-password/", change_password),
+    path("api/customer/force-set-password/", force_set_password),
     path("api/customer/update-address/", update_address),
 
     # Employee management endpoints
