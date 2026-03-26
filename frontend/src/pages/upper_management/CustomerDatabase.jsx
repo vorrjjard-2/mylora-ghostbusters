@@ -19,11 +19,14 @@ export default function CustomerDatabase() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [includeDeactivated, setIncludeDeactivated] = useState(false);
 
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredCustomers, 5, [searchTerm, sortBy, sortDirection]);
 
-  useEffect(() => {
-    apiFetch("/api/um/customers/")
+  const fetchCustomers = (withDeactivated) => {
+    setLoading(true);
+    const url = withDeactivated ? "/api/um/customers/?include_deactivated=true" : "/api/um/customers/";
+    apiFetch(url)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customers");
         return res.json();
@@ -37,7 +40,11 @@ export default function CustomerDatabase() {
         alert("Failed to load customers");
       })
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchCustomers(includeDeactivated);
+  }, [includeDeactivated]);
 
   // Handle search
   useEffect(() => {
@@ -153,6 +160,15 @@ export default function CustomerDatabase() {
               </span>
             </div>
             <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", color: "#444", cursor: "pointer", whiteSpace: "nowrap" }}>
+                <input
+                  type="checkbox"
+                  checked={includeDeactivated}
+                  onChange={(e) => setIncludeDeactivated(e.target.checked)}
+                  style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                />
+                Include deactivated
+              </label>
               <div style={{ position: "relative", maxWidth: "300px" }}>
                 <span style={{ position: "absolute", left: "15px", top: "50%", transform: "translateY(-50%)", fontSize: "18px" }}>🔍</span>
                 <input
@@ -255,8 +271,17 @@ export default function CustomerDatabase() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F9F9F9"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
               >
-                <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "12px" }}>
+                <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px" }}>
                   {customer.name}
+                  {customer.is_active === false && (
+                    <span style={{
+                      fontSize: "12px", fontWeight: "600",
+                      padding: "3px 10px", borderRadius: "12px",
+                      backgroundColor: "#F8D7DA", color: "#842029",
+                    }}>
+                      Deactivated
+                    </span>
+                  )}
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "15px" }}>
                   <div style={{ fontSize: "16px" }}>

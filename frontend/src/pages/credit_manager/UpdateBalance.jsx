@@ -35,7 +35,7 @@ export default function UpdateBalance() {
 
   useEffect(() => {
     // Fetch customer details
-    apiFetch("/api/cm/customers/")
+    apiFetch("/api/cm/customers/?include_deactivated=true")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customers");
         return res.json();
@@ -43,6 +43,11 @@ export default function UpdateBalance() {
       .then((customers) => {
         const found = customers.find((c) => c.customer_id === parseInt(customerId));
         if (!found) throw new Error("Customer not found");
+        if (found.is_active === false) {
+          alert("This account is deactivated. Actions are disabled.");
+          navigate(`/credit-manager/customer/${customerId}/details`);
+          return;
+        }
         setCustomer(found);
       })
       .catch((err) => {

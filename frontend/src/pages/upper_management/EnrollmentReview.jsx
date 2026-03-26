@@ -110,8 +110,8 @@ export default function EnrollmentReview() {
 
   function handleRejectSubmit() {
     let hasError = false;
-    if (rejectReason.trim().split(/\s+/).length < 5) {
-      setRejectReasonError("Please provide at least 5 words for the rejection reason.");
+    if (!rejectReason.trim()) {
+      setRejectReasonError("Rejection reason is required.");
       hasError = true;
     }
     if (!rejectPassword.trim()) {

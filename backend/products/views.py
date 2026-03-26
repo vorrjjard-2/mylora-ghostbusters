@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from decimal import Decimal, InvalidOperation
+from django.db import models
 
 from .models import Product
 from accounts.models import Branch, log_audit
@@ -15,8 +16,21 @@ def _require_role(request, role_name):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def product_list(request):
-    """Get all available products"""
+    """Get available products for the logged-in customer's branch"""
+    from accounts.models import Customer
+
     products = Product.objects.select_related('branch').all().order_by('name')
+
+    # If the user is a customer, filter products to their branch
+    try:
+        customer = Customer.objects.select_related('credit_account').get(user=request.user)
+        if customer.credit_account and customer.credit_account.branch_id:
+            branch_id = customer.credit_account.branch_id
+            products = products.filter(
+                models.Q(branch_id=branch_id) | models.Q(branch__isnull=True)
+            )
+    except Customer.DoesNotExist:
+        pass
 
     data = []
     for product in products:
@@ -212,6 +226,13 @@ def um_product_delete(request, product_id):
     """Delete a product"""
     if not _require_role(request, "upper_management"):
         return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Verify password
+    password = request.data.get("password")
+    if not password:
+        return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.user.check_password(password):
+        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
 
     try:
         product = Product.objects.select_related('branch').get(product_id=product_id)

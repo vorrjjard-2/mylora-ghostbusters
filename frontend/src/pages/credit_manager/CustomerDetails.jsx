@@ -34,7 +34,7 @@ export default function CustomerDetails() {
   }
 
   useEffect(() => {
-    apiFetch("/api/cm/customers/")
+    apiFetch("/api/cm/customers/?include_deactivated=true")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load customers");
         return res.json();
@@ -74,28 +74,45 @@ return (
       </header>
  
       <div className="cd-content">
-        <h1 className="cd-customer-title">{customer.name}</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <h1 className="cd-customer-title" style={{ marginBottom: 0 }}>{customer.name}</h1>
+          {customer.is_active === false && (
+            <span style={{
+              fontSize: "14px", fontWeight: "600",
+              padding: "4px 14px", borderRadius: "12px",
+              backgroundColor: "#F8D7DA", color: "#842029",
+            }}>
+              Deactivated
+            </span>
+          )}
+        </div>
 
         {/* Action Buttons */}
-        <div className="cd-button-row">
+        <div className="cd-button-row" style={{ marginTop: "15px" }}>
           <button
             className="cd-adjust-btn"
             onClick={() => navigate(`/credit-manager/customer/${customerId}/history`)}
           >
-            <img src={paperIcon} alt="History" className="cd-paper-icon" />    
-            View Credit History      
+            <img src={paperIcon} alt="History" className="cd-paper-icon" />
+            View Credit History
           </button>
           <button
             className="cd-adjust-btn"
+            disabled={customer.is_active === false}
             onClick={() => navigate(`/credit-manager/customer/${customerId}/update-balance`)}
+            style={customer.is_active === false ? { opacity: 0.5, cursor: "not-allowed" } : {}}
           >
             <img src={clockIcon} alt="Credit" className="cd-clock-icon" />
              Payments
           </button>
           <button
             className="cd-adjust-btn"
+            disabled={customer.is_active === false}
             onClick={() => setShowReminderModal(true)}
-            style={{ backgroundColor: "#dc3545", color: "white", border: "none" }}
+            style={customer.is_active === false
+              ? { backgroundColor: "#dc3545", color: "white", border: "none", opacity: 0.5, cursor: "not-allowed" }
+              : { backgroundColor: "#dc3545", color: "white", border: "none" }
+            }
           >
             Send Reminder
           </button>

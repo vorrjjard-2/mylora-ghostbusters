@@ -25,6 +25,9 @@ export default function AllProducts() {
   const [formData, setFormData] = useState({ name: "", unit_price: "", unit: "", branch_id: "" });
   const [formError, setFormError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeletePasswordModal, setShowDeletePasswordModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deletePasswordError, setDeletePasswordError] = useState("");
 
   const { currentPage, totalPages, paginatedData, goToPage } = usePagination(filteredProducts, 10, [searchTerm, sortBy, sortDirection]);
 
@@ -161,22 +164,35 @@ export default function AllProducts() {
       .catch(err => setFormError(err.message));
   };
 
-  const handleDelete = () => {
+  const handleDeleteClick = () => {
+    setDeletePassword("");
+    setDeletePasswordError("");
+    setShowDeleteConfirm(false);
+    setShowDeletePasswordModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deletePassword.trim()) {
+      setDeletePasswordError("Password is required.");
+      return;
+    }
     apiFetch(`/api/um/product/${selectedProduct.product_id}/delete/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({ password: deletePassword }),
     })
       .then(res => {
         if (!res.ok) return res.json().then(d => { throw new Error(d.error || "Failed"); });
         return res.json();
       })
       .then(() => {
+        setShowDeletePasswordModal(false);
         setShowModal(false);
         fetchProducts();
       })
-      .catch(err => setFormError(err.message));
+      .catch(err => setDeletePasswordError(err.message));
   };
 
   return (
@@ -365,6 +381,73 @@ export default function AllProducts() {
       </div>
 
       {/* Modal */}
+      {/* Delete Password Confirmation Modal */}
+      {showDeletePasswordModal && (
+        <div
+          onClick={() => setShowDeletePasswordModal(false)}
+          style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 1100,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "white",
+              borderRadius: "15px",
+              padding: "40px",
+              width: "420px",
+              maxWidth: "90vw",
+              fontFamily: "'Arimo', sans-serif",
+            }}
+          >
+            <h2 style={{ fontSize: "24px", fontWeight: "700", marginTop: 0, marginBottom: "10px", color: "#262626" }}>
+              Delete Product
+            </h2>
+            <p style={{ color: "#666", fontSize: "14px", marginBottom: "20px" }}>
+              Please enter your password to confirm deletion of <strong>{selectedProduct?.name}</strong>.
+            </p>
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => { setDeletePassword(e.target.value); setDeletePasswordError(""); }}
+              placeholder="Enter your password"
+              style={{
+                width: "100%", padding: "10px 12px", fontSize: "16px",
+                border: "1px solid #262626", borderRadius: "8px", boxSizing: "border-box"
+              }}
+            />
+            {deletePasswordError && (
+              <p style={{ color: "#b03a2e", fontSize: "0.85rem", marginTop: "6px" }}>{deletePasswordError}</p>
+            )}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "25px", gap: "10px" }}>
+              <button
+                onClick={() => setShowDeletePasswordModal(false)}
+                style={{
+                  padding: "10px 24px", fontSize: "16px", fontWeight: "600",
+                  border: "1px solid #262626", borderRadius: "8px",
+                  backgroundColor: "white", cursor: "pointer"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                style={{
+                  padding: "10px 24px", fontSize: "16px", fontWeight: "600",
+                  border: "none", borderRadius: "8px",
+                  backgroundColor: "#dc3545", color: "white", cursor: "pointer"
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showModal && (
         <div
           onClick={() => setShowModal(false)}
@@ -476,7 +559,7 @@ export default function AllProducts() {
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <span style={{ fontSize: "14px", color: "#dc3545" }}>Are you sure?</span>
                     <button
-                      onClick={handleDelete}
+                      onClick={handleDeleteClick}
                       style={{
                         padding: "8px 16px", fontSize: "14px", fontWeight: "600",
                         border: "none", borderRadius: "8px",
@@ -484,16 +567,6 @@ export default function AllProducts() {
                       }}
                     >
                       Yes, Delete
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      style={{
-                        padding: "8px 16px", fontSize: "14px", fontWeight: "600",
-                        border: "1px solid #262626", borderRadius: "8px",
-                        backgroundColor: "white", cursor: "pointer"
-                      }}
-                    >
-                      Cancel
                     </button>
                   </div>
                 )}

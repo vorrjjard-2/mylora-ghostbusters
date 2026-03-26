@@ -95,7 +95,7 @@ return (
               <thead>
                 <tr>
                   <th className="ch-th">Date</th>
-                  <th className="ch-th">Invoice Number</th>
+                  <th className="ch-th">Reference No.</th>
                   <th className="ch-th">Amount Paid</th>
                   <th className="ch-th">Status</th>
                   <th className="ch-th">Approved By</th>

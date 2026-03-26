@@ -100,7 +100,7 @@ export default function CreditHistory() {
               return (
                 <div key={p.payment_id} className="mobile-card" style={{ cursor: "default" }}>
                   <div className="mobile-card-row">
-                    <span className="mobile-card-label">Invoice #</span>
+                    <span className="mobile-card-label">Reference No.</span>
                     <span className="mobile-card-value">{p.inv_number || "—"}</span>
                   </div>
                   <div className="mobile-card-row">
@@ -134,7 +134,7 @@ export default function CreditHistory() {
             <table className="cd-table">
               <thead>
                 <tr>
-                  <th className="cd-th">INVOICE #</th>
+                  <th className="cd-th">REFERENCE NO.</th>
                   <th className="cd-th">AMOUNT PAID</th>
                   <th className="cd-th">DATE PAID</th>
                   <th className="cd-th">DATE SUBMITTED</th>

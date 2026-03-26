@@ -305,9 +305,9 @@ def reject_enrollment(request, application_id):
     
     # Validate rejection reason
     rejection_reason = request.data.get("rejection_reason", "").strip()
-    if len(rejection_reason.split()) < 5:
+    if not rejection_reason:
         return Response(
-            {"error": "Please provide at least 5 words for the rejection reason."},
+            {"error": "Rejection reason is required."},
             status=status.HTTP_400_BAD_REQUEST
         )
 

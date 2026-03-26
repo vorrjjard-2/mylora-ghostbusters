@@ -275,7 +275,7 @@ return (
                 className="cd-progress-bar"
                 style={{
                   width: `${Math.min(creditUtilization, 100)}%`,
-                  background: exceedsCreditLimit ? "#c62828" : "#86A07D",
+                  background: exceedsCreditLimit ? "#c62828" : "#e0e0e0",
                 }}
               />
             </div>
@@ -313,7 +313,7 @@ return (
                 className="cd-progress-bar"
                 style={{
                   width: `${Math.min(creditUtilization, 100)}%`,
-                  background: exceedsCreditLimit ? "#c62828" : "#86A07D",
+                  background: exceedsCreditLimit ? "#c62828" : "#e0e0e0",
                 }}
               />
             </div>

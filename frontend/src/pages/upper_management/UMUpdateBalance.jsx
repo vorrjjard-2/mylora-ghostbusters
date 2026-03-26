@@ -19,7 +19,7 @@ export default function UMUpdateBalance() {
   const [password, setPassword] = useState("");
 
   const [paymentForm, setPaymentForm] = useState({
-    invoice_number: "",
+    reference_no: "",
     balance_paid: "",
     date_of_payment: "",
     proof_of_payment: null,
@@ -38,7 +38,14 @@ export default function UMUpdateBalance() {
         if (!res.ok) throw new Error("Failed to load customer");
         return res.json();
       })
-      .then(setCustomer)
+      .then((data) => {
+        if (data.is_active === false) {
+          alert("This account is deactivated. Actions are disabled.");
+          navigate(`/upper-management/customer/${customerId}`);
+          return;
+        }
+        setCustomer(data);
+      })
       .catch((err) => {
         console.error(err);
         alert("Failed to load customer details");
@@ -75,7 +82,7 @@ export default function UMUpdateBalance() {
     try {
       const formData = new FormData();
       formData.append("password", password);
-      formData.append("invoice_number", paymentForm.invoice_number);
+      formData.append("reference_no", paymentForm.reference_no);
       formData.append("balance_paid", paymentForm.balance_paid);
       formData.append("date_of_payment", paymentForm.date_of_payment);
       if (paymentForm.proof_of_payment) {
@@ -152,14 +159,14 @@ export default function UMUpdateBalance() {
         <form className="ub-section" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <div className="ub-form-row">
             <div className="ub-form-group">
-              <label className="ub-label">Invoice Number</label>
+              <label className="ub-label">Reference No.</label>
               <input
                 type="text"
-                name="invoice_number"
-                value={paymentForm.invoice_number}
+                name="reference_no"
+                value={paymentForm.reference_no}
                 onChange={handleFormChange}
                 className="ub-input"
-                placeholder="Enter invoice number"
+                placeholder="Enter reference number"
               />
             </div>
             <div className="ub-form-group">

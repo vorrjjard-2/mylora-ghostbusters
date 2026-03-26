@@ -28,6 +28,10 @@ export default function EmployeeCreate() {
       setErrorMsg("Username and password are required");
       return;
     }
+    if (formData.password.length < 8) {
+      setErrorMsg("Password must be at least 8 characters");
+      return;
+    }
 
     const createData = {
       username: formData.username,

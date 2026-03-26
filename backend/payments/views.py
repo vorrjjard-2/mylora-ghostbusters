@@ -24,7 +24,7 @@ def submit_payment(request):
         customer = Customer.objects.get(user=request.user)
         credit_account = customer.credit_account
         
-        # Extract payment data (inv_number is auto-generated)
+        # Extract payment data (reference number is auto-generated)
         amount_paid = request.data.get("amount_paid")
         date_paid = request.data.get("date_paid")
         proof_payment = request.FILES.get("proof_payment")
@@ -82,7 +82,7 @@ def submit_payment(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create payment request (inv_number auto-generated after save)
+        # Create payment request (reference number auto-generated after save)
         payment = PaymentRequest.objects.create(
             account=credit_account,
             amount_paid=amount_decimal,
@@ -92,8 +92,8 @@ def submit_payment(request):
             payment_status="PENDING"
         )
 
-        # Auto-generate invoice number based on payment_id
-        payment.inv_number = f"INV-{payment.payment_id:06d}"
+        # Auto-generate reference number based on payment_id
+        payment.inv_number = f"REF-{payment.payment_id:06d}"
         payment.save(update_fields=["inv_number"])
 
         with new_context():
@@ -371,9 +371,9 @@ def cm_reject_payment(request, payment_id):
         )
 
     rejection_reason = request.data.get("rejection_reason", "").strip()
-    if not rejection_reason or len(rejection_reason.split()) < 5:
+    if not rejection_reason:
         return Response(
-            {"error": "Please provide at least 5 words for the rejection reason."},
+            {"error": "Rejection reason is required."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 

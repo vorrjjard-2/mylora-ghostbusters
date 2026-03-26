@@ -218,7 +218,7 @@ export default function OverrideReview() {
                 <textarea
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Please provide a reason for rejecting this override request (at least 5 words)..."
+                  placeholder="Please provide a reason for rejecting this override request..."
                   style={styles.reasonTextarea}
                   rows={4}
                 />

@@ -36,7 +36,7 @@ export default function CMSidebar({ activeTab, setActiveTab }) {
           active={isOnDashboard && activeTab === "adjustment"} 
           onClick={() => handleClick("adjustment")}
         >
-          Credit Adjustment
+          All Customers
         </MenuItem>
       </nav>
     </aside>

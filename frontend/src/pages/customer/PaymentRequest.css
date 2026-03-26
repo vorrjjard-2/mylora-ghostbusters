@@ -87,7 +87,7 @@
 .pr-progress-container {
     width: 100%;
     height: 35px;
-    background: #E8E8E8;
+    background: #849E7C;
     border-radius: 6px;
     margin: 10px 0;
     overflow: hidden;
@@ -95,7 +95,7 @@
 
 .pr-progress-bar {
     height: 100%;
-    background: #849E7C; 
+    background: #E8E8E8;
 }
 
 /* Outstanding Balance */

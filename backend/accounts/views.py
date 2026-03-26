@@ -425,6 +425,12 @@ def um_create_employee(request):
             {"error": "Username, password, and role are required"},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+    if len(password) < 8:
+        return Response(
+            {"error": "Password must be at least 8 characters"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
     employee_users = User.objects.filter(groups__name__in=["credit_manager", "order_processor"])
 

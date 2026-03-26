@@ -41,6 +41,7 @@ export default function CreditManagerDashboard() {
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [reminderTarget, setReminderTarget] = useState(null);
+  const [includeDeactivated, setIncludeDeactivated] = useState(false);
 
   // Dashboard home view sorted data
   const [sortedDashOrders, setSortedDashOrders] = useState([]);
@@ -65,6 +66,15 @@ export default function CreditManagerDashboard() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  // Re-fetch customers when include deactivated changes
+  useEffect(() => {
+    const url = includeDeactivated ? "/api/cm/customers/?include_deactivated=true" : "/api/cm/customers/";
+    apiFetch(url)
+      .then((r) => r.json())
+      .then((cust) => setCustomers(cust))
+      .catch(console.error);
+  }, [includeDeactivated]);
 
 
   // Update filtered and sorted data whenever dependencies change
@@ -396,7 +406,7 @@ export default function CreditManagerDashboard() {
             {!activeTab && `Hello, ${user.username}`}
             {(activeTab === "credit" || activeTab === "credit-all") && "Credit Approval"}
             {(activeTab === "payment" || activeTab === "payment-all") && "Payment Review"}
-            {activeTab === "adjustment" && "Credit Adjustment"}
+            {activeTab === "adjustment" && "All Customers"}
           </h1>
 
           {/* STAT CARDS - Only show on dashboard view */}
@@ -929,6 +939,15 @@ export default function CreditManagerDashboard() {
                     }}
                   />
                 </div>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", color: "#444", cursor: "pointer", whiteSpace: "nowrap" }}>
+                  <input
+                    type="checkbox"
+                    checked={includeDeactivated}
+                    onChange={(e) => setIncludeDeactivated(e.target.checked)}
+                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                  />
+                  Include deactivated
+                </label>
                 {renderSortIndicator()}
                 {renderSortDropdown()}
               </div>
@@ -953,8 +972,17 @@ export default function CreditManagerDashboard() {
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#F9F9F9"}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
                   >
-                    <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "15px" }}>
+                    <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>
                       {customer.name}
+                      {customer.is_active === false && (
+                        <span style={{
+                          fontSize: "12px", fontWeight: "600",
+                          padding: "3px 10px", borderRadius: "12px",
+                          backgroundColor: "#F8D7DA", color: "#842029",
+                        }}>
+                          Deactivated
+                        </span>
+                      )}
                     </h3>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>

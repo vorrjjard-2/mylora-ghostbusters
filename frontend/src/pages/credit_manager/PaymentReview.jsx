@@ -52,8 +52,8 @@ export default function PaymentReview() {
     }
 
     if (pendingAction === "reject") {
-      if (rejectReason.trim().split(/\s+/).length < 5) {
-        setRejectReasonError("Please provide at least 5 words for the rejection reason.");
+      if (!rejectReason.trim()) {
+        setRejectReasonError("Rejection reason is required.");
         return;
       }
       setRejectReasonError("");
@@ -184,7 +184,7 @@ export default function PaymentReview() {
       {/* Payment Form Fields */}
       <div className="payment-form-row"> 
         <div className="payment-form-group flex-1">
-          <label className="payment-label">Invoice Number</label>
+          <label className="payment-label">Reference No.</label>
           <input className="payment-input" readOnly value={payment.inv_number || ""} />
         </div>
 

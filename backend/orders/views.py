@@ -518,9 +518,9 @@ def cm_reject_order(request, order_id):
         return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
 
     rejection_reason = request.data.get("rejection_reason", "").strip()
-    if len(rejection_reason.split()) < 5:
+    if not rejection_reason:
         return Response(
-            {"error": "Please provide at least 5 words for the rejection reason."},
+            {"error": "Rejection reason is required."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -849,9 +849,9 @@ def um_reject_override(request, override_id):
         )
 
     rejection_reason = request.data.get("rejection_reason", "").strip()
-    if len(rejection_reason.split()) < 5:
+    if not rejection_reason:
         return Response(
-            {"error": "Please provide at least 5 words for the rejection reason."},
+            {"error": "Rejection reason is required."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -949,10 +949,14 @@ def cm_customers_list(request):
         return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
     from accounts.models import Customer
-    
+
+    include_deactivated = request.query_params.get("include_deactivated", "").lower() == "true"
+
     customers = Customer.objects.select_related(
         "user", "credit_account", "application"
-    ).all()
+    )
+    if not include_deactivated:
+        customers = customers.filter(user__is_active=True)
 
     data = []
     for customer in customers:
@@ -960,7 +964,7 @@ def cm_customers_list(request):
             # Skip customers without credit accounts
             if not hasattr(customer, 'credit_account') or not customer.credit_account:
                 continue
-                
+
             app = customer.application
             credit = customer.credit_account
             data.append({
@@ -982,6 +986,7 @@ def cm_customers_list(request):
                 "credit_limit": str(credit.credit_limit),
                 "available_credit": str(credit.available_credit),
                 "outstanding_balance": str(credit.outstanding_bal),
+                "is_active": customer.user.is_active,
                 "documents": [d for d in [
                     {"name": "Supporting Document 1", "url": app.doc1_file.url} if app and app.doc1_file else None,
                     {"name": "Supporting Document 2", "url": app.doc2_file.url} if app and app.doc2_file else None,
@@ -1141,14 +1146,21 @@ def cm_adjust_customer_balance(request, customer_id):
             payment_status="VERIFIED",
             approved_by=request.user,
         )
-        # Auto-generate invoice number
-        payment.inv_number = f"INV-{payment.payment_id:06d}"
+        # Auto-generate reference number
+        payment.inv_number = f"REF-{payment.payment_id:06d}"
         payment.save(update_fields=["inv_number"])
 
         # Update credit account with new calculated values
         credit.outstanding_bal = new_outstanding
         credit.available_credit = new_available
         credit.save()
+
+        # Notify customer
+        Notification.objects.create(
+            customer=customer,
+            sent_by=request.user,
+            message=f"A payment of ₱{amount_decimal:,.2f} has been submitted on your behalf and verified. Your credit balance has been updated.",
+        )
 
     log_audit(user=request.user, action="ADJUST_BALANCE", details={"customer_id": customer_id, "amount": str(amount_decimal)}, request=request)
 
@@ -1338,6 +1350,13 @@ def op_complete_order(request, order_id):
         # Update order status
         order.order_status = "COMPLETED"
         order.save()
+
+        # Notify customer
+        Notification.objects.create(
+            customer=order.account.customer,
+            sent_by=request.user,
+            message=f"Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been completed and is ready for delivery/pickup.",
+        )
 
     log_audit(user=request.user, action="COMPLETE_ORDER", details={"order_id": order_id}, request=request)
 
@@ -1548,16 +1567,20 @@ def um_customers_list(request):
 
     from accounts.models import Customer
     
+    include_deactivated = request.query_params.get("include_deactivated", "").lower() == "true"
+
     customers = Customer.objects.select_related(
         "credit_account", "application"
-    ).filter(user__is_active=True)
+    )
+    if not include_deactivated:
+        customers = customers.filter(user__is_active=True)
 
     data = []
     for customer in customers:
         try:
             if not hasattr(customer, 'credit_account') or not customer.credit_account:
                 continue
-                
+
             app = customer.application
             credit = customer.credit_account
             data.append({
@@ -1567,6 +1590,7 @@ def um_customers_list(request):
                 "email": app.email if app else customer.user.email,
                 "credit_limit": str(credit.credit_limit),
                 "outstanding_balance": str(credit.outstanding_bal),
+                "is_active": customer.user.is_active,
             })
         except Exception as e:
             print(f"Error loading customer {customer.id}: {str(e)}")
@@ -1622,6 +1646,7 @@ def um_customer_detail(request, customer_id):
         ] if d],
         "gov_id": app.gov_id.url if app and app.gov_id else None,
         "notes": None,
+        "is_active": customer.user.is_active,
     })
 
 
@@ -1654,7 +1679,7 @@ def um_update_customer_balance(request, customer_id):
         return Response({"error": "Customer has no credit account"}, status=status.HTTP_400_BAD_REQUEST)
 
     credit = customer.credit_account
-    invoice_number = request.data.get("invoice_number", "")
+    reference_no = request.data.get("reference_no", "")
     balance_paid = request.data.get("balance_paid")
     date_of_payment = request.data.get("date_of_payment")
 
@@ -1675,7 +1700,7 @@ def um_update_customer_balance(request, customer_id):
         # Create payment request record (auto-verified by upper management)
         PaymentRequest.objects.create(
             account=credit,
-            inv_number=invoice_number,
+            inv_number=reference_no,
             amount_paid=amount,
             date_paid=date_of_payment,
             proof_payment=request.FILES.get("proof_of_payment"),
@@ -1688,6 +1713,13 @@ def um_update_customer_balance(request, customer_id):
         credit.outstanding_bal -= amount
         credit.available_credit += amount
         credit.save()
+
+        # Notify customer
+        Notification.objects.create(
+            customer=customer,
+            sent_by=request.user,
+            message=f"A payment of ₱{amount:,.2f} has been submitted on your behalf and verified. Your credit balance has been updated.",
+        )
 
     log_audit(user=request.user, action="UPDATE_BALANCE", details={"customer_id": customer_id, "amount": str(amount)}, request=request)
     # Return updated customer data
