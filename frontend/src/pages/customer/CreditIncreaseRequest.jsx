@@ -15,6 +15,7 @@ export default function CreditIncreaseRequest() {
 
   const [requestedLimit, setRequestedLimit] = useState("");
   const [displayLimit, setDisplayLimit] = useState("");
+  const [requestedTerm, setRequestedTerm] = useState("");
   const [justification, setJustification] = useState("");
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -39,15 +40,16 @@ export default function CreditIncreaseRequest() {
     const formatted = parts.length > 1 ? `${intPart}.${parts[1]}` : intPart;
     setDisplayLimit(formatted);
     setRequestedLimit(raw);
-    setErrors((prev) => ({ ...prev, requestedLimit: "" }));
+    setErrors((prev) => ({ ...prev, requestedLimit: "", general: "" }));
     setInlineError("");
   };
 
   const validate = () => {
     const newErrors = {};
-    if (!requestedLimit) {
-      newErrors.requestedLimit = "New credit limit is required.";
-    } else if (creditInfo && parseFloat(requestedLimit) <= parseFloat(creditInfo.credit_limit)) {
+    if (!requestedLimit && !requestedTerm) {
+      newErrors.general = "Please apply for at least a new credit limit or a new credit term.";
+    }
+    if (requestedLimit && creditInfo && parseFloat(requestedLimit) <= parseFloat(creditInfo.credit_limit)) {
       newErrors.requestedLimit = "New limit must be greater than your current credit limit.";
     }
     if (!justification.trim()) {
@@ -74,7 +76,8 @@ export default function CreditIncreaseRequest() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          requested_limit: requestedLimit,
+          requested_limit: requestedLimit || null,
+          requested_term: requestedTerm || null,
           justification: justification.trim(),
         }),
       });
@@ -125,6 +128,9 @@ export default function CreditIncreaseRequest() {
           <p className="cir-current-limit">
             Current Credit Limit: ₱{creditInfo ? parseFloat(creditInfo.credit_limit).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
           </p>
+          <p className="cir-current-limit">
+            Current Credit Term: {creditInfo ? `${creditInfo.credit_term} Days` : "—"}
+          </p>
         </div>
 
         {inlineError && (
@@ -132,6 +138,11 @@ export default function CreditIncreaseRequest() {
         )}
 
         <form onSubmit={handleSubmit} className="cir-form">
+          <p style={{ fontSize: "14px", color: "#666", marginBottom: "20px", marginTop: 0 }}>
+            Fill in at least one of the fields below. You may apply for a new credit limit, a new credit term, or both.
+          </p>
+          {errors.general && <div className="cir-inline-error">{errors.general}</div>}
+
           <div className="cir-form-group">
             <label className="cir-label">New Credit Limit</label>
             <input
@@ -146,6 +157,23 @@ export default function CreditIncreaseRequest() {
           </div>
 
           <div className="cir-form-group">
+            <label className="cir-label">New Credit Term</label>
+            <select
+              value={requestedTerm}
+              onChange={(e) => { setRequestedTerm(e.target.value); setErrors((prev) => ({ ...prev, general: "" })); }}
+              className="cir-input"
+              disabled={hasPending}
+            >
+              <option value="">Select new credit term (optional)</option>
+              {["30", "60", "90", "120"].filter(
+                (t) => !creditInfo || parseInt(t) !== creditInfo.credit_term
+              ).map((t) => (
+                <option key={t} value={t}>{t} Days</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="cir-form-group">
             <label className="cir-label">Reason</label>
             <textarea
               value={justification}
@@ -154,7 +182,7 @@ export default function CreditIncreaseRequest() {
                 setErrors((prev) => ({ ...prev, justification: "" }));
               }}
               className={`cir-textarea${errors.justification ? " cir-input-error" : ""}`}
-              placeholder="Please explain why you need a higher credit limit..."
+              placeholder="Please explain why you need a new credit limit or term..."
               disabled={hasPending}
             />
             {errors.justification && <span className="cir-error">{errors.justification}</span>}

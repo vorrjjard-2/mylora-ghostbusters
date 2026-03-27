@@ -233,7 +233,7 @@ return (
             <button className="cd-action-card" onClick={() => navigate("/credit/history")}>
               <span className="cd-action-icon">💳</span>
               <div className="cd-action-text">
-                <span>Credit History</span>
+                <span>Payment History</span>
               </div>
             </button>
 

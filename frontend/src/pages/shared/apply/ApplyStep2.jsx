@@ -153,10 +153,10 @@ export default function ApplyStep2() {
       !firstName || !lastName || !phone ||
       !address1 || !barangay || !city || !zipCode ||
       !branch || !creditAmount || !creditTerm ||
-      supportingDocs.length < 2. // ADDED TO CHECK FOR AT LEAST 2 DOCS
+      supportingDocs.length < 3. // ADDED TO CHECK FOR AT LEAST 2 DOCS
     ) {
-    if (supportingDocs.length < 2) {
-            setError("Please upload at least 2 supporting documents.");  // ADDED ERROR MESSAGE FOR LACKING DOCS
+    if (supportingDocs.length < 3) {
+            setError("Please upload at least 3 supporting documents.");  // ADDED ERROR MESSAGE FOR LACKING DOCS
         } else {
             setError("Please complete all required fields.");
         }
@@ -206,6 +206,7 @@ export default function ApplyStep2() {
 
       if (supportingDocs[0]) formData.append("doc1", supportingDocs[0]);
       if (supportingDocs[1]) formData.append("doc2", supportingDocs[1]);
+      if (supportingDocs[2]) formData.append("doc3", supportingDocs[2]);
       if (govId) formData.append("gov_id", govId);
 
       const res = await apiFetch("/api/applications/", {
@@ -553,6 +554,7 @@ export default function ApplyStep2() {
                <option value="30">30 Days</option>
                <option value="60">60 Days</option>
                <option value="90">90 Days</option>
+              <option value="120">120 Days</option>
              </select>
            </div>
            <div className="input-group">
@@ -574,7 +576,7 @@ export default function ApplyStep2() {
             <ul className="required-docs-list">
               <li>Mayor's / Business Permit -- Valid for Current Year<span className="required">*</span></li>
               <li>BIR Certificate of Registration (2303)<span className="required">*</span></li>
-              <li>Proof of Billing<span>(optional)</span></li>
+              <li>Proof of Billing<span className="required">*</span></li>
             </ul>
           </div>
           {supportingDocs.length > 0 ? (
@@ -591,7 +593,7 @@ export default function ApplyStep2() {
                 id="docs-input"
                 type="file"
                 multiple
-                accept=".jpg, .jpeg, .png, .pdf"
+                accept=".pdf"
                 onChange={e => setSupportingDocs([...supportingDocs, ...e.target.files])}
                 className="hidden-file-input"
               />
@@ -600,11 +602,12 @@ export default function ApplyStep2() {
             <label className="upload-zone">
               <div className="upload-content">
                 <p className="upload-icon">↑ Upload files here.</p>
-                <small className="upload-hint">Supported formats are .jpg, .jpeg, and .png, .pdf. Max file size is 10mb</small>
+                <small className="upload-hint">Supported format is .pdf. Max file size is 10mb</small>
               </div>
               <input
                 type="file"
                 multiple
+                accept=".pdf"
                 onChange={e => setSupportingDocs([...e.target.files])}
                 className="hidden-file-input"
               />
@@ -615,7 +618,7 @@ export default function ApplyStep2() {
         {/* Section 06 */}
         <section className="form-section">
           <h2 className="section-title">06 Upload a Government-Issued ID</h2>
-          <p className="id-hint-text">Please make sure that uploaded image is clear.<span className="required">*</span></p>
+          <p className="id-hint-text">Please make sure that uploaded file is clear.<span className="required">*</span></p>
           {govId ? (
             <div className="file-list-container">
               <div className="file-display-badge">
@@ -628,11 +631,11 @@ export default function ApplyStep2() {
             <label className="upload-zone">
               <div className="upload-content">
                 <p className="upload-icon">↑ Upload file here.</p>
-                <small className="upload-hint">Supported formats are .jpg, .jpeg, and .png. Max file size is 10mb</small>
+                <small className="upload-hint">Supported format is .pdf. Max file size is 10mb</small>
               </div>
               <input
                 type="file"
-                accept=".jpg, .jpeg, .png"
+                accept=".pdf"
                 onChange={e => setGovId(e.target.files[0])}
                 className="hidden-file-input"
               />

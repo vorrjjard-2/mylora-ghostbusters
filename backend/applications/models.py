@@ -56,6 +56,7 @@ class CreditEnrollment(models.Model):
     # Documents
     doc1_file = models.FileField(upload_to="applications/docs/")
     doc2_file = models.FileField(upload_to="applications/docs/")
+    doc3_file = models.FileField(upload_to="applications/docs/", blank=True, null=True)
     gov_id = models.FileField(upload_to="applications/gov_ids/")
 
     # Status + audit

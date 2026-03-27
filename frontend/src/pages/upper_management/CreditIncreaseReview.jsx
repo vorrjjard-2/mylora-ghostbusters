@@ -156,14 +156,30 @@ export default function CreditIncreaseReview() {
                   {request.status.charAt(0) + request.status.slice(1).toLowerCase()}
                 </span>
               </div>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: "600", color: "#888", marginBottom: "4px" }}>CURRENT LIMIT</div>
-                <div style={{ fontSize: "17px", fontWeight: "600" }}>{fmt(request.current_limit)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: "600", color: "#888", marginBottom: "4px" }}>REQUESTED LIMIT</div>
-                <div style={{ fontSize: "17px", fontWeight: "600", color: "#183112" }}>{fmt(request.requested_limit)}</div>
-              </div>
+              {request.requested_limit && (
+                <>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: "600", color: "#888", marginBottom: "4px" }}>CURRENT LIMIT</div>
+                    <div style={{ fontSize: "17px", fontWeight: "600" }}>{fmt(request.current_limit)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: "600", color: "#888", marginBottom: "4px" }}>REQUESTED LIMIT</div>
+                    <div style={{ fontSize: "17px", fontWeight: "600", color: "#183112" }}>{fmt(request.requested_limit)}</div>
+                  </div>
+                </>
+              )}
+              {request.requested_term && (
+                <>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: "600", color: "#888", marginBottom: "4px" }}>CURRENT TERM</div>
+                    <div style={{ fontSize: "17px", fontWeight: "600" }}>{request.current_term} Days</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: "600", color: "#888", marginBottom: "4px" }}>REQUESTED TERM</div>
+                    <div style={{ fontSize: "17px", fontWeight: "600", color: "#183112" }}>{request.requested_term} Days</div>
+                  </div>
+                </>
+              )}
             </div>
 
             <div>
@@ -261,7 +277,7 @@ export default function CreditIncreaseReview() {
             </h3>
             <p style={{ fontSize: "15px", color: "#555", marginBottom: "28px", lineHeight: "1.6" }}>
               {pendingAction === "approve"
-                ? "The credit limit has been updated and the customer has been notified."
+                ? "The credit account has been updated and the customer has been notified."
                 : "The request has been rejected and the customer has been notified."}
             </p>
             <button

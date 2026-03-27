@@ -517,13 +517,6 @@ def cm_reject_order(request, order_id):
     if not request.user.check_password(password):
         return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    rejection_reason = request.data.get("rejection_reason", "").strip()
-    if not rejection_reason:
-        return Response(
-            {"error": "Rejection reason is required."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
     try:
         order = Order.objects.select_related("account__customer__user").get(order_id=order_id)
     except Order.DoesNotExist:
@@ -547,7 +540,6 @@ def cm_reject_order(request, order_id):
             order=order,
             approval_status="REJECTED",
             approval_date=timezone.now(),
-            notes=rejection_reason,
         )
 
     # Send rejection email to customer
@@ -559,9 +551,6 @@ def cm_reject_order(request, order_id):
 Hello {customer_user.get_full_name()},
 
 We regret to inform you that your order (Order ID: {order.order_id}) amounting to \u20B1{order.total_amount:,.2f} has been rejected.
-
-Reason for rejection:
-{rejection_reason}
 
 If you have any questions, please contact your branch for further assistance.
 
@@ -579,10 +568,10 @@ Mylora Web Credit System
     Notification.objects.create(
         customer=order.account.customer,
         sent_by=request.user,
-        message=f"Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been rejected. Reason: {rejection_reason}",
+        message=f"Your order (Order ID: {order.order_id}) amounting to ₱{order.total_amount:,.2f} has been rejected.",
     )
 
-    log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id, "rejection_reason": rejection_reason}, request=request)
+    log_audit(user=request.user, action="REJECT_ORDER", details={"order_id": order_id}, request=request)
 
     with new_context():
         identify_context(str(request.user.id))

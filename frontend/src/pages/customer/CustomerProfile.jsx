@@ -130,7 +130,7 @@ return (
           </button>
           <button className="profile-history-btn" onClick={() => navigate("/credit/history")}>
             <span className="profile-history-icon">💳</span>
-            <span>Credit History</span>
+            <span>Payment History</span>
           </button>
         </div>
       </div>

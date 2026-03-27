@@ -248,6 +248,14 @@ export default function EnrollmentReview() {
                   Document 2 ↗
                 </button>
               )}
+              {data.doc3_file && (
+                <button
+                  onClick={() => openFilePreview(`${MEDIA_BASE_URL}${data.doc3_file}`, "Document 3")}
+                  style={{ padding: "8px 20px", border: "1px solid #262626", borderRadius: "8px", color: "#1f3d1a", fontWeight: "600", fontSize: "14px", background: "white", cursor: "pointer" }}
+                >
+                  Document 3 ↗
+                </button>
+              )}
             </div>
 
             {/* 05 Government-issued ID */}

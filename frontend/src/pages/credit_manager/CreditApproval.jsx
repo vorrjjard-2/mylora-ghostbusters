@@ -45,13 +45,12 @@ export default function CreditApproval() {
     return totalAmount > availableCredit;
   };
 
-  const postAction = async (action, password = null, rejectionReason = null) => {
+  const postAction = async (action, password = null) => {
     // action = "approve" | "reject"
     setActing(true);
     try {
       const payload = {};
       if (password) payload.password = password;
-      if (rejectionReason) payload.rejection_reason = rejectionReason;
       const body = Object.keys(payload).length > 0 ? JSON.stringify(payload) : undefined;
       const res = await apiFetch(
         `/api/cm/order/${orderId}/${action}/`,

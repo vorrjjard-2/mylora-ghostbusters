@@ -142,7 +142,8 @@ class ReminderMessage(models.Model):
 class CreditIncreaseRequest(models.Model):
     request_id = models.AutoField(primary_key=True)
     account = models.ForeignKey('CreditAccount', on_delete=models.CASCADE, related_name='credit_increase_requests')
-    requested_limit = models.DecimalField(max_digits=12, decimal_places=2)
+    requested_limit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    requested_term = models.IntegerField(null=True, blank=True, help_text="Requested credit term in days")
     justification = models.TextField()
     status = models.CharField(max_length=20, choices=[
         ('PENDING', 'Pending'), ('APPROVED', 'Approved'), ('REJECTED', 'Rejected')

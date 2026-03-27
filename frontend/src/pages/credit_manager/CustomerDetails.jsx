@@ -94,7 +94,7 @@ return (
             onClick={() => navigate(`/credit-manager/customer/${customerId}/history`)}
           >
             <img src={paperIcon} alt="History" className="cd-paper-icon" />
-            View Credit History
+            View Payment History
           </button>
           <button
             className="cd-adjust-btn"

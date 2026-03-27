@@ -216,8 +216,7 @@ export default function CreditChanges() {
                 <thead>
                   <tr style={{ backgroundColor: "#F9F9F9", borderBottom: "1px solid #262626" }}>
                     <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>CUSTOMER NAME</th>
-                    <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>CURRENT LIMIT</th>
-                    <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>REQUESTED LIMIT</th>
+                    <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>REQUESTED CHANGES</th>
                     <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>JUSTIFICATION</th>
                     <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>DATE SUBMITTED</th>
                   </tr>
@@ -225,7 +224,7 @@ export default function CreditChanges() {
                 <tbody>
                   {sortedPending.length === 0 && (
                     <tr>
-                      <td colSpan="5" style={{ padding: "30px", textAlign: "center", color: "#888" }}>
+                      <td colSpan="4" style={{ padding: "30px", textAlign: "center", color: "#888" }}>
                         No pending requests
                       </td>
                     </tr>
@@ -239,8 +238,10 @@ export default function CreditChanges() {
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "white")}
                     >
                       <td style={{ padding: "15px 20px" }}>{r.customer_name}</td>
-                      <td style={{ padding: "15px 20px" }}>{formatCurrency(r.current_limit)}</td>
-                      <td style={{ padding: "15px 20px" }}>{formatCurrency(r.requested_limit)}</td>
+                      <td style={{ padding: "15px 20px" }}>
+                        {r.requested_limit && <div>Limit: {formatCurrency(r.requested_limit)}</div>}
+                        {r.requested_term && <div>Term: {r.requested_term} Days</div>}
+                      </td>
                       <td style={{ padding: "15px 20px", maxWidth: "200px" }}>
                         <span style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "200px" }}>
                           {r.justification}
@@ -265,8 +266,7 @@ export default function CreditChanges() {
                 <thead>
                   <tr style={{ backgroundColor: "#F9F9F9", borderBottom: "1px solid #262626" }}>
                     <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>CUSTOMER NAME</th>
-                    <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>CURRENT LIMIT</th>
-                    <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>REQUESTED LIMIT</th>
+                    <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>REQUESTED CHANGES</th>
                     <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>STATUS</th>
                     <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>REVIEWED BY</th>
                     <th style={{ padding: "15px 20px", textAlign: "left", fontWeight: "700" }}>DATE</th>
@@ -275,7 +275,7 @@ export default function CreditChanges() {
                 <tbody>
                   {sortedCompleted.length === 0 && (
                     <tr>
-                      <td colSpan="6" style={{ padding: "30px", textAlign: "center", color: "#888" }}>
+                      <td colSpan="5" style={{ padding: "30px", textAlign: "center", color: "#888" }}>
                         No completed requests
                       </td>
                     </tr>
@@ -288,8 +288,10 @@ export default function CreditChanges() {
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "white")}
                     >
                       <td style={{ padding: "15px 20px" }}>{r.customer_name}</td>
-                      <td style={{ padding: "15px 20px" }}>{formatCurrency(r.current_limit)}</td>
-                      <td style={{ padding: "15px 20px" }}>{formatCurrency(r.requested_limit)}</td>
+                      <td style={{ padding: "15px 20px" }}>
+                        {r.requested_limit && <div>Limit: {formatCurrency(r.requested_limit)}</div>}
+                        {r.requested_term && <div>Term: {r.requested_term} Days</div>}
+                      </td>
                       <td style={{ padding: "15px 20px" }}>
                         <span style={{
                           backgroundColor: r.status === "APPROVED" ? "#D1E7DD" : "#F8D7DA",

@@ -802,33 +802,46 @@ def customer_submit_credit_increase(request):
         return Response({"error": "You already have a pending credit increase request."}, status=status.HTTP_400_BAD_REQUEST)
 
     requested_limit = request.data.get("requested_limit")
+    requested_term = request.data.get("requested_term")
     justification = request.data.get("justification", "").strip()
 
-    if not requested_limit:
-        return Response({"error": "Requested limit is required."}, status=status.HTTP_400_BAD_REQUEST)
+    # At least one of limit or term must be provided
+    if not requested_limit and not requested_term:
+        return Response({"error": "Please apply for at least a new credit limit or a new credit term."}, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        requested_limit = float(requested_limit)
-    except (ValueError, TypeError):
-        return Response({"error": "Invalid requested limit."}, status=status.HTTP_400_BAD_REQUEST)
+    parsed_limit = None
+    if requested_limit:
+        try:
+            parsed_limit = float(requested_limit)
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid requested limit."}, status=status.HTTP_400_BAD_REQUEST)
+        if parsed_limit <= float(credit_account.credit_limit):
+            return Response({"error": "Requested limit must be greater than your current credit limit."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if requested_limit <= float(credit_account.credit_limit):
-        return Response({"error": "Requested limit must be greater than your current credit limit."}, status=status.HTTP_400_BAD_REQUEST)
+    parsed_term = None
+    if requested_term:
+        try:
+            parsed_term = int(requested_term)
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid requested term."}, status=status.HTTP_400_BAD_REQUEST)
 
     if not justification:
         return Response({"error": "Justification is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     req = CreditIncreaseRequest.objects.create(
         account=credit_account,
-        requested_limit=requested_limit,
+        requested_limit=parsed_limit,
+        requested_term=parsed_term,
         justification=justification,
     )
 
     with new_context():
         identify_context(str(request.user.id))
         capture('credit_increase_requested', properties={
-            'requested_limit': requested_limit,
+            'requested_limit': parsed_limit,
+            'requested_term': parsed_term,
             'current_limit': float(credit_account.credit_limit),
+            'current_term': credit_account.credit_term,
         })
 
     return Response({"success": True, "request_id": req.request_id}, status=status.HTTP_201_CREATED)
@@ -854,7 +867,9 @@ def um_credit_increase_detail(request, request_id):
         "request_id": r.request_id,
         "customer_name": customer_user.get_full_name() or customer_user.username,
         "current_limit": str(r.account.credit_limit),
-        "requested_limit": str(r.requested_limit),
+        "requested_limit": str(r.requested_limit) if r.requested_limit else None,
+        "current_term": r.account.credit_term,
+        "requested_term": r.requested_term,
         "justification": r.justification,
         "status": r.status,
         "created_at": r.created_at.strftime("%B %d, %Y %I:%M %p"),
@@ -882,7 +897,9 @@ def um_credit_increase_list(request):
             "request_id": r.request_id,
             "customer_name": customer_user.get_full_name() or customer_user.username,
             "current_limit": str(r.account.credit_limit),
-            "requested_limit": str(r.requested_limit),
+            "requested_limit": str(r.requested_limit) if r.requested_limit else None,
+            "current_term": r.account.credit_term,
+            "requested_term": r.requested_term,
             "justification": r.justification,
             "status": r.status,
             "created_at": r.created_at.strftime("%B %d, %Y %I:%M %p"),
@@ -916,6 +933,8 @@ def um_approve_credit_increase(request, request_id):
 
     old_limit = credit_request.account.credit_limit
     new_limit = credit_request.requested_limit
+    old_term = credit_request.account.credit_term
+    new_term = credit_request.requested_term
 
     # Update status
     credit_request.status = 'APPROVED'
@@ -925,17 +944,26 @@ def um_approve_credit_increase(request, request_id):
 
     # Update credit account
     account = credit_request.account
-    limit_increase = new_limit - old_limit
-    account.credit_limit = new_limit
-    account.available_credit = min(account.available_credit + limit_increase, new_limit)
+    if new_limit:
+        limit_increase = new_limit - old_limit
+        account.credit_limit = new_limit
+        account.available_credit = min(account.available_credit + limit_increase, new_limit)
+    if new_term:
+        account.credit_term = new_term
     account.save()
 
     # Notify customer
     customer = account.customer
+    changes = []
+    if new_limit:
+        changes.append(f"Your new credit limit is ₱{float(new_limit):,.2f}.")
+    if new_term:
+        changes.append(f"Your new credit term is {new_term} days.")
+    notification_msg = f"Your credit change request has been approved. {' '.join(changes)}"
     Notification.objects.create(
         customer=customer,
         sent_by=request.user,
-        message=f"Your credit limit increase request has been approved. Your new credit limit is ₱{float(new_limit):,.2f}.",
+        message=notification_msg,
         requires_acknowledgment=True,
     )
 
@@ -943,14 +971,18 @@ def um_approve_credit_increase(request, request_id):
         "request_id": request_id,
         "customer_name": customer.user.get_full_name(),
         "old_limit": str(old_limit),
-        "new_limit": str(new_limit),
+        "new_limit": str(new_limit) if new_limit else None,
+        "old_term": old_term,
+        "new_term": new_term,
     }, request)
 
     with new_context():
         identify_context(str(request.user.id))
         capture('credit_increase_approved', properties={
             'old_limit': float(old_limit),
-            'new_limit': float(new_limit),
+            'new_limit': float(new_limit) if new_limit else None,
+            'old_term': old_term,
+            'new_term': new_term,
         })
 
     return Response({"success": True})
@@ -986,20 +1018,22 @@ def um_reject_credit_increase(request, request_id):
     Notification.objects.create(
         customer=customer,
         sent_by=request.user,
-        message="Your credit limit increase request has been reviewed and was not approved at this time.",
+        message="Your credit change request has been reviewed and was not approved at this time.",
         requires_acknowledgment=True,
     )
 
     log_audit(request.user, "CREDIT_INCREASE_REJECTED", {
         "request_id": request_id,
         "customer_name": customer.user.get_full_name(),
-        "requested_limit": str(credit_request.requested_limit),
+        "requested_limit": str(credit_request.requested_limit) if credit_request.requested_limit else None,
+        "requested_term": credit_request.requested_term,
     }, request)
 
     with new_context():
         identify_context(str(request.user.id))
         capture('credit_increase_rejected', properties={
-            'requested_limit': float(credit_request.requested_limit),
+            'requested_limit': float(credit_request.requested_limit) if credit_request.requested_limit else None,
+            'requested_term': credit_request.requested_term,
         })
 
     return Response({"success": True})

@@ -102,6 +102,7 @@ def create_application(request):
 
             doc1_file=request.FILES.get("doc1"),
             doc2_file=request.FILES.get("doc2"),
+            doc3_file=request.FILES.get("doc3"),
             gov_id=request.FILES.get("gov_id"),
         )
     except Exception as e:
@@ -201,6 +202,7 @@ def enrollment_detail(request, application_id):
         "credit_term_request": app.credit_term_request,
         "doc1_file": app.doc1_file.url if app.doc1_file else None,
         "doc2_file": app.doc2_file.url if app.doc2_file else None,
+        "doc3_file": app.doc3_file.url if app.doc3_file else None,
         "gov_id": app.gov_id.url if app.gov_id else None,
     })
 

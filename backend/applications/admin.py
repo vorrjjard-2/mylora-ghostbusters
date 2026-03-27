@@ -50,6 +50,7 @@ class CreditEnrollmentAdmin(admin.ModelAdmin):
             "fields": (
                 "doc1_file",
                 "doc2_file",
+                "doc3_file",
                 "gov_id",
             )
         }),

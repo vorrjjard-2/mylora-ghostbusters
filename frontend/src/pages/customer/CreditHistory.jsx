@@ -63,7 +63,7 @@ export default function CreditHistory() {
       </header>
 
       <main className="cd-content">
-        <h1 className="cd-title">Credit History</h1>
+        <h1 className="cd-title">Payment History</h1>
 
         {/* Credit Summary */}
         {creditInfo && (

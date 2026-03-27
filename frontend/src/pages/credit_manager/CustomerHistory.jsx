@@ -57,7 +57,7 @@ return (
 
       <main className="ch-content">
 
-      <h1 className="ch-title">Credit History</h1>
+      <h1 className="ch-title">Payment History</h1>
       <h2 className="ch-customer-name">{customer.name}</h2>
 
       {/* Current Balance Summary */}
