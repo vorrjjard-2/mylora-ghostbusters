@@ -4,6 +4,12 @@ from django.conf import settings
 
 def send_email(to, subject, message):
     """Send email via Resend API. Falls back to printing if no API key."""
+    if not settings.SEND_EMAILS:
+        print(f"[EMAIL] Emails disabled (SEND_EMAILS=false). Would send to {to}:")
+        print(f"  Subject: {subject}")
+        print(f"  Body: {message[:200]}...")
+        return True
+
     api_key = settings.RESEND_API_KEY
     from_email = settings.DEFAULT_FROM_EMAIL
 

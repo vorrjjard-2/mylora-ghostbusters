@@ -168,3 +168,4 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', BASE_DIR / "media")
 # Use Resend API key if available, otherwise console backend for local dev
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'onboarding@resend.dev')
+SEND_EMAILS = os.environ.get('SEND_EMAILS', 'false').lower() == 'true'

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
+import posthog from "posthog-js";
 import "./index.css";
 
 import {
@@ -9,6 +10,17 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
+
+// Initialize PostHog
+const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
+const posthogHost = import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com";
+if (posthogKey) {
+  posthog.init(posthogKey, {
+    api_host: posthogHost,
+    capture_pageview: false,
+    capture_pageleave: true,
+  });
+}
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -78,6 +90,12 @@ import ProcessorOrderView from "./pages/order_processor/ProcessorOrderView";
 
 function Layout() {
   const location = useLocation();
+
+  useEffect(() => {
+    posthog.capture("$pageview", {
+      $current_url: window.location.href,
+    });
+  }, [location]);
 
   return (
     <>
