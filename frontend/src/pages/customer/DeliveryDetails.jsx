@@ -1,4 +1,5 @@
 import apiFetch from "../../utils/apiFetch";
+import posthog from "posthog-js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/mylora-logo.png";
@@ -19,6 +20,10 @@ export default function DeliveryDetails() {
   const [city, setCity] = useState("");
   const [barangay, setBarangay] = useState("");
   const [zipCode, setZipCode] = useState("");
+
+  useEffect(() => {
+    posthog.capture("order_step_delivery_details");
+  }, []);
 
   useEffect(() => {
     const items = localStorage.getItem("order_items");

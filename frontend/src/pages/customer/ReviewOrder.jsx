@@ -1,4 +1,5 @@
 import apiFetch from "../../utils/apiFetch";
+import posthog from "posthog-js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -15,8 +16,12 @@ export default function ReviewOrder() {
   const [showCreditModal, setShowCreditModal] = useState(false);
 
   useEffect(() => {
+    posthog.capture("order_step_review");
+  }, []);
+
+  useEffect(() => {
     // Load order items from localStorage
-    const items = localStorage.getItem("order_items");   
+    const items = localStorage.getItem("order_items");
     if (!items) {
       navigate("/orders/create");
       return;

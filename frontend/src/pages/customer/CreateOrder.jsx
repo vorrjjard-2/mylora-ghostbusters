@@ -1,4 +1,5 @@
 import apiFetch from "../../utils/apiFetch";
+import posthog from "posthog-js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -18,6 +19,10 @@ export default function CreateOrder() {
     const saved = localStorage.getItem("order_items");
     return saved ? JSON.parse(saved) : [];
   });
+
+  useEffect(() => {
+    posthog.capture("order_step_select_products");
+  }, []);
 
   useEffect(() => {
     // Fetch available products

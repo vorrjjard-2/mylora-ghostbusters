@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import posthog from "posthog-js";
 import { useEffect } from "react";
 import logo from "../../assets/mylora-logo.png";
 import "./OrderSuccess.css";
@@ -13,7 +14,9 @@ export default function OrderSuccess() {
   useEffect(() => {
     if (!orderId) {
       navigate("/customer/dashboard");
-    } 
+    } else {
+      posthog.capture("order_step_success", { order_id: orderId, exceeds_credit: exceedsCredit });
+    }
   }, [orderId, navigate]);
 
 return (
