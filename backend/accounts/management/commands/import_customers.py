@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
 from django.db import transaction
-from accounts.models import Customer, Branch, CreditAccount
+from accounts.models import Customer, Branch, CreditAccount, UserProfile
 from applications.models import CreditEnrollment
 
 
@@ -198,10 +198,14 @@ class Command(BaseCommand):
                         gov_id='',
                     )
 
+                    UserProfile.objects.create(
+                        user=user,
+                        must_change_password=True,
+                    )
+
                     customer = Customer.objects.create(
                         user=user,
                         application=enrollment,
-                        must_change_password=True,
                     )
 
                     CreditAccount.objects.create(

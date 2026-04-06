@@ -16,7 +16,7 @@ import posthog
 from posthog import new_context, identify_context, tag, capture
 
 from django.contrib.auth.models import User
-from .models import Customer, CreditAccount, AuditLog, log_audit
+from .models import Customer, CreditAccount, AuditLog, log_audit, UserProfile
 from orders.models import Order
 
 @ensure_csrf_cookie
@@ -47,7 +47,7 @@ def login_view(request):
         })
 
     must_change = False
-    if hasattr(user, 'customer_profile') and user.customer_profile.must_change_password:
+    if hasattr(user, 'profile') and user.profile.must_change_password:
         must_change = True
 
     return Response({
@@ -258,7 +258,7 @@ def change_password(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def force_set_password(request):
-    """Set password for first-time login (imported customers)"""
+    """Set password for first-time login (imported users)"""
     new_password = request.data.get("new_password")
     if not new_password or len(new_password) < 8:
         return Response(
@@ -266,8 +266,8 @@ def force_set_password(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    customer = getattr(request.user, 'customer_profile', None)
-    if not customer or not customer.must_change_password:
+    profile = getattr(request.user, 'profile', None)
+    if not profile or not profile.must_change_password:
         return Response(
             {"error": "Password change not required"},
             status=status.HTTP_400_BAD_REQUEST
@@ -275,8 +275,8 @@ def force_set_password(request):
 
     request.user.set_password(new_password)
     request.user.save()
-    customer.must_change_password = False
-    customer.save()
+    profile.must_change_password = False
+    profile.save()
 
     # Re-create token since password change invalidates session
     Token.objects.filter(user=request.user).delete()

@@ -38,7 +38,7 @@ urlpatterns = [
     path("api/customer/dashboard/", customer_dashboard),
     path("api/customer/profile/", customer_profile),
     path("api/customer/change-password/", change_password),
-    path("api/customer/force-set-password/", force_set_password),
+    path("api/force-set-password/", force_set_password),
     path("api/customer/update-address/", update_address),
 
     # Employee management endpoints

@@ -30,7 +30,7 @@ export default function SetPassword() {
     setSubmitting(true);
 
     try {
-      const res = await apiFetch("/api/customer/force-set-password/", {
+      const res = await apiFetch("/api/force-set-password/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ new_password: password }),
@@ -48,10 +48,20 @@ export default function SetPassword() {
         localStorage.setItem("authToken", data.token);
       }
 
-      // Clear the flag and navigate to dashboard
+      // Clear the flag and navigate to appropriate dashboard
       const updatedAuth = { ...auth, must_change_password: false };
       localStorage.setItem("auth", JSON.stringify(updatedAuth));
-      navigate("/customer/dashboard");
+
+      const roles = auth.roles || [];
+      if (roles.includes("upper_management")) {
+        navigate("/internal/dashboard");
+      } else if (roles.includes("credit_manager")) {
+        navigate("/credit-manager/dashboard");
+      } else if (roles.includes("order_processor")) {
+        navigate("/order-processor/dashboard");
+      } else {
+        navigate("/customer/dashboard");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
