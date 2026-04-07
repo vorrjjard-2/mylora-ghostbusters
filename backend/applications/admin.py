@@ -37,7 +37,8 @@ class CreditEnrollmentAdmin(admin.ModelAdmin):
                 "barangay",
                 "city",
                 "zipcode",
-                "default_branch",
+                "province",
+                "branch",
             )
         }),
         ("Credit Request", {
