@@ -24,12 +24,12 @@ class CreditEnrollment(models.Model):
     email = models.EmailField(db_index=True)
 
     # Delivery Address
-    address1 = models.CharField(max_length=255)
-    address2 = models.CharField(max_length=255, blank=True)
-    province = models.CharField(max_length=100, blank=True)
-    barangay = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
-    zipcode = models.CharField(max_length=20)
+    address1 = models.CharField(max_length=255, blank=True, default="")
+    address2 = models.CharField(max_length=255, blank=True, default="")
+    province = models.CharField(max_length=100, blank=True, default="")
+    barangay = models.CharField(max_length=100, blank=True, default="")
+    city = models.CharField(max_length=100, blank=True, default="")
+    zipcode = models.CharField(max_length=20, blank=True, default="")
 
     # Billing Address
     billing_address1 = models.CharField(max_length=255, blank=True, default="")
@@ -54,10 +54,10 @@ class CreditEnrollment(models.Model):
     credit_term_request = models.CharField(max_length=50)
 
     # Documents
-    doc1_file = models.FileField(upload_to="applications/docs/")
-    doc2_file = models.FileField(upload_to="applications/docs/")
+    doc1_file = models.FileField(upload_to="applications/docs/", blank=True, null=True)
+    doc2_file = models.FileField(upload_to="applications/docs/", blank=True, null=True)
     doc3_file = models.FileField(upload_to="applications/docs/", blank=True, null=True)
-    gov_id = models.FileField(upload_to="applications/gov_ids/")
+    gov_id = models.FileField(upload_to="applications/gov_ids/", blank=True, null=True)
 
     # Status + audit
     enrollment_status = models.CharField(
